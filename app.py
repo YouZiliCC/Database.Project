@@ -70,7 +70,7 @@ def create_app():
             try:
                 admin = create_user(**eval(app.config["INITIAL_ADMIN"]))
                 if admin and admin.is_admin:
-                    app.logger.info(f"默认管理员用户已创建: {admin.username} / {admin.email}")
+                    app.logger.info(f"默认管理员用户已创建: {admin.uname} / {admin.email}")
             except Exception as e:
                 app.logger.error(f"初始化默认管理员用户失败: {e}", exc_info=True)
 

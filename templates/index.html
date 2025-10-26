@@ -2,6 +2,12 @@
 {% block title %}DBSYS_INDEX{% endblock %}
 
 {% block content %}
+    <div>
+        <a href="/">Home</a>
+        <a href="/users">Users</a>
+        <a href="/groups">Groups</a>
+        <a href="/projects">Projects</a>
+    </div>
     <div class="container">
         <h2>欢迎来到数据库系统课程项目展示平台</h2>
         <p>在这里，您可以浏览和管理数据库系统相关的项目。</p>
@@ -14,6 +20,9 @@
             {% else %}
                 <a href="/auth/login" class="btn">登录</a>
                 <a href="/auth/register" class="btn">注册</a>
+            {% endif %}
+            {% if current_user.is_admin %}
+                <a href="/admin/dashboard" class="btn">管理员面板</a>
             {% endif %}
         </div>
     </div>
