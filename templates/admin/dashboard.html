@@ -1,0 +1,154 @@
+<!-- ...existing code... -->
+{% extends "base.html" %}
+{% block title %}DBSYS_DASHBOARD{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>管理员仪表盘</h2>
+    <p>管理用户与项目（点击按钮异步加载，不跳转）</p>
+
+    <div class="button-group" style="margin-bottom:1rem;">
+        <button class="btn" data-endpoint="{{ url_for('admin.list_users') }}" id="btn-users">管理用户</button>
+        <button class="btn" data-endpoint="{{ url_for('admin.list_projects') }}" id="btn-projects">管理项目</button>
+    </div>
+
+    <div id="admin-result"></div>
+
+    <!-- 删除确认模态（纯 HTML/CSS/JS 无依赖） -->
+    <div id="confirm-modal"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:1rem; border-radius:6px; width:90%; max-width:420px;">
+            <p id="confirm-text">确认删除？</p>
+            <div style="text-align:right;">
+                <button id="confirm-cancel" class="btn">取消</button>
+                <button id="confirm-ok" class="btn" style="margin-left:.5rem;">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    /* 简单通用前端：请求并渲染表格；提交删除（POST）并更新视图 */
+    (function () {
+        const result = document.getElementById('admin-result');
+        const modal = document.getElementById('confirm-modal');
+        const confirmText = document.getElementById('confirm-text');
+        const btnOk = document.getElementById('confirm-ok');
+        const btnCancel = document.getElementById('confirm-cancel');
+        let pendingDelete = null;
+
+        function getCsrf() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            if (meta) return meta.content;
+            // fallback: cookie named 'csrf_token'
+            const m = document.cookie.match(/(?:^|; )csrf_token=([^;]+)/);
+            return m ? decodeURIComponent(m[1]) : null;
+        }
+
+        function showMessage(msg, cls = '') { result.innerHTML = `<div class="${cls}">${msg}</div>`; }
+
+        function renderTable(columns, rows) {
+            if (!rows || rows.length === 0) return showMessage('无记录');
+            const thead = '<tr>' + columns.map(c => `<th>${c.label}</th>`).join('') + '<th>操作</th></tr>';
+            const body = rows.map(r => {
+                const cells = columns.map(c => `<td>${r[c.key] ?? ''}</td>`).join('');
+                const id = encodeURIComponent(r[columns[0].key]);
+                return `<tr data-id="${id}">${cells}<td><button class="btn btn-del" data-id="${id}" data-endpoint="${r._delete_endpoint || ''}">删除</button></td></tr>`;
+            }).join('');
+            result.innerHTML = `<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%"><thead>${thead}</thead><tbody>${body}</tbody></table>`;
+            attachDelete();
+        }
+
+        function attachDelete() {
+            document.querySelectorAll('.btn-del').forEach(b => {
+                b.addEventListener('click', () => {
+                    const id = b.dataset.id;
+                    const endpoint = b.dataset.endpoint || b.closest('tr').dataset.deleteEndpoint || '';
+                    // if endpoint provided in row use it, else construct by pattern fallback
+                    pendingDelete = { id, endpoint: endpoint || null };
+                    confirmText.textContent = `确认删除 ID: ${decodeURIComponent(id)} ?`;
+                    modal.style.display = 'flex';
+                });
+            });
+        }
+
+        btnCancel.addEventListener('click', () => { modal.style.display = 'none'; pendingDelete = null; });
+        btnOk.addEventListener('click', async () => {
+            if (!pendingDelete) { modal.style.display = 'none'; return; }
+            try {
+                const csrf = getCsrf();
+                // if endpoint provided use it, else try POST to /admin/delete_user/<id> or /admin/delete_projects/<id>
+                let url = pendingDelete.endpoint;
+                if (!url) {
+                    // guess by current table: check header text
+                    const header = result.querySelector('thead th');
+                    if (header && /用户名|用户名/i.test(header.textContent)) url = `/delete_user/${decodeURIComponent(pendingDelete.id)}`;
+                    else url = `/delete_projects/${decodeURIComponent(pendingDelete.id)}`;
+                }
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: Object.assign({ 'Content-Type': 'application/json' }, csrf ? { 'X-CSRFToken': csrf } : {}),
+                    credentials: 'include'
+                });
+                if (!res.ok) {
+                    const j = await res.json().catch(() => null);
+                    throw new Error(j?.message || res.statusText || `HTTP ${res.status}`);
+                }
+                // 成功后简单刷新当前视图（再次点击按钮或 re-fetch if endpoint known）
+                modal.style.display = 'none';
+                pendingDelete = null;
+                // 尝试触发当前 active button click to reload
+                const activeBtn = document.querySelector('.button-group .active');
+                if (activeBtn) activeBtn.click(); else showMessage('操作成功，请手动刷新列表');
+            } catch (err) {
+                modal.style.display = 'none';
+                pendingDelete = null;
+                showMessage('删除失败：' + err.message, 'error');
+            }
+        });
+
+        async function fetchAndRender(url) {
+            showMessage('加载中...');
+            try {
+                const res = await fetch(url, { credentials: 'include' });
+                if (!res.ok) {
+                    const j = await res.json().catch(() => null);
+                    throw new Error(j?.message || res.statusText || `HTTP ${res.status}`);
+                }
+                const data = await res.json();
+                if (url.endsWith('/users')) {
+                    renderTable(
+                        [{ key: 'user_id', label: 'ID' }, { key: 'username', label: '用户名' }, { key: 'email', label: '邮箱' }, { key: 'is_admin', label: '管理员' }],
+                        data.map(u => Object.assign(u, { _delete_endpoint: `/delete_user/${u.user_id}` }))
+                    );
+                } else if (url.endsWith('/projects')) {
+                    renderTable(
+                        [{ key: 'project_id', label: 'ID' }, { key: 'project_name', label: '名称' }, { key: 'group_id', label: '组ID' }],
+                        data.map(p => Object.assign(p, { _delete_endpoint: `/delete_projects/${p.project_id}` }))
+                    );
+                } else {
+                    result.textContent = JSON.stringify(data, null, 2);
+                }
+            } catch (err) {
+                showMessage('请求失败：' + err.message, 'error');
+            }
+        }
+
+        document.getElementById('btn-users').addEventListener('click', function () {
+            document.querySelectorAll('.button-group .btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            fetchAndRender(this.dataset.endpoint);
+        });
+        document.getElementById('btn-projects').addEventListener('click', function () {
+            document.querySelectorAll('.button-group .btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            fetchAndRender(this.dataset.endpoint);
+        });
+
+    })();
+</script>
+{% endblock %}
+<!-- ...existing code... -->

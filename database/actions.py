@@ -187,7 +187,7 @@ def update_user(user, **kwargs):
                     setattr(user, key, value)
         return safe_commit()
     except Exception as e:
-        logger.error(f"更新用户 {user.id} 失败: {e}", exc_info=True)
+        logger.error(f"更新用户 {user.uid} 失败: {e}", exc_info=True)
         db.session.rollback()
         return False
 
@@ -207,9 +207,23 @@ def delete_user(user):
     try:
         return safe_delete(user)
     except Exception as e:
-        logger.error(f"删除用户 {user.id} 失败: {e}", exc_info=True)
+        logger.error(f"删除用户 {user.uid} 失败: {e}", exc_info=True)
         db.session.rollback()
         return False
+
+
+def list_all_users():
+    """
+    列出所有用户。
+
+    返回:
+        list: 所有用户对象列表。
+    """
+    try:
+        return db.session.execute(select(User)).scalars().all()
+    except Exception as e:
+        logger.error(f"list_all_users Failed: {e}", exc_info=True)
+        return []
 
 # Group
 def create_group(group_name, group_info=None):
@@ -279,6 +293,37 @@ def delete_group(group):
         logger.error(f"删除用户组 {group.gid} 失败: {e}", exc_info=True)
         db.session.rollback()
         return False
+
+
+def list_all_groups():
+    """
+    列出所有用户组。
+
+    返回:
+        list: 所有用户组对象列表。
+    """
+    try:
+        return db.session.execute(select(Group)).scalars().all()
+    except Exception as e:
+        logger.error(f"list_all_groups Failed: {e}", exc_info=True)
+        return []
+
+
+def get_group_by_id(group_id):
+    """
+    根据用户组ID获取用户组。
+
+    参数:
+        group_id (str): 用户组ID。
+
+    返回:
+        Group: 匹配的用户组对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(select(Group).where(Group.gid == group_id)).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_group_by_id Failed: {e}", exc_info=True)
+        return None
 
 
 def get_leader_by_group_id(group_id):
@@ -388,3 +433,34 @@ def delete_project(project):
         logger.error(f"删除项目 {project.pid} 失败: {e}", exc_info=True)
         db.session.rollback()
         return False
+    
+
+def get_project_by_id(project_id):
+    """
+    根据项目ID获取项目。
+
+    参数:
+        project_id (str): 项目ID。
+
+    返回:
+        Project: 匹配的项目对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(select(Project).where(Project.pid == project_id)).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_project_by_id Failed: {e}", exc_info=True)
+        return None
+
+
+def list_all_projects():
+    """
+    列出所有项目。
+
+    返回:
+        list: 所有项目对象列表。
+    """
+    try:
+        return db.session.execute(select(Project)).scalars().all()
+    except Exception as e:
+        logger.error(f"list_all_projects Failed: {e}", exc_info=True)
+        return []

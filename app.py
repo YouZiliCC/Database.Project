@@ -50,7 +50,7 @@ def create_app():
     # from blueprints.user import user_bp
     # from blueprints.group import group_bp
     # from blueprints.project import project_bp
-    # from blueprints.admin import admin_bp
+    from blueprints.admin import admin_bp
 
     # 将蓝图注册到应用
     app.register_blueprint(index_bp)
@@ -59,7 +59,7 @@ def create_app():
     # app.register_blueprint(user_bp, url_prefix="/user")
     # app.register_blueprint(group_bp, url_prefix="/group")
     # app.register_blueprint(project_bp, url_prefix="/project")
-    # app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(admin_bp, url_prefix="/admin")
     # app.register_blueprint(terminal_bp, url_prefix="/terminal")
 
     # 创建数据库表
