@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}login - 数据库系统课程项目展示平台{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>login</h2>
+    <form method="POST" action="{{ url_for('auth.login') }}">
+        {{ form.hidden_tag() }}
+        {{ form.account.label }}<br>
+        {{ form.account(size=32) }}<br><br>
+
+        {{ form.password.label }}<br>
+        {{ form.password(size=32) }}<br><br>
+
+        {{ form.remember_me.label }} {{ form.remember_me() }}
+
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+    {% endblock %}

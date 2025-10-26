@@ -1,75 +1,20 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据库系统课程 - 学生项目展示</title>
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>🎓 数据库系统课程 - 学生项目展示平台</h1>
-            <nav>
-                <a href="/" class="nav-link active">首页</a>
-                <a href="/terminal" class="nav-link">命令行终端</a>
-            </nav>
+{% extends "base.html" %}
+{% block title %}DBSYS_INDEX{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>欢迎来到数据库系统课程项目展示平台</h2>
+        <p>在这里，您可以浏览和管理数据库系统相关的项目。</p>
+        <div class="button-group">
+            <a href="/projects" class="btn">查看所有项目</a>
+            <a href="/terminal" class="btn">访问命令行终端</a>
+            {% if current_user.is_authenticated %}
+                <a href="/dashboard" class="btn">用户仪表盘</a>
+                <a href="/auth/logout" class="btn">登出</a>
+            {% else %}
+                <a href="/auth/login" class="btn">登录</a>
+                <a href="/auth/register" class="btn">注册</a>
+            {% endif %}
         </div>
-    </header>
-
-    <main class="container">
-        <section class="intro">
-            <h2>欢迎来到项目展示平台</h2>
-            <p>这里展示了所有同学的数据库系统课程项目，每个项目都运行在独立的Docker容器中。</p>
-        </section>
-
-        <section class="projects-grid">
-            {% for project in projects %}
-            <div class="project-card">
-                <div class="project-header">
-                    <h3>{{ project.project_name }}</h3>
-                    <span class="status-badge">运行中</span>
-                </div>
-                <div class="project-body">
-                    <p class="student-name">👤 学生：{{ project.name }}</p>
-                    <p class="description">{{ project.description }}</p>
-                    <div class="project-info">
-                        <p><strong>Docker镜像：</strong> {{ project.docker_image }}</p>
-                        <p><strong>端口：</strong> {{ project.port }}</p>
-                    </div>
-                </div>
-                <div class="project-footer">
-                    <a href="/project/{{ project.id }}" class="btn btn-primary">查看详情</a>
-                    <button class="btn btn-secondary" onclick="window.open('http://localhost:{{ project.port }}', '_blank')">访问应用</button>
-                </div>
-            </div>
-            {% endfor %}
-        </section>
-
-        <section class="instructions">
-            <h2>📚 使用说明</h2>
-            <div class="instruction-grid">
-                <div class="instruction-card">
-                    <h3>1. 查看项目</h3>
-                    <p>点击"查看详情"按钮查看项目的详细信息和Docker配置</p>
-                </div>
-                <div class="instruction-card">
-                    <h3>2. 访问应用</h3>
-                    <p>点击"访问应用"按钮在新窗口中打开学生的Web应用</p>
-                </div>
-                <div class="instruction-card">
-                    <h3>3. 命令行终端</h3>
-                    <p>使用顶部导航的"命令行终端"进行交互式操作</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>© 2025 数据库系统课程项目展示平台</p>
-        </div>
-    </footer>
-</body>
-</html>
+    </div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}注册 - 数据库系统课程项目展示平台{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>创建新账户</h2>
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            {{ form.hidden_tag() }}
+            {{ form.username.label }}<br>
+            {{ form.username(size=32) }}<br><br>
+
+            {{ form.email.label }}<br>
+            {{ form.email(size=64) }}<br><br>
+
+            {{ form.password.label }}<br>
+            {{ form.password(size=32) }}<br><br>
+
+            {{ form.password2.label }}<br>
+            {{ form.password2(size=32) }}<br><br>
+
+            {{ form.submit(class="btn btn-primary") }}
+
+            {% for flashes in get_flashed_messages() %}
+                <div class="flash-message">{{ flashes }}</div>
+            {% endfor %}
+        </form>
+{% endblock %}
