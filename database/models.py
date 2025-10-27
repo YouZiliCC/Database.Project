@@ -26,8 +26,10 @@ class User(db.Model, TimestampMixin, UserMixin):
     uid = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     uname = db.Column(db.String(64), unique=True, nullable=False)
     uinfo = db.Column(db.Text, nullable=True)
+    sid = db.Column(db.String(36), unique=True, nullable=False)
     email = db.Column(db.String(128), unique=True, nullable=False)
     passwd_hash = db.Column(db.String(128), nullable=False)
+    uimg = db.Column(db.String(256), nullable=True)
     gid = db.Column(db.String(36), db.ForeignKey('groups.gid', ondelete='SET NULL'), nullable=True)
     role = db.Column(db.Integer, default=0)  # 0: 普通用户, 1: 管理员
 
@@ -57,8 +59,9 @@ class Group(db.Model, TimestampMixin):
     __tablename__ = 'groups'
     # 字段
     gid = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    gname = db.Column(db.String(64), unique=True, nullable=False)
+    gname = db.Column(db.String(64), nullable=False)
     ginfo = db.Column(db.Text, nullable=True)
+    gimg = db.Column(db.String(256), nullable=True)
     leader_id = db.Column(db.String(36), db.ForeignKey('users.uid'), nullable=False)
     users = db.relationship('User', backref='group', foreign_keys=[User.gid], lazy=True)
     projects = db.relationship(
@@ -81,6 +84,7 @@ class Project(db.Model, TimestampMixin):
     pid = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     pname = db.Column(db.String(100), nullable=False)
     pinfo = db.Column(db.Text, nullable=True)
+    pimg = db.Column(db.String(256), nullable=True)
     gid = db.Column(db.String(36), db.ForeignKey('groups.gid', ondelete='CASCADE'), nullable=False)
     docker_id = db.Column(db.String(64), unique=True, default=generate_uuid)
     port = db.Column(db.Integer, unique=True, nullable=True)

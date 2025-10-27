@@ -62,6 +62,7 @@ def safe_delete(instance):
         db.session.rollback()
         return False
 
+
 # 用户 (User) CRUD 操作
 def get_user_by_username(uname):
     """
@@ -114,6 +115,23 @@ def get_user_by_id(uid):
         return None
 
 
+def get_user_by_sid(sid):
+    """
+    根据学号获取用户。
+
+    参数:
+        sid (str): 学号。
+
+    返回:
+        User: 匹配的用户对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(select(User).where(User.sid == sid)).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_user_by_sid Failed: {e}", exc_info=True)
+        return None
+
+
 def get_user_by_group_id(gid):
     """
     根据用户组ID获取用户列表。
@@ -131,13 +149,14 @@ def get_user_by_group_id(gid):
         return []
 
 
-def create_user(uname, email, password, uinfo=None, role=0):
+def create_user(uname, email, sid, password, uinfo=None, role=0):
     """
     创建新用户。
 
     参数:
         uname (str): 用户名。
         email (str): 邮箱。
+        sid (str): 学号。
         password (str): 原始密码。
         uinfo (str): 用户信息。
 
@@ -146,11 +165,11 @@ def create_user(uname, email, password, uinfo=None, role=0):
     """
     try:
         # 检查用户名和邮箱是否已存在
-        if get_user_by_username(uname) or get_user_by_email(email):
-            logger.warning(f"创建用户失败: 用户名或邮箱已存在 ({uname}, {email})")
+        if any([get_user_by_username(uname), get_user_by_email(email), get_user_by_sid(sid)]):
+            logger.warning(f"创建用户失败: 用户名/邮箱/学号已存在 ({uname}, {email}, {sid})")
             return None
 
-        user = User(uname=uname, email=email, uinfo=uinfo, role=role)
+        user = User(uname=uname, email=email, uinfo=uinfo, sid=sid, role=role)
         user.set_password(password)  # 使用模型方法设置密码哈希
 
         if safe_add(user):

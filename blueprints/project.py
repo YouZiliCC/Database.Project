@@ -11,7 +11,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
-from database.actions import get_user_by_email, get_user_by_username, create_user, list_all_projects
+from database.actions import *
 from blueprints.group import group_required, leader_required
 import logging
 
@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 
 # details
 
-@project_bp.route("/projects", methods=["GET"])
-def projects():
+@project_bp.route("/", methods=["GET"])
+def project_list():
     """项目列表页面"""
     projects = list_all_projects()
     return render_template("project/list.html", projects=projects)

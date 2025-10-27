@@ -12,7 +12,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
-from database.actions import get_user_by_email, get_user_by_username, create_user, list_all_users, list_all_groups, list_all_projects
+from database.actions import *
 from blueprints.auth import login_required, admin_required
 import logging
 
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 @api_bp.route("/users", methods=["GET"])
 @login_required
 @admin_required
-def list_users():
+def api_users():
     """列出所有用户"""
     users = list_all_users()
     users_data = [
@@ -32,6 +32,8 @@ def list_users():
             "email": user.email,
             "is_admin": user.is_admin,
             "gid": user.gid,
+            "sid": user.sid,
+            "uimg": user.uimg,
         }
         for user in users
     ]
@@ -41,7 +43,7 @@ def list_users():
 @api_bp.route("/groups", methods=["GET"])
 @login_required
 @admin_required
-def list_groups():
+def api_groups():
     """列出所有用户组"""
     groups = list_all_groups()
     groups_data = [
@@ -50,6 +52,9 @@ def list_groups():
             "gname": group.gname,
             "ginfo": group.ginfo,
             "leader_id": group.leader_id,
+            "gimg": group.gimg,
+            "users": [user.uname for user in group.users],
+            "projects": [project.pname for project in group.projects],
         }
         for group in groups
     ]
@@ -70,6 +75,7 @@ def list_projects():
             "docker_id": project.docker_id,
             "port": project.port,
             "docker_port": project.docker_port,
+            "pimg": project.pimg,
         }
         for project in projects
     ]

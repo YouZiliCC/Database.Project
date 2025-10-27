@@ -47,23 +47,6 @@ def dashboard():
     return render_template("admin/dashboard.html")
 
 
-@admin_bp.route("/users", methods=["GET"])
-@login_required
-@admin_required
-def list_users():
-    """列出所有用户"""
-    users = list_all_users()
-    users_data = [
-        {
-            "uid": user.uid,
-            "uname": user.uname,
-            "email": user.email,
-            "is_admin": user.is_admin,
-            "gid": user.gid,
-        }
-        for user in users
-    ]
-    return jsonify(users_data)
 
 
 @admin_bp.route("/delete_user/<uuid:uid>", methods=["POST"])
@@ -110,22 +93,6 @@ def update_user(uid):
     return jsonify({"message": "用户信息更新成功"}), 200
 
 
-@admin_bp.route("/groups", methods=["GET"])
-@login_required
-@admin_required
-def list_groups():
-    """列出所有用户组"""
-    groups = list_all_groups()
-    groups_data = [
-        {
-            "gid": group.gid,
-            "gname": group.gname,
-            "ginfo": group.ginfo,
-            "leader_id": group.leader_id,
-        }
-        for group in groups
-    ]
-    return jsonify(groups_data)
 
 @admin_bp.route("/delete_group/<uuid:gid>", methods=["POST"])
 @login_required
@@ -165,24 +132,7 @@ def update_group(gid):
     return jsonify({"message": "用户组信息更新成功"}), 200
 
 
-@admin_bp.route("/projects", methods=["GET"])
-@login_required
-@admin_required
-def list_projects():
-    """列出所有项目"""
-    projects = list_all_projects()
-    projects_data = [
-        {
-            "pid": project.pid,
-            "pname": project.pname,
-            "gid": project.gid,
-            "docker_id": project.docker_id,
-            "port": project.port,
-            "docker_port": project.docker_port,
-        }
-        for project in projects
-    ]
-    return jsonify(projects_data)
+
 
 
 @admin_bp.route("/delete_projects/<uuid:pid>", methods=["POST"])

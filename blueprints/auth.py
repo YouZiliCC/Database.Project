@@ -9,9 +9,9 @@ from flask import (
 )
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
-from database.actions import get_user_by_email, get_user_by_username, create_user
+from database.actions import *
 import logging
 
 auth_bp = Blueprint("auth", __name__)
@@ -30,6 +30,7 @@ class LoginForm(FlaskForm):
 class RegisterForm(FlaskForm):
     uname = StringField("用户名", validators=[DataRequired(), Length(min=3, max=20)])
     email = StringField("邮箱", validators=[DataRequired(), Email()])
+    sid = StringField("学号", validators=[DataRequired()])
     password = PasswordField("密码", validators=[DataRequired(), Length(min=6)])
     password2 = PasswordField(
         "确认密码",
@@ -48,6 +49,15 @@ class RegisterForm(FlaskForm):
     def validate_email(self, email):
         if get_user_by_email(email.data):
             raise ValidationError("该邮箱已被注册，请使用其他邮箱")
+    
+    def validate_sid(self, sid):
+        if get_user_by_sid(sid.data):
+            raise ValidationError("该学号已被注册，请使用其他学号")
+        
+    def check_sid_format(self, sid):
+        """验证学号格式：10位数字"""
+        if len(sid.data) != 10 or not sid.data.isdigit():
+            raise ValidationError("学号格式不正确，应为10位数字")
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -100,6 +110,7 @@ def register():
         create_user(
             uname=form.uname.data,
             email=form.email.data,
+            sid=form.sid.data,
             password=form.password.data,
         )
         if not create_user:
