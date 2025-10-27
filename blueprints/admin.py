@@ -75,18 +75,19 @@ def delete_user(user_id):
     user = get_user_by_id(str(user_id))
     if not user:
         flash("用户不存在", "warning")
-        return redirect(url_for("admin.list_users"))
+        return jsonify({"error": "用户不存在"}), 404
     if user.is_admin:
         flash("不能删除管理员用户", "danger")
-        return redirect(url_for("admin.list_users"))
+        return jsonify({"error": "不能删除管理员用户"}), 403
     if user.is_leader:
         flash("不能删除用户组负责人，请先更换负责人", "danger")
-        return redirect(url_for("admin.list_users"))
+        return jsonify({"error": "不能删除用户组负责人，请先更换负责人"}), 403
     if delete_user(user):
-        flash("用户已删除", "success")
+        flash("用户已删除", "success") 
+        return jsonify({"message": "用户删除成功"}), 200
     else:
         flash("删除用户失败", "error")
-    return redirect(url_for("admin.list_users"))
+        return jsonify({"error": "删除用户失败"}), 500
 
 
 @admin_bp.route("/update_user/<uuid:user_id>", methods=["POST"])
@@ -97,13 +98,17 @@ def update_user(user_id):
     user = get_user_by_id(str(user_id))
     if not user:
         flash("用户不存在", "warning")
-        return redirect(url_for("admin.list_users"))
-    # 这里可以添加更新用户信息的逻辑
+        return jsonify({"error": "用户不存在"}), 404
+    # TODO: 这里可以添加更新用户信息的逻辑
+
+
+
     if update_user(user):
         flash("用户信息已更新", "success")
+        return jsonify({"message": "用户信息更新成功"}), 200
     else:
         flash("更新用户信息失败", "error")
-    return redirect(url_for("admin.list_users"))
+        return jsonify({"error": "更新用户信息失败"}), 500
 
 
 @admin_bp.route("/groups", methods=["GET"])
@@ -131,12 +136,13 @@ def delete_group(group_id):
     group = get_group_by_id(str(group_id))
     if not group:
         flash("用户组不存在", "warning")
-        return redirect(url_for("admin.list_groups"))
+        return jsonify({"error": "用户组不存在"}), 404
     if delete_group(group):
         flash("用户组已删除", "success")
+        return jsonify({"message": "用户组删除成功"}), 200
     else:
         flash("删除用户组失败", "error")
-    return redirect(url_for("admin.list_groups"))
+        return jsonify({"error": "删除用户组失败"}), 500
 
 
 @admin_bp.route("/update_group/<uuid:group_id>", methods=["POST"])
@@ -147,13 +153,17 @@ def update_group(group_id):
     group = get_group_by_id(str(group_id))
     if not group:
         flash("用户组不存在", "warning")
-        return redirect(url_for("admin.list_groups"))
-    # 这里可以添加更新用户组信息的逻辑
+        return jsonify({"error": "用户组不存在"}), 404
+    # TODO: 这里可以添加更新用户组信息的逻辑
+
+
+    
     if update_group(group):
         flash("用户组信息已更新", "success")
+        return jsonify({"message": "用户组信息更新成功"}), 200
     else:
         flash("更新用户组信息失败", "error")
-    return redirect(url_for("admin.list_groups"))
+        return jsonify({"error": "更新用户组信息失败"}), 500
 
 
 @admin_bp.route("/projects", methods=["GET"])
@@ -184,12 +194,13 @@ def delete_project(project_id):
     project = get_project_by_id(str(project_id))
     if not project:
         flash("项目不存在", "warning")
-        return redirect(url_for("admin.list_projects"))
+        return jsonify({"error": "项目不存在"}), 404
     if delete_project(project):
         flash("项目已删除", "success")
+        return jsonify({"message": "项目删除成功"}), 200
     else:
         flash("删除项目失败", "error")
-    return redirect(url_for("admin.list_projects"))
+        return jsonify({"error": "删除项目失败"}), 500
 
 @admin_bp.route("/update_project/<uuid:project_id>", methods=["POST"])
 @login_required
@@ -199,10 +210,14 @@ def update_project(project_id):
     project = get_project_by_id(str(project_id))
     if not project:
         flash("项目不存在", "warning")
-        return redirect(url_for("admin.list_projects"))
-    # 这里可以添加更新项目的逻辑
+        return jsonify({"error": "项目不存在"}), 404
+    # TODO: 这里可以添加更新项目的逻辑
+
+
+
     if update_project(project):
         flash("项目已更新", "success")
+        return jsonify({"message": "项目更新成功"}), 200
     else:
         flash("更新项目失败", "error")
-    return redirect(url_for("admin.list_projects"))
+        return jsonify({"error": "更新项目失败"}), 500
