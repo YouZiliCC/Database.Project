@@ -18,22 +18,24 @@ def create_app():
     except Exception as e:
         app.logger.error(f"加载环境变量失败: {e}", exc_info=True)
 
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS')
-    app.config['LOG_LEVEL'] = os.getenv('LOG_LEVEL')
-    app.config['ADMIN_ONLY_LOGIN'] = os.getenv('ADMIN_ONLY_LOGIN', 'False') == 'True'
-    app.config['PORT'] = int(os.getenv('PORT', 5000))
-    app.config['HOST'] = os.getenv('HOST', '0.0.0.0')
-    app.config['DEBUG'] = os.getenv('DEBUG', 'False') == 'True'
-    
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.getenv(
+        "SQLALCHEMY_TRACK_MODIFICATIONS"
+    )
+    app.config["LOG_LEVEL"] = os.getenv("LOG_LEVEL")
+    app.config["ADMIN_ONLY_LOGIN"] = os.getenv("ADMIN_ONLY_LOGIN", "False") == "True"
+    app.config["PORT"] = int(os.getenv("PORT", 5000))
+    app.config["HOST"] = os.getenv("HOST", "0.0.0.0")
+    app.config["DEBUG"] = os.getenv("DEBUG", "False") == "True"
+
     # CSRF保护
     csrf = CSRFProtect()
     csrf.init_app(app)
-    
+
     # 初始化数据库
     db.init_app(app)
-    
+
     # 初始化登录管理器
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
@@ -63,24 +65,27 @@ def create_app():
         db.create_all()
         # 初始化默认管理员用户
         initial_admin = {
-            "uname": os.getenv('INITIAL_ADMIN_UNAME'),
-            "uinfo": os.getenv('INITIAL_ADMIN_USER_INFO'),
-            "password": os.getenv('INITIAL_ADMIN_PASSWORD'),
-            "email": os.getenv('INITIAL_ADMIN_EMAIL'),
-            "role": int(os.getenv('INITIAL_ADMIN_ROLE', 1)),
-            "sid": os.getenv('INITIAL_ADMIN_SID')
+            "uname": os.getenv("INITIAL_ADMIN_UNAME"),
+            "uinfo": os.getenv("INITIAL_ADMIN_USER_INFO"),
+            "password": os.getenv("INITIAL_ADMIN_PASSWORD"),
+            "email": os.getenv("INITIAL_ADMIN_EMAIL"),
+            "role": int(os.getenv("INITIAL_ADMIN_ROLE", 1)),
+            "sid": os.getenv("INITIAL_ADMIN_SID"),
         }
         if initial_admin and not get_user_by_username(initial_admin["uname"]):
             try:
                 admin = create_user(**initial_admin)
                 if admin and admin.is_admin:
-                    app.logger.info(f"默认管理员用户已创建: {admin.uname} / {admin.email}")
+                    app.logger.info(
+                        f"默认管理员用户已创建: {admin.uname} / {admin.email}"
+                    )
             except Exception as e:
                 app.logger.error(f"初始化默认管理员用户失败: {e}", exc_info=True)
 
     # 配置日志
-    logging.basicConfig(level=app.config["LOG_LEVEL"],
-                        format='[%(levelname)s] %(name)s : %(message)s')
+    logging.basicConfig(
+        level=app.config["LOG_LEVEL"], format="[%(levelname)s] %(name)s : %(message)s"
+    )
     app.logger.setLevel(app.config["LOG_LEVEL"])
 
     app.logger.info("Flask应用初始化完成")

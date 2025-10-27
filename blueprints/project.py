@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 # details
 
+
 @project_bp.route("/", methods=["GET"])
 def project_list():
     """项目列表页面"""
@@ -29,7 +30,7 @@ def project_list():
     return render_template("project/list.html", projects=projects)
 
 
-#TODO: project details
+# TODO: project details
 @project_bp.route("/<uuid:pid>", methods=["GET"])
 def project_detail(pid):
     """项目详情页面"""
@@ -38,6 +39,7 @@ def project_detail(pid):
         abort(404, description="项目不存在")
     return render_template("project/detail.html", project=project)
 
-#TODO: terminal
 
-#TODO: iframe
+# TODO: terminal
+
+# TODO: iframe

@@ -19,6 +19,7 @@ import logging
 api_bp = Blueprint("api", __name__)
 logger = logging.getLogger(__name__)
 
+
 @api_bp.route("/users", methods=["GET"])
 @login_required
 @admin_required

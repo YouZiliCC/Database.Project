@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 # details
 
+
 # TODO: 学号解析工具
 # def parse_student_id(sid: str) -> dict:
 #     """解析学号，返回包含院系和专业信息的字典"""
@@ -42,7 +43,7 @@ class UserForm(FlaskForm):
     uname = StringField("用户名", validators=[DataRequired(), Length(min=3, max=50)])
     email = StringField("邮箱", validators=[DataRequired(), Email(), Length(max=100)])
     sid = StringField("学号", validators=[DataRequired(), Length(min=10, max=10)])
-    #TODO uimg = StringField("用户头像URL", validators=[Length(max=200)])
+    # TODO uimg = StringField("用户头像URL", validators=[Length(max=200)])
     uinfo = StringField("个人简介", validators=[Length(max=200)])
     submit = SubmitField("保存")
 
@@ -54,12 +55,13 @@ class UserForm(FlaskForm):
     def validate_email(self, email):
         if get_user_by_email(email.data):
             raise ValidationError("该邮箱已被注册，请使用其他邮箱")
-    
+
     def validate_sid(self, sid):
         if get_user_by_sid(sid.data):
             raise ValidationError("该学号已被注册，请使用其他学号")
         if len(sid.data) != 10 or not sid.data.isdigit():
             raise ValidationError("学号格式不正确，应为10位数字")
+
 
 @user_bp.route("/", methods=["GET"])
 def user_list():
@@ -118,14 +120,14 @@ def user_edit():
     return render_template("user/edit.html", form=form, user=user)
 
 
-#TODO: Password change
+# TODO: Password change
 
-#TODO: EMAIL change
+# TODO: EMAIL change
 
-#TODO: IMAGE upload
+# TODO: IMAGE upload
 
-#TODO: join group
+# TODO: join group
 
-#TODO: leave group
+# TODO: leave group
 
-#TODO: delete account
+# TODO: delete account

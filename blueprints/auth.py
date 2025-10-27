@@ -49,7 +49,7 @@ class RegisterForm(FlaskForm):
     def validate_email(self, email):
         if get_user_by_email(email.data):
             raise ValidationError("该邮箱已被注册，请使用其他邮箱")
-    
+
     def validate_sid(self, sid):
         if get_user_by_sid(sid.data):
             raise ValidationError("该学号已被注册，请使用其他学号")

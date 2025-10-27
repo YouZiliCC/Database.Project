@@ -20,7 +20,9 @@ logger = logging.getLogger(__name__)
 
 
 class GroupForm(FlaskForm):
-    gname = StringField("工作组名称", validators=[DataRequired(), Length(min=3, max=50)])
+    gname = StringField(
+        "工作组名称", validators=[DataRequired(), Length(min=3, max=50)]
+    )
     ginfo = StringField("工作组描述", validators=[Length(max=200)])
     submit = SubmitField("保存")
 
@@ -32,33 +34,41 @@ class ChangeLeaderForm(FlaskForm):
 
 def group_required(func):
     """工作组成员权限装饰器"""
+
     @wraps(func)
     def decorated(*args, **kwargs):
         gid = kwargs.get("gid")
-        if any([
-            not current_user.is_authenticated,
-            not current_user.gid,
-            str(current_user.gid) != str(gid)
-        ]):
+        if any(
+            [
+                not current_user.is_authenticated,
+                not current_user.gid,
+                str(current_user.gid) != str(gid),
+            ]
+        ):
             abort(403, description="需要工作组成员权限才能访问此页面")
         return func(*args, **kwargs)
+
     return decorated
 
 
 def leader_required(func):
     """工作组组长权限装饰器"""
+
     @wraps(func)
     def decorated(*args, **kwargs):
         gid = kwargs.get("gid")
         group = get_group_by_id(gid)
-        if any([
-            not current_user.is_authenticated,
-            not current_user.gid,
-            str(current_user.gid) != str(gid),
-            str(group.leader_id) != str(current_user.uid),
-        ]):
+        if any(
+            [
+                not current_user.is_authenticated,
+                not current_user.gid,
+                str(current_user.gid) != str(gid),
+                str(group.leader_id) != str(current_user.uid),
+            ]
+        ):
             abort(403, description="需要工作组组长权限才能访问此页面")
         return func(*args, **kwargs)
+
     return decorated
 
 
@@ -141,7 +151,9 @@ def group_edit(gid):
             logger.warning(f"更新工作组信息失败: {form.gname.data}")
             return jsonify({"error": "更新工作组信息失败"}), 500
         flash("工作组信息更新成功", "success")
-        logger.info(f"更新工作组信息成功: {form.gname.data} by user {current_user.uname}")
+        logger.info(
+            f"更新工作组信息成功: {form.gname.data} by user {current_user.uname}"
+        )
         return jsonify({"message": "工作组信息更新成功"}), 200
     return render_template("group/edit.html", form=form, group=group)
 
@@ -188,7 +200,8 @@ def group_members(gid):
         return jsonify({"error": "工作组不存在"}), 404
     pass
 
-#TODO: accept member
+
+# TODO: accept member
 @group_bp.route("/<uuid:gid>/members/<uuid:uid>/accept", methods=["POST"])
 @login_required
 @leader_required
@@ -212,7 +225,7 @@ def accept_member(gid, uid):
     # return jsonify({"message": "用户已成功加入工作组"}), 200
 
 
-#TODO: remove member
+# TODO: remove member
 @group_bp.route("/<uuid:gid>/members/<uuid:uid>/remove", methods=["POST"])
 @login_required
 @leader_required
@@ -249,10 +262,11 @@ def group_projects(gid):
         return jsonify({"error": "工作组不存在"}), 404
     pass
 
-#TODO: create project
 
-#TODO: delete project
+# TODO: create project
 
-#TODO: IMAGE upload
+# TODO: delete project
 
-#TODO: delete group
+# TODO: IMAGE upload
+
+# TODO: delete group

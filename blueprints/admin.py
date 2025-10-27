@@ -8,6 +8,7 @@ from database.actions import *
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
 
+
 @admin_bp.errorhandler(400)
 @admin_bp.errorhandler(403)
 @admin_bp.errorhandler(404)
@@ -31,11 +32,13 @@ def handle_errors(e):
 
 def admin_required(func):
     """管理员权限装饰器"""
+
     @wraps(func)
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.is_admin:
             abort(403, description="需要管理员权限才能访问此页面")
         return func(*args, **kwargs)
+
     return decorated
 
 
@@ -45,8 +48,6 @@ def admin_required(func):
 def dashboard():
     """管理员仪表板"""
     return render_template("admin/dashboard.html")
-
-
 
 
 @admin_bp.route("/delete_user/<uuid:uid>", methods=["POST"])
@@ -68,7 +69,7 @@ def delete_user(uid):
     if not delete_user(user):
         flash("删除用户失败", "error")
         return jsonify({"error": "删除用户失败"}), 500
-    flash("用户已删除", "success") 
+    flash("用户已删除", "success")
     return jsonify({"message": "用户删除成功"}), 200
 
 
@@ -84,14 +85,11 @@ def update_user(uid):
         return jsonify({"error": "用户不存在"}), 404
     # TODO: 这里可以添加更新用户信息的逻辑
 
-
-
     if not update_user(user):
         flash("更新用户信息失败", "error")
         return jsonify({"error": "更新用户信息失败"}), 500
     flash("用户信息已更新", "success")
     return jsonify({"message": "用户信息更新成功"}), 200
-
 
 
 @admin_bp.route("/delete_group/<uuid:gid>", methods=["POST"])
@@ -123,16 +121,11 @@ def update_group(gid):
         return jsonify({"error": "工作组不存在"}), 404
     # TODO: 这里可以添加更新工作组信息的逻辑
 
-
-    
     if not update_group(group):
         flash("更新工作组信息失败", "error")
         return jsonify({"error": "更新工作组信息失败"}), 500
     flash("工作组信息已更新", "success")
     return jsonify({"message": "工作组信息更新成功"}), 200
-
-
-
 
 
 @admin_bp.route("/delete_projects/<uuid:pid>", methods=["POST"])
@@ -163,8 +156,6 @@ def update_project(pid):
         flash("项目不存在", "warning")
         return jsonify({"error": "项目不存在"}), 404
     # TODO: 这里可以添加更新项目的逻辑
-
-
 
     if not update_project(project):
         flash("更新项目失败", "error")

@@ -8,6 +8,7 @@ import logging
 # 配置 Logger
 logger = logging.getLogger(__name__)
 
+
 # -------------------------------------------------------------------------------------------
 # 基础数据库工具函数
 # -------------------------------------------------------------------------------------------
@@ -79,7 +80,9 @@ def get_user_by_username(uname):
         User: 匹配的用户对象，未找到则返回None。
     """
     try:
-        return db.session.execute(select(User).where(User.uname == uname)).scalar_one_or_none()
+        return db.session.execute(
+            select(User).where(User.uname == uname)
+        ).scalar_one_or_none()
     except Exception as e:
         logger.error(f"get_user_by_username Failed: {e}", exc_info=True)
         return None
@@ -96,7 +99,9 @@ def get_user_by_email(email):
         User: 匹配的用户对象，未找到则返回None。
     """
     try:
-        return db.session.execute(select(User).where(User.email == email)).scalar_one_or_none()
+        return db.session.execute(
+            select(User).where(User.email == email)
+        ).scalar_one_or_none()
     except Exception as e:
         logger.error(f"get_user_by_email Failed: {e}", exc_info=True)
         return None
@@ -113,7 +118,9 @@ def get_user_by_id(uid):
         User: 匹配的用户对象，未找到则返回None。
     """
     try:
-        return db.session.execute(select(User).where(User.uid == uid)).scalar_one_or_none()
+        return db.session.execute(
+            select(User).where(User.uid == uid)
+        ).scalar_one_or_none()
     except Exception as e:
         logger.error(f"get_user_by_id Failed: {e}", exc_info=True)
         return None
@@ -130,7 +137,9 @@ def get_user_by_sid(sid):
         User: 匹配的用户对象，未找到则返回None。
     """
     try:
-        return db.session.execute(select(User).where(User.sid == sid)).scalar_one_or_none()
+        return db.session.execute(
+            select(User).where(User.sid == sid)
+        ).scalar_one_or_none()
     except Exception as e:
         logger.error(f"get_user_by_sid Failed: {e}", exc_info=True)
         return None
@@ -152,8 +161,16 @@ def create_user(uname, email, sid, password, uinfo=None, role=0):
     """
     try:
         # 检查用户名和邮箱是否已存在
-        if any([get_user_by_username(uname), get_user_by_email(email), get_user_by_sid(sid)]):
-            logger.warning(f"创建用户失败: 用户名/邮箱/学号已存在 ({uname}, {email}, {sid})")
+        if any(
+            [
+                get_user_by_username(uname),
+                get_user_by_email(email),
+                get_user_by_sid(sid),
+            ]
+        ):
+            logger.warning(
+                f"创建用户失败: 用户名/邮箱/学号已存在 ({uname}, {email}, {sid})"
+            )
             return None
 
         user = User(uname=uname, email=email, uinfo=uinfo, sid=sid, role=role)
@@ -326,7 +343,9 @@ def get_group_by_id(gid):
         Group: 匹配的工作组对象，未找到则返回None。
     """
     try:
-        return db.session.execute(select(Group).where(Group.gid == gid)).scalar_one_or_none()
+        return db.session.execute(
+            select(Group).where(Group.gid == gid)
+        ).scalar_one_or_none()
     except Exception as e:
         logger.error(f"get_group_by_id Failed: {e}", exc_info=True)
         return None
@@ -350,7 +369,9 @@ def create_project(pname, gid, pinfo=None, port=None, docker_port=None):
         Project: 创建成功的项目对象，失败则返回None。
     """
     try:
-        project = Project(pname=pname, pinfo=pinfo, gid=gid, port=port, docker_port=docker_port)
+        project = Project(
+            pname=pname, pinfo=pinfo, gid=gid, port=port, docker_port=docker_port
+        )
         if safe_add(project):
             logger.info(f"项目 {pname} 创建成功, ID: {project.pid}")
             return project
@@ -404,7 +425,7 @@ def delete_project(project):
         logger.error(f"删除项目 {project.pid} 失败: {e}", exc_info=True)
         db.session.rollback()
         return False
-    
+
 
 def get_project_by_id(pid):
     """
@@ -417,7 +438,9 @@ def get_project_by_id(pid):
         Project: 匹配的项目对象，未找到则返回None。
     """
     try:
-        return db.session.execute(select(Project).where(Project.pid == pid)).scalar_one_or_none()
+        return db.session.execute(
+            select(Project).where(Project.pid == pid)
+        ).scalar_one_or_none()
     except Exception as e:
         logger.error(f"get_project_by_id Failed: {e}", exc_info=True)
         return None
@@ -435,7 +458,7 @@ def list_all_projects():
     except Exception as e:
         logger.error(f"list_all_projects Failed: {e}", exc_info=True)
         return []
-    
+
 
 def get_projects_by_user(user):
     """
@@ -448,7 +471,11 @@ def get_projects_by_user(user):
         list: 匹配的项目对象列表。
     """
     try:
-        return db.session.execute(select(Project).where(Project.gid == user.gid)).scalars().all()
+        return (
+            db.session.execute(select(Project).where(Project.gid == user.gid))
+            .scalars()
+            .all()
+        )
     except Exception as e:
         logger.error(f"get_projects_by_user Failed: {e}", exc_info=True)
         return []
