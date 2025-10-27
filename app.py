@@ -1,13 +1,11 @@
 from datetime import timedelta
-from flask import Flask, render_template, request, jsonify
+from flask import Flask
 from flask_wtf import CSRFProtect
-from blueprints import admin
 from database.base import db, login_manager
 from database.actions import create_user, get_user_by_username
 from dotenv import load_dotenv
 import logging
 import os
-
 
 
 def create_app():
@@ -47,20 +45,19 @@ def create_app():
     # 注册蓝图
     from blueprints.index import index_bp
     from blueprints.auth import auth_bp
-    # from blueprints.user import user_bp
-    # from blueprints.group import group_bp
-    # from blueprints.project import project_bp
+    from blueprints.user import user_bp
+    from blueprints.group import group_bp
+    from blueprints.project import project_bp
     from blueprints.admin import admin_bp
 
     # 将蓝图注册到应用
     app.register_blueprint(index_bp)
     # 除主页面之外均制定前缀，避免与主页面路由冲突
     app.register_blueprint(auth_bp, url_prefix="/auth")
-    # app.register_blueprint(user_bp, url_prefix="/user")
-    # app.register_blueprint(group_bp, url_prefix="/group")
-    # app.register_blueprint(project_bp, url_prefix="/project")
+    app.register_blueprint(user_bp, url_prefix="/user")
+    app.register_blueprint(group_bp, url_prefix="/group")
+    app.register_blueprint(project_bp, url_prefix="/project")
     app.register_blueprint(admin_bp, url_prefix="/admin")
-    # app.register_blueprint(terminal_bp, url_prefix="/terminal")
 
     # 创建数据库表
     with app.app_context():

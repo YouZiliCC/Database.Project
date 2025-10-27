@@ -147,6 +147,7 @@ def group_edit(gid):
     return render_template("group/edit.html", form=form, group=group)
 
 
+# TODO: 模态窗口
 @group_bp.route("/<uuid:gid>/change_leader", methods=["GET", "POST"])
 @login_required
 @leader_required
@@ -173,3 +174,31 @@ def leader_change(gid):
         logger.info(f"用户组组长更换成功: {group.gname} by user {current_user.uname}")
         return jsonify({"message": "用户组组长更换成功"}), 200
     return render_template("group/change_leader.html", form=form, group=group)
+
+
+# TODO: 模态窗口
+@group_bp.route("/<uuid:gid>/users", methods=["GET", "POST"])
+@login_required
+@group_required
+def group_users(gid):
+    """用户组成员管理"""
+    gid = str(gid)
+    group = get_group_by_id(gid)
+    if not group:
+        flash("用户组不存在", "warning")
+        return jsonify({"error": "用户组不存在"}), 404
+    pass
+
+
+# TODO: 模态窗口
+@group_bp.route("/<uuid:gid>/projects", methods=["GET", "POST"])
+@login_required
+@group_required
+def group_projects(gid):
+    """用户组项目管理"""
+    gid = str(gid)
+    group = get_group_by_id(gid)
+    if not group:
+        flash("用户组不存在", "warning")
+        return jsonify({"error": "用户组不存在"}), 404
+    pass
