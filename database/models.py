@@ -55,7 +55,7 @@ class User(db.Model, TimestampMixin, UserMixin):
 
 
 class Group(db.Model, TimestampMixin):
-    # 用户组表
+    # 工作组表
     __tablename__ = 'groups'
     # 字段
     gid = db.Column(db.String(36), primary_key=True, default=generate_uuid)

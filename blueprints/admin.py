@@ -63,8 +63,8 @@ def delete_user(uid):
         flash("不能删除管理员用户", "danger")
         return jsonify({"error": "不能删除管理员用户"}), 403
     if user.is_leader:
-        flash("不能删除用户组负责人，请先更换负责人", "danger")
-        return jsonify({"error": "不能删除用户组负责人，请先更换负责人"}), 403
+        flash("不能删除工作组负责人，请先更换负责人", "danger")
+        return jsonify({"error": "不能删除工作组负责人，请先更换负责人"}), 403
     if not delete_user(user):
         flash("删除用户失败", "error")
         return jsonify({"error": "删除用户失败"}), 500
@@ -98,38 +98,38 @@ def update_user(uid):
 @login_required
 @admin_required
 def delete_group(gid):
-    """删除用户组"""
+    """删除工作组"""
     gid = str(gid)
     group = get_group_by_id(str(gid))
     if not group:
-        flash("用户组不存在", "warning")
-        return jsonify({"error": "用户组不存在"}), 404
+        flash("工作组不存在", "warning")
+        return jsonify({"error": "工作组不存在"}), 404
     if not delete_group(group):
-        flash("删除用户组失败", "error")
-        return jsonify({"error": "删除用户组失败"}), 500
-    flash("用户组已删除", "success")
-    return jsonify({"message": "用户组删除成功"}), 200
+        flash("删除工作组失败", "error")
+        return jsonify({"error": "删除工作组失败"}), 500
+    flash("工作组已删除", "success")
+    return jsonify({"message": "工作组删除成功"}), 200
 
 
 @admin_bp.route("/update_group/<uuid:gid>", methods=["POST"])
 @login_required
 @admin_required
 def update_group(gid):
-    """更新用户组信息"""
+    """更新工作组信息"""
     gid = str(gid)
     group = get_group_by_id(gid)
     if not group:
-        flash("用户组不存在", "warning")
-        return jsonify({"error": "用户组不存在"}), 404
-    # TODO: 这里可以添加更新用户组信息的逻辑
+        flash("工作组不存在", "warning")
+        return jsonify({"error": "工作组不存在"}), 404
+    # TODO: 这里可以添加更新工作组信息的逻辑
 
 
     
     if not update_group(group):
-        flash("更新用户组信息失败", "error")
-        return jsonify({"error": "更新用户组信息失败"}), 500
-    flash("用户组信息已更新", "success")
-    return jsonify({"message": "用户组信息更新成功"}), 200
+        flash("更新工作组信息失败", "error")
+        return jsonify({"error": "更新工作组信息失败"}), 500
+    flash("工作组信息已更新", "success")
+    return jsonify({"message": "工作组信息更新成功"}), 200
 
 
 

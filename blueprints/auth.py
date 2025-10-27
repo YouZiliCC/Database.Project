@@ -30,7 +30,7 @@ class LoginForm(FlaskForm):
 class RegisterForm(FlaskForm):
     uname = StringField("用户名", validators=[DataRequired(), Length(min=3, max=20)])
     email = StringField("邮箱", validators=[DataRequired(), Email()])
-    sid = StringField("学号", validators=[DataRequired()])
+    sid = StringField("学号", validators=[DataRequired(), Length(min=10, max=10)])
     password = PasswordField("密码", validators=[DataRequired(), Length(min=6)])
     password2 = PasswordField(
         "确认密码",
@@ -53,9 +53,6 @@ class RegisterForm(FlaskForm):
     def validate_sid(self, sid):
         if get_user_by_sid(sid.data):
             raise ValidationError("该学号已被注册，请使用其他学号")
-        
-    def check_sid_format(self, sid):
-        """验证学号格式：10位数字"""
         if len(sid.data) != 10 or not sid.data.isdigit():
             raise ValidationError("学号格式不正确，应为10位数字")
 

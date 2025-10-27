@@ -44,7 +44,7 @@ def api_users():
 @login_required
 @admin_required
 def api_groups():
-    """列出所有用户组"""
+    """列出所有工作组"""
     groups = list_all_groups()
     groups_data = [
         {

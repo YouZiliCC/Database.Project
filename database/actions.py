@@ -8,7 +8,9 @@ import logging
 # 配置 Logger
 logger = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------
 # 基础数据库工具函数
+# -------------------------------------------------------------------------------------------
 def safe_commit():
     """
     安全地提交数据库事务，出错时回滚并记录错误。
@@ -63,7 +65,9 @@ def safe_delete(instance):
         return False
 
 
+# -------------------------------------------------------------------------------------------
 # 用户 (User) CRUD 操作
+# -------------------------------------------------------------------------------------------
 def get_user_by_username(uname):
     """
     根据用户名获取用户。
@@ -130,23 +134,6 @@ def get_user_by_sid(sid):
     except Exception as e:
         logger.error(f"get_user_by_sid Failed: {e}", exc_info=True)
         return None
-
-
-def get_user_by_group_id(gid):
-    """
-    根据用户组ID获取用户列表。
-
-    参数:
-        gid (str): 用户组ID。
-
-    返回:
-        list: 匹配的用户对象列表。
-    """
-    try:
-        return db.session.execute(select(User).where(User.gid == gid)).scalars().all()
-    except Exception as e:
-        logger.error(f"get_user_by_group_id Failed: {e}", exc_info=True)
-        return []
 
 
 def create_user(uname, email, sid, password, uinfo=None, role=0):
@@ -242,36 +229,39 @@ def list_all_users():
         logger.error(f"list_all_users Failed: {e}", exc_info=True)
         return []
 
+
+# -------------------------------------------------------------------------------------------
 # Group
-def create_group(gname, ginfo=None):
+# -------------------------------------------------------------------------------------------
+def create_group(gname, leader_id, ginfo=None):
     """
-    创建新用户组。
+    创建新工作组。
 
     参数:
-        gname (str): 用户组名称。
-        ginfo (str): 用户组信息。
+        gname (str): 工作组名称。
+        ginfo (str): 工作组信息。
 
     返回:
-        Group: 创建成功的用户组对象，失败则返回None。
+        Group: 创建成功的工作组对象，失败则返回None。
     """
     try:
-        group = Group(gname=gname, ginfo=ginfo)
+        group = Group(gname=gname, leader_id=leader_id, ginfo=ginfo)
         if safe_add(group):
-            logger.info(f"用户组 {gname} 创建成功, ID: {group.gid}")
+            logger.info(f"工作组 {gname} 创建成功, ID: {group.gid}")
             return group
         return None
     except Exception as e:
-        logger.error(f"创建用户组失败: {e}", exc_info=True)
+        logger.error(f"创建工作组失败: {e}", exc_info=True)
         db.session.rollback()
         return None
 
 
 def update_group(group, **kwargs):
     """
-    更新用户组记录。
+    更新工作组记录。
 
     参数:
-        group (Group): 要更新的用户组对象。
+        group (Group): 要更新的工作组对象。
         **kwargs: 要更新的字段及其值。
 
     返回:
@@ -286,17 +276,17 @@ def update_group(group, **kwargs):
                     setattr(group, key, value)
         return safe_commit()
     except Exception as e:
-        logger.error(f"更新用户组 {group.gid} 失败: {e}", exc_info=True)
+        logger.error(f"更新工作组 {group.gid} 失败: {e}", exc_info=True)
         db.session.rollback()
         return False
 
 
 def delete_group(group):
     """
-    删除用户组记录。
+    删除工作组记录。
 
     参数:
-        group (Group): 要删除的用户组对象。
+        group (Group): 要删除的工作组对象。
 
     返回:
         bool: 删除是否成功。
@@ -306,17 +296,17 @@ def delete_group(group):
     try:
         return safe_delete(group)
     except Exception as e:
-        logger.error(f"删除用户组 {group.gid} 失败: {e}", exc_info=True)
+        logger.error(f"删除工作组 {group.gid} 失败: {e}", exc_info=True)
         db.session.rollback()
         return False
 
 
 def list_all_groups():
     """
-    列出所有用户组。
+    列出所有工作组。
 
     返回:
-        list: 所有用户组对象列表。
+        list: 所有工作组对象列表。
     """
     try:
         return db.session.execute(select(Group)).scalars().all()
@@ -327,13 +317,13 @@ def list_all_groups():
 
 def get_group_by_id(gid):
     """
-    根据用户组ID获取用户组。
+    根据工作组ID获取工作组。
 
     参数:
-        gid (str): 用户组ID。
+        gid (str): 工作组ID。
 
     返回:
-        Group: 匹配的用户组对象，未找到则返回None。
+        Group: 匹配的工作组对象，未找到则返回None。
     """
     try:
         return db.session.execute(select(Group).where(Group.gid == gid)).scalar_one_or_none()
@@ -342,43 +332,9 @@ def get_group_by_id(gid):
         return None
 
 
-def get_leader_by_group_id(gid):
-    """
-    根据用户组ID获取组长用户。
-
-    参数:
-        gid (str): 用户组ID。
-
-    返回:
-        User: 组长用户对象，未找到则返回None。
-    """
-    try:
-        group = db.session.execute(select(Group).where(Group.gid == gid)).scalar_one_or_none()
-        if group:
-            return db.session.execute(select(User).where(User.uid == group.leader_id)).scalar_one_or_none()
-        return None
-    except Exception as e:
-        logger.error(f"get_leader_by_group_id Failed: {e}", exc_info=True)
-        return None
-
-
-def get_users_by_group_id(gid):
-    """
-    根据用户组ID获取用户列表。
-
-    参数:
-        gid (str): 用户组ID。
-
-    返回:
-        list: 匹配的用户对象列表。
-    """
-    try:
-        return db.session.execute(select(User).where(User.gid == gid)).scalars().all()
-    except Exception as e:
-        logger.error(f"get_users_by_group_id Failed: {e}", exc_info=True)
-        return []
-
+# -------------------------------------------------------------------------------------------
 # Project CRUD 操作
+# -------------------------------------------------------------------------------------------
 def create_project(pname, gid, pinfo=None, port=None, docker_port=None):
     """
     创建新项目。
@@ -386,7 +342,7 @@ def create_project(pname, gid, pinfo=None, port=None, docker_port=None):
     参数:
         pname (str): 项目名称。
         pinfo (str): 项目描述。
-        gid (str): 用户组ID。
+        gid (str): 工作组ID。
         port (int): 项目端口。
         docker_port (int): Docker映射端口。
 
@@ -478,4 +434,21 @@ def list_all_projects():
         return db.session.execute(select(Project)).scalars().all()
     except Exception as e:
         logger.error(f"list_all_projects Failed: {e}", exc_info=True)
+        return []
+    
+
+def get_projects_by_user(user):
+    """
+    根据用户ID获取项目列表。
+
+    参数:
+        user (User): 用户对象。
+
+    返回:
+        list: 匹配的项目对象列表。
+    """
+    try:
+        return db.session.execute(select(Project).where(Project.gid == user.gid)).scalars().all()
+    except Exception as e:
+        logger.error(f"get_projects_by_user Failed: {e}", exc_info=True)
         return []

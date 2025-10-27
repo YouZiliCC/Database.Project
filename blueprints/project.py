@@ -6,6 +6,7 @@ from flask import (
     flash,
     request,
     current_app,
+    abort,
 )
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
@@ -26,6 +27,17 @@ def project_list():
     """项目列表页面"""
     projects = list_all_projects()
     return render_template("project/list.html", projects=projects)
-# terminal
 
-# iframe
+
+#TODO: project details
+@project_bp.route("/<uuid:pid>", methods=["GET"])
+def project_detail(pid):
+    """项目详情页面"""
+    project = get_project_by_id(pid)
+    if not project:
+        abort(404, description="项目不存在")
+    return render_template("project/detail.html", project=project)
+
+#TODO: terminal
+
+#TODO: iframe
