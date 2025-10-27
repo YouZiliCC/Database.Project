@@ -26,7 +26,6 @@ def create_app():
     app.config['PORT'] = int(os.getenv('PORT', 5000))
     app.config['HOST'] = os.getenv('HOST', '0.0.0.0')
     app.config['DEBUG'] = os.getenv('DEBUG', 'False') == 'True'
-    app.config['INITIAL_ADMIN'] = os.getenv('INITIAL_ADMIN')
     
     # CSRF保护
     csrf = CSRFProtect()
@@ -63,9 +62,17 @@ def create_app():
     with app.app_context():
         db.create_all()
         # 初始化默认管理员用户
-        if app.config["INITIAL_ADMIN"] and not get_user_by_username(eval(app.config["INITIAL_ADMIN"])["username"]):
+        initial_admin = {
+            "uname": os.getenv('INITIAL_ADMIN_UNAME'),
+            "uinfo": os.getenv('INITIAL_ADMIN_USER_INFO'),
+            "password": os.getenv('INITIAL_ADMIN_PASSWORD'),
+            "email": os.getenv('INITIAL_ADMIN_EMAIL'),
+            "role": int(os.getenv('INITIAL_ADMIN_ROLE', 1)),
+            "sid": os.getenv('INITIAL_ADMIN_SID')
+        }
+        if initial_admin and not get_user_by_username(initial_admin["uname"]):
             try:
-                admin = create_user(**eval(app.config["INITIAL_ADMIN"]))
+                admin = create_user(**initial_admin)
                 if admin and admin.is_admin:
                     app.logger.info(f"默认管理员用户已创建: {admin.uname} / {admin.email}")
             except Exception as e:
