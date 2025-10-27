@@ -1,5 +1,5 @@
 import logging
-from flask import Blueprint, jsonify, render_template, url_for, flash, redirect
+from flask import Blueprint, jsonify, render_template, flash, abort
 from flask_login import login_required, current_user
 from functools import wraps
 from database.actions import *
@@ -34,8 +34,7 @@ def admin_required(func):
     @wraps(func)
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.is_admin:
-            flash("需要管理员权限才能访问此页面", "warning")
-            return redirect(url_for("index.index"))
+            abort(403, description="需要管理员权限才能访问此页面")
         return func(*args, **kwargs)
     return decorated
 
@@ -56,23 +55,24 @@ def list_users():
     users = list_all_users()
     users_data = [
         {
-            "user_id": user.uid,
-            "username": user.uname,
+            "uid": user.uid,
+            "uname": user.uname,
             "email": user.email,
             "is_admin": user.is_admin,
-            "group_id": user.gid,
+            "gid": user.gid,
         }
         for user in users
     ]
     return jsonify(users_data)
 
 
-@admin_bp.route("/delete_user/<uuid:user_id>", methods=["POST"])
+@admin_bp.route("/delete_user/<uuid:uid>", methods=["POST"])
 @login_required
 @admin_required
-def delete_user(user_id):
+def delete_user(uid):
     """删除用户"""
-    user = get_user_by_id(str(user_id))
+    uid = str(uid)
+    user = get_user_by_id(uid)
     if not user:
         flash("用户不存在", "warning")
         return jsonify({"error": "用户不存在"}), 404
@@ -82,20 +82,20 @@ def delete_user(user_id):
     if user.is_leader:
         flash("不能删除用户组负责人，请先更换负责人", "danger")
         return jsonify({"error": "不能删除用户组负责人，请先更换负责人"}), 403
-    if delete_user(user):
-        flash("用户已删除", "success") 
-        return jsonify({"message": "用户删除成功"}), 200
-    else:
+    if not delete_user(user):
         flash("删除用户失败", "error")
         return jsonify({"error": "删除用户失败"}), 500
+    flash("用户已删除", "success") 
+    return jsonify({"message": "用户删除成功"}), 200
 
 
-@admin_bp.route("/update_user/<uuid:user_id>", methods=["POST"])
+@admin_bp.route("/update_user/<uuid:uid>", methods=["POST"])
 @login_required
 @admin_required
-def update_user(user_id):
+def update_user(uid):
     """更新用户信息"""
-    user = get_user_by_id(str(user_id))
+    uid = str(uid)
+    user = get_user_by_id(uid)
     if not user:
         flash("用户不存在", "warning")
         return jsonify({"error": "用户不存在"}), 404
@@ -103,12 +103,11 @@ def update_user(user_id):
 
 
 
-    if update_user(user):
-        flash("用户信息已更新", "success")
-        return jsonify({"message": "用户信息更新成功"}), 200
-    else:
+    if not update_user(user):
         flash("更新用户信息失败", "error")
         return jsonify({"error": "更新用户信息失败"}), 500
+    flash("用户信息已更新", "success")
+    return jsonify({"message": "用户信息更新成功"}), 200
 
 
 @admin_bp.route("/groups", methods=["GET"])
@@ -119,38 +118,39 @@ def list_groups():
     groups = list_all_groups()
     groups_data = [
         {
-            "group_id": group.gid,
-            "group_name": group.gname,
-            "group_info": group.ginfo,
+            "gid": group.gid,
+            "gname": group.gname,
+            "ginfo": group.ginfo,
             "leader_id": group.leader_id,
         }
         for group in groups
     ]
     return jsonify(groups_data)
 
-@admin_bp.route("/delete_group/<uuid:group_id>", methods=["POST"])
+@admin_bp.route("/delete_group/<uuid:gid>", methods=["POST"])
 @login_required
 @admin_required
-def delete_group(group_id):
+def delete_group(gid):
     """删除用户组"""
-    group = get_group_by_id(str(group_id))
+    gid = str(gid)
+    group = get_group_by_id(str(gid))
     if not group:
         flash("用户组不存在", "warning")
         return jsonify({"error": "用户组不存在"}), 404
-    if delete_group(group):
-        flash("用户组已删除", "success")
-        return jsonify({"message": "用户组删除成功"}), 200
-    else:
+    if not delete_group(group):
         flash("删除用户组失败", "error")
         return jsonify({"error": "删除用户组失败"}), 500
+    flash("用户组已删除", "success")
+    return jsonify({"message": "用户组删除成功"}), 200
 
 
-@admin_bp.route("/update_group/<uuid:group_id>", methods=["POST"])
+@admin_bp.route("/update_group/<uuid:gid>", methods=["POST"])
 @login_required
 @admin_required
-def update_group(group_id):
+def update_group(gid):
     """更新用户组信息"""
-    group = get_group_by_id(str(group_id))
+    gid = str(gid)
+    group = get_group_by_id(gid)
     if not group:
         flash("用户组不存在", "warning")
         return jsonify({"error": "用户组不存在"}), 404
@@ -158,12 +158,11 @@ def update_group(group_id):
 
 
     
-    if update_group(group):
-        flash("用户组信息已更新", "success")
-        return jsonify({"message": "用户组信息更新成功"}), 200
-    else:
+    if not update_group(group):
         flash("更新用户组信息失败", "error")
         return jsonify({"error": "更新用户组信息失败"}), 500
+    flash("用户组信息已更新", "success")
+    return jsonify({"message": "用户组信息更新成功"}), 200
 
 
 @admin_bp.route("/projects", methods=["GET"])
@@ -174,9 +173,9 @@ def list_projects():
     projects = list_all_projects()
     projects_data = [
         {
-            "project_id": project.pid,
-            "project_name": project.pname,
-            "group_id": project.gid,
+            "pid": project.pid,
+            "pname": project.pname,
+            "gid": project.gid,
             "docker_id": project.docker_id,
             "port": project.port,
             "docker_port": project.docker_port,
@@ -186,28 +185,30 @@ def list_projects():
     return jsonify(projects_data)
 
 
-@admin_bp.route("/delete_projects/<uuid:project_id>", methods=["POST"])
+@admin_bp.route("/delete_projects/<uuid:pid>", methods=["POST"])
 @login_required
 @admin_required
-def delete_project(project_id):
+def delete_project(pid):
     """删除项目"""
-    project = get_project_by_id(str(project_id))
+    pid = str(pid)
+    project = get_project_by_id(pid)
     if not project:
         flash("项目不存在", "warning")
         return jsonify({"error": "项目不存在"}), 404
-    if delete_project(project):
-        flash("项目已删除", "success")
-        return jsonify({"message": "项目删除成功"}), 200
-    else:
+    if not delete_project(project):
         flash("删除项目失败", "error")
         return jsonify({"error": "删除项目失败"}), 500
+    flash("项目已删除", "success")
+    return jsonify({"message": "项目删除成功"}), 200
 
-@admin_bp.route("/update_project/<uuid:project_id>", methods=["POST"])
+
+@admin_bp.route("/update_project/<uuid:pid>", methods=["POST"])
 @login_required
 @admin_required
-def update_project(project_id):
+def update_project(pid):
     """更新项目"""
-    project = get_project_by_id(str(project_id))
+    pid = str(pid)
+    project = get_project_by_id(pid)
     if not project:
         flash("项目不存在", "warning")
         return jsonify({"error": "项目不存在"}), 404
@@ -215,9 +216,8 @@ def update_project(project_id):
 
 
 
-    if update_project(project):
-        flash("项目已更新", "success")
-        return jsonify({"message": "项目更新成功"}), 200
-    else:
+    if not update_project(project):
         flash("更新项目失败", "error")
         return jsonify({"error": "更新项目失败"}), 500
+    flash("项目已更新", "success")
+    return jsonify({"message": "项目更新成功"}), 200

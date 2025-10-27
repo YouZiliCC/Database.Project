@@ -63,18 +63,18 @@ def safe_delete(instance):
         return False
 
 # 用户 (User) CRUD 操作
-def get_user_by_username(username):
+def get_user_by_username(uname):
     """
     根据用户名获取用户。
 
     参数:
-        username (str): 用户名。
+        uname (str): 用户名。
 
     返回:
         User: 匹配的用户对象，未找到则返回None。
     """
     try:
-        return db.session.execute(select(User).where(User.uname == username)).scalar_one_or_none()
+        return db.session.execute(select(User).where(User.uname == uname)).scalar_one_or_none()
     except Exception as e:
         logger.error(f"get_user_by_username Failed: {e}", exc_info=True)
         return None
@@ -97,66 +97,64 @@ def get_user_by_email(email):
         return None
 
 
-def get_user_by_id(user_id):
+def get_user_by_id(uid):
     """
     根据用户ID获取用户。
 
     参数:
-        user_id (str): 用户ID。
+        uid (str): 用户ID。
 
     返回:
         User: 匹配的用户对象，未找到则返回None。
     """
     try:
-        return db.session.execute(select(User).where(User.uid == user_id)).scalar_one_or_none()
+        return db.session.execute(select(User).where(User.uid == uid)).scalar_one_or_none()
     except Exception as e:
         logger.error(f"get_user_by_id Failed: {e}", exc_info=True)
         return None
 
 
-def get_user_by_group_id(group_id):
+def get_user_by_group_id(gid):
     """
     根据用户组ID获取用户列表。
 
     参数:
-        group_id (str): 用户组ID。
+        gid (str): 用户组ID。
 
     返回:
         list: 匹配的用户对象列表。
     """
     try:
-        return db.session.execute(select(User).where(User.gid == group_id)).scalars().all()
+        return db.session.execute(select(User).where(User.gid == gid)).scalars().all()
     except Exception as e:
         logger.error(f"get_user_by_group_id Failed: {e}", exc_info=True)
         return []
 
 
-def create_user(username, email, password, user_info=None, role=0):
+def create_user(uname, email, password, uinfo=None, role=0):
     """
     创建新用户。
 
     参数:
-        username (str): 用户名。
+        uname (str): 用户名。
         email (str): 邮箱。
         password (str): 原始密码。
-        user_info (str): 用户信息。。
+        uinfo (str): 用户信息。
 
     返回:
         User: 创建成功的用户对象，失败则返回None。
     """
     try:
         # 检查用户名和邮箱是否已存在
-        if get_user_by_username(username) or get_user_by_email(email):
-            logger.warning(f"创建用户失败: 用户名或邮箱已存在 ({username}, {email})")
+        if get_user_by_username(uname) or get_user_by_email(email):
+            logger.warning(f"创建用户失败: 用户名或邮箱已存在 ({uname}, {email})")
             return None
 
-        user = User(uname=username, email=email, uinfo=user_info, role=role)
+        user = User(uname=uname, email=email, uinfo=uinfo, role=role)
         user.set_password(password)  # 使用模型方法设置密码哈希
 
-        db.session.add(user)
-
-        if safe_commit():
-            logger.info(f"用户 {username} 创建成功, ID: {user.uid}")
+        if safe_add(user):
+            logger.info(f"用户 {uname} 创建成功, ID: {user.uid}")
             return user
         return None
     except Exception as e:
@@ -183,7 +181,7 @@ def update_user(user, **kwargs):
             if hasattr(user, key):
                 if key == "password":  # 特殊处理密码更新
                     user.set_password(value)
-                elif key != "id":  # 不允许修改ID
+                elif key != "uid":  # 不允许修改ID
                     setattr(user, key, value)
         return safe_commit()
     except Exception as e:
@@ -226,22 +224,21 @@ def list_all_users():
         return []
 
 # Group
-def create_group(group_name, group_info=None):
+def create_group(gname, ginfo=None):
     """
     创建新用户组。
 
     参数:
-        group_name (str): 用户组名称。
-        group_info (str): 用户组信息。
+        gname (str): 用户组名称。
+        ginfo (str): 用户组信息。
 
     返回:
         Group: 创建成功的用户组对象，失败则返回None。
     """
     try:
-        group = Group(gname=group_name, ginfo=group_info)
-        db.session.add(group)
-        if safe_commit():
-            logger.info(f"用户组 {group_name} 创建成功, ID: {group.gid}")
+        group = Group(gname=gname, ginfo=ginfo)
+        if safe_add(group):
+            logger.info(f"用户组 {gname} 创建成功, ID: {group.gid}")
             return group
         return None
     except Exception as e:
@@ -309,35 +306,35 @@ def list_all_groups():
         return []
 
 
-def get_group_by_id(group_id):
+def get_group_by_id(gid):
     """
     根据用户组ID获取用户组。
 
     参数:
-        group_id (str): 用户组ID。
+        gid (str): 用户组ID。
 
     返回:
         Group: 匹配的用户组对象，未找到则返回None。
     """
     try:
-        return db.session.execute(select(Group).where(Group.gid == group_id)).scalar_one_or_none()
+        return db.session.execute(select(Group).where(Group.gid == gid)).scalar_one_or_none()
     except Exception as e:
         logger.error(f"get_group_by_id Failed: {e}", exc_info=True)
         return None
 
 
-def get_leader_by_group_id(group_id):
+def get_leader_by_group_id(gid):
     """
     根据用户组ID获取组长用户。
 
     参数:
-        group_id (str): 用户组ID。
+        gid (str): 用户组ID。
 
     返回:
         User: 组长用户对象，未找到则返回None。
     """
     try:
-        group = db.session.execute(select(Group).where(Group.gid == group_id)).scalar_one_or_none()
+        group = db.session.execute(select(Group).where(Group.gid == gid)).scalar_one_or_none()
         if group:
             return db.session.execute(select(User).where(User.uid == group.leader_id)).scalar_one_or_none()
         return None
@@ -346,31 +343,31 @@ def get_leader_by_group_id(group_id):
         return None
 
 
-def get_users_by_group_id(group_id):
+def get_users_by_group_id(gid):
     """
     根据用户组ID获取用户列表。
 
     参数:
-        group_id (str): 用户组ID。
+        gid (str): 用户组ID。
 
     返回:
         list: 匹配的用户对象列表。
     """
     try:
-        return db.session.execute(select(User).where(User.gid == group_id)).scalars().all()
+        return db.session.execute(select(User).where(User.gid == gid)).scalars().all()
     except Exception as e:
         logger.error(f"get_users_by_group_id Failed: {e}", exc_info=True)
         return []
 
 # Project CRUD 操作
-def create_project(project_name, group_id, project_info=None, port=None, docker_port=None):
+def create_project(pname, gid, pinfo=None, port=None, docker_port=None):
     """
     创建新项目。
 
     参数:
-        project_name (str): 项目名称。
-        project_info (str): 项目描述。
-        group_id (str): 用户组ID。
+        pname (str): 项目名称。
+        pinfo (str): 项目描述。
+        gid (str): 用户组ID。
         port (int): 项目端口。
         docker_port (int): Docker映射端口。
 
@@ -378,10 +375,9 @@ def create_project(project_name, group_id, project_info=None, port=None, docker_
         Project: 创建成功的项目对象，失败则返回None。
     """
     try:
-        project = Project(project_name=project_name, project_info=project_info, group_id=group_id, port=port, docker_port=docker_port)
-        db.session.add(project)
-        if safe_commit():
-            logger.info(f"项目 {project_name} 创建成功, ID: {project.pid}")
+        project = Project(pname=pname, pinfo=pinfo, gid=gid, port=port, docker_port=docker_port)
+        if safe_add(project):
+            logger.info(f"项目 {pname} 创建成功, ID: {project.pid}")
             return project
         return None
     except Exception as e:
@@ -435,18 +431,18 @@ def delete_project(project):
         return False
     
 
-def get_project_by_id(project_id):
+def get_project_by_id(pid):
     """
     根据项目ID获取项目。
 
     参数:
-        project_id (str): 项目ID。
+        pid (str): 项目ID。
 
     返回:
         Project: 匹配的项目对象，未找到则返回None。
     """
     try:
-        return db.session.execute(select(Project).where(Project.pid == project_id)).scalar_one_or_none()
+        return db.session.execute(select(Project).where(Project.pid == pid)).scalar_one_or_none()
     except Exception as e:
         logger.error(f"get_project_by_id Failed: {e}", exc_info=True)
         return None

@@ -28,7 +28,7 @@ class LoginForm(FlaskForm):
 
 # 创建注册表单类
 class RegisterForm(FlaskForm):
-    username = StringField("用户名", validators=[DataRequired(), Length(min=3, max=20)])
+    uname = StringField("用户名", validators=[DataRequired(), Length(min=3, max=20)])
     email = StringField("邮箱", validators=[DataRequired(), Email()])
     password = PasswordField("密码", validators=[DataRequired(), Length(min=6)])
     password2 = PasswordField(
@@ -41,8 +41,8 @@ class RegisterForm(FlaskForm):
     submit = SubmitField("注册")
 
     # 自定义验证器
-    def validate_username(self, username):
-        if get_user_by_username(username.data):
+    def validate_uname(self, uname):
+        if get_user_by_username(uname.data) or get_user_by_email(uname.data):
             raise ValidationError("该用户名已被使用，请选择其他用户名")
 
     def validate_email(self, email):
@@ -98,16 +98,16 @@ def register():
     if form.validate_on_submit():
         # 创建新用户
         create_user(
-            username=form.username.data,
+            uname=form.uname.data,
             email=form.email.data,
             password=form.password.data,
         )
         if not create_user:
             flash("注册失败，请重试", "danger")
-            logger.warning(f"注册用户失败: {form.username.data} / {form.email.data}")
+            logger.warning(f"注册用户失败: {form.uname.data} / {form.email.data}")
             return render_template("auth/register.html", form=form)
         flash("注册成功！现在您可以登录了", "success")
-        logger.info(f"注册用户成功: {form.username.data} / {form.email.data}")
+        logger.info(f"注册用户成功: {form.uname.data} / {form.email.data}")
         return redirect(url_for("auth.login"))
     return render_template("auth/register.html", form=form)
 
