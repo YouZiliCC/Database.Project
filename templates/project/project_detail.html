@@ -1,74 +1,3 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.project_name }} - 项目详情</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>🎓 数据库系统课程 - 项目详情</h1>
-            <nav>
-                <a href="/" class="nav-link">首页</a>
-                <a href="/terminal" class="nav-link">命令行终端</a>
-            </nav>
-        </div>
-    </header>
-
-    <main class="container">
-        <div class="breadcrumb">
-            <a href="/">首页</a> > <span>{{ project.project_name }}</span>
-        </div>
-
-        <section class="project-detail">
-            <div class="detail-header">
-                <h2>{{ project.project_name }}</h2>
-                <span class="status-badge">运行中</span>
-            </div>
-
-            <div class="detail-content">
-                <div class="info-section">
-                    <h3>📋 基本信息</h3>
-                    <table class="info-table">
-                        <tr>
-                            <td><strong>学生姓名：</strong></td>
-                            <td>{{ project.name }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>项目名称：</strong></td>
-                            <td>{{ project.project_name }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>项目描述：</strong></td>
-                            <td>{{ project.description }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>访问端口：</strong></td>
-                            <td>{{ project.port }}</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="info-section">
-                    <h3>🐳 Docker 配置</h3>
-                    <table class="info-table">
-                        <tr>
-                            <td><strong>镜像名称：</strong></td>
-                            <td><code>{{ project.docker_image }}</code></td>
-                        </tr>
-                        <tr>
-                            <td><strong>容器状态：</strong></td>
-                            <td><span class="status-running">运行中</span></td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="info-section">
-                    <h3>🚀 部署命令</h3>
-                    <div class="code-block">
-                        <pre><code># 拉取镜像
 docker pull {{ project.docker_image }}
 
 # 运行容器
@@ -82,23 +11,86 @@ docker stop {{ project.project_name.lower().replace(' ', '-') }}
 
 # 删除容器
 docker rm {{ project.project_name.lower().replace(' ', '-') }}</code></pre>
-                    </div>
-                </div>
+{% extends "base.html" %}
 
-                <div class="action-buttons">
-                    <button class="btn btn-primary btn-large" onclick="window.open('http://localhost:{{ project.port }}', '_blank')">
-                        🌐 访问应用
-                    </button>
-                    <a href="/" class="btn btn-secondary btn-large">← 返回首页</a>
+{% block title %}{{ project.project_name }} - 项目详情{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="breadcrumb">
+        <a href="/">首页</a> &gt; <span>{{ project.project_name }}</span>
+    </div>
+
+    <section class="project-detail">
+        <div class="detail-header">
+            <h2>{{ project.project_name }}</h2>
+            <span class="status-badge">运行中</span>
+        </div>
+
+        <div class="detail-content">
+            <div class="info-section">
+                <h3>📋 基本信息</h3>
+                <table class="info-table">
+                    <tr>
+                        <td><strong>学生姓名：</strong></td>
+                        <td>{{ project.name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>项目名称：</strong></td>
+                        <td>{{ project.project_name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>项目描述：</strong></td>
+                        <td>{{ project.description }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>访问端口：</strong></td>
+                        <td>{{ project.port }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="info-section">
+                <h3>🐳 Docker 配置</h3>
+                <table class="info-table">
+                    <tr>
+                        <td><strong>镜像名称：</strong></td>
+                        <td><code>{{ project.docker_image }}</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>容器状态：</strong></td>
+                        <td><span class="status-running">运行中</span></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="info-section">
+                <h3>🚀 部署命令</h3>
+                <div class="code-block">
+                    <pre><code># 拉取镜像
+docker pull {{ project.docker_image }}
+
+# 运行容器
+docker run -d -p {{ project.port }}:5000 --name {{ project.project_name.lower().replace(' ', '-') }} {{ project.docker_image }}
+
+# 查看日志
+docker logs {{ project.project_name.lower().replace(' ', '-') }}
+
+# 停止容器
+docker stop {{ project.project_name.lower().replace(' ', '-') }}
+
+# 删除容器
+docker rm {{ project.project_name.lower().replace(' ', '-') }}</code></pre>
                 </div>
             </div>
-        </section>
-    </main>
 
-    <footer>
-        <div class="container">
-            <p>© 2025 数据库系统课程项目展示平台</p>
+            <div class="action-buttons">
+                <button class="btn btn-primary btn-large" onclick="window.open('http://localhost:{{ project.port }}', '_blank')">
+                    🌐 访问应用
+                </button>
+                <a href="/" class="btn btn-secondary btn-large">← 返回首页</a>
+            </div>
         </div>
-    </footer>
-</body>
-</html>
+    </section>
+</div>
+{% endblock %}

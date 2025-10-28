@@ -15,7 +15,6 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
 from database.actions import *
-from blueprints.group import group_required, leader_required
 import logging
 
 # 项目蓝图

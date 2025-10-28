@@ -13,7 +13,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Length
 from database.actions import *
-from project import ProjectForm
+from blueprints.project import ProjectForm
 import logging
 
 group_bp = Blueprint("group", __name__)
