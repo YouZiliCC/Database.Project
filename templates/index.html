@@ -1,29 +1,22 @@
 {% extends "base.html" %}
 {% block title %}DBSYS_INDEX{% endblock %}
-
 {% block content %}
-    <div>
-        <a href="/">Home</a>
-        <a href="/users">Users</a>
-        <a href="/groups">Groups</a>
-        <a href="/projects">Projects</a>
-    </div>
-    <div class="container">
-        <h2>欢迎来到数据库系统课程项目展示平台</h2>
-        <p>在这里，您可以浏览和管理数据库系统相关的项目。</p>
-        <div class="button-group">
-            <a href="/projects" class="btn">查看所有项目</a>
-            <a href="/terminal" class="btn">访问命令行终端</a>
-            {% if current_user.is_authenticated %}
-                <a href="/dashboard" class="btn">用户仪表盘</a>
-                <a href="/auth/logout" class="btn">登出</a>
-            {% else %}
-                <a href="/auth/login" class="btn">登录</a>
-                <a href="/auth/register" class="btn">注册</a>
-            {% endif %}
-            {% if current_user.is_admin %}
-                <a href="/admin/dashboard" class="btn">管理员面板</a>
-            {% endif %}
+    <section class="hero">
+        <div class="container">
+            <h2>数据库系统课程 · 项目展示平台</h2>
+            <p>浏览作品、管理小组与项目，访问集成命令行终端。</p>
+            <div class="button-group">
+                <a href="/projects" class="btn">查看所有项目</a>
+                <a href="/projects/terminal" class="btn">访问命令行终端</a>
+                {% if current_user.is_authenticated %}
+                    <a href="/users/me" class="btn">我的资料</a>
+                    <a href="/auth/logout" class="btn">登出</a>
+                {% else %}
+                    <a href="/auth/login" class="btn">登录</a>
+                    <a href="/auth/register" class="btn">注册</a>
+                {% endif %}
+                {% if current_user.is_admin %}<a href="/admin/dashboard" class="btn">管理员面板</a>{% endif %}
+            </div>
         </div>
-    </div>
+    </section>
 {% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}编辑个人信息{% endblock %}
+{% block content %}
+    <div class="container">
+        <h2>编辑个人信息</h2>
+        <form method="POST" class="form">
+            {{ form.hidden_tag() }}
+            <div class="form-row">
+                <label>{{ form.uname.label }}</label>
+                {{ form.uname(size=32, **{"data-validate":"required|min:3"}) }}
+            </div>
+            <div class="form-row">
+                <label>{{ form.email.label }}</label>
+                {{ form.email(size=64, **{"data-validate":"required"}) }}
+            </div>
+            <div class="form-row">
+                <label>{{ form.sid.label }}</label>
+                {{ form.sid(size=10, **{"data-validate":"required|min:10"}) }}
+            </div>
+            <div class="form-row">
+                <label>{{ form.uinfo.label }}</label>
+                {{ form.uinfo(size=80) }}
+            </div>
+            <div class="form-row">{{ form.submit(class="btn") }}</div>
+        </form>
+    </div>
+{% endblock %}

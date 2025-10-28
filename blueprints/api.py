@@ -13,7 +13,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
 from database.actions import *
-from blueprints.auth import login_required, admin_required
+from blueprints.auth import login_required
+from blueprints.admin import admin_required
 import logging
 
 api_bp = Blueprint("api", __name__)

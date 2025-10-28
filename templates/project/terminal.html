@@ -1,51 +1,50 @@
 {% extends "base.html" %}
-
 {% block title %}命令行终端 - 数据库系统课程{% endblock %}
-
 {% block content %}
-<div style="display:flex;justify-content:center;">
-    <iframe src="http://127.0.0.1:5050" width="1600" height="1000" style="border:0;max-width:100%;"></iframe>
-</div>
-
-<div class="container">
-    <section class="terminal-section">
-        <div class="terminal-info">
-            <h2>💻 交互式命令行</h2>
-            <p>在下方终端中输入命令，支持基本的系统命令和Docker操作。</p>
-            <p class="warning">⚠️ 出于安全考虑，只允许执行特定的安全命令。</p>
-        </div>
-
-        <div class="terminal-container">
-            <div class="terminal-header">
-                <span class="terminal-title">Terminal</span>
-                <button class="btn-clear" onclick="clearTerminal()">清空</button>
+    <div class="iframe-wrap">
+        <iframe src="http://127.0.0.1:5050"
+                width="1600"
+                height="1000"
+                class="iframe-box"></iframe>
+    </div>
+    <div class="container">
+        <section class="terminal-section">
+            <div class="terminal-info">
+                <h2>💻 交互式命令行</h2>
+                <p>在下方终端中输入命令，支持基本的系统命令和Docker操作。</p>
+                <p class="warning">⚠️ 出于安全考虑，只允许执行特定的安全命令。</p>
             </div>
-            <div id="terminal-output" class="terminal-output">
-                <div class="terminal-line">欢迎使用命令行终端！</div>
-                <div class="terminal-line">允许的命令：ls, pwd, echo, date, whoami, docker ps, docker images</div>
-                <div class="terminal-line">输入 'help' 查看帮助信息</div>
-                <div class="terminal-line"></div>
+            <div class="terminal-container">
+                <div class="terminal-header">
+                    <span class="terminal-title">Terminal</span>
+                    <button class="btn-clear" onclick="clearTerminal()">清空</button>
+                </div>
+                <div id="terminal-output" class="terminal-output">
+                    <div class="terminal-line">欢迎使用命令行终端！</div>
+                    <div class="terminal-line">允许的命令：ls, pwd, echo, date, whoami, docker ps, docker images</div>
+                    <div class="terminal-line">输入 'help' 查看帮助信息</div>
+                    <div class="terminal-line"></div>
+                </div>
+                <div class="terminal-input-container">
+                    <span class="terminal-prompt">$</span>
+                    <input type="text"
+                           id="command-input"
+                           class="terminal-input"
+                           placeholder="输入命令..."
+                           autofocus>
+                </div>
             </div>
-            <div class="terminal-input-container">
-                <span class="terminal-prompt">$</span>
-                <input type="text" id="command-input" class="terminal-input" placeholder="输入命令..." autofocus>
+            <div class="command-examples">
+                <h3>常用命令示例：</h3>
+                <div class="example-grid">
+                    <button class="example-btn" onclick="executeExample('pwd')">pwd - 当前目录</button>
+                    <button class="example-btn" onclick="executeExample('date')">date - 当前时间</button>
+                    <button class="example-btn" onclick="executeExample('docker ps')">docker ps - 容器列表</button>
+                    <button class="example-btn" onclick="executeExample('docker images')">docker images - 镜像列表</button>
+                    <button class="example-btn" onclick="executeExample('echo Hello World')">echo - 输出文本</button>
+                </div>
             </div>
-        </div>
-
-        <div class="command-examples">
-            <h3>常用命令示例：</h3>
-            <div class="example-grid">
-                <button class="example-btn" onclick="executeExample('pwd')">pwd - 当前目录</button>
-                <button class="example-btn" onclick="executeExample('date')">date - 当前时间</button>
-                <button class="example-btn" onclick="executeExample('docker ps')">docker ps - 容器列表</button>
-                <button class="example-btn" onclick="executeExample('docker images')">docker images - 镜像列表</button>
-                <button class="example-btn" onclick="executeExample('echo Hello World')">echo - 输出文本</button>
-            </div>
-        </div>
-    </section>
-</div>
+        </section>
+    </div>
 {% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/terminal.js') }}"></script>
-{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/terminal.js') }}"></script>{% endblock %}

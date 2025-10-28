@@ -1,21 +1,38 @@
 {% extends "base.html" %}
 {% block title %}项目列表{% endblock %}
-
 {% block content %}
-<div>
-    <a href="/">Home</a>
-    <a href="/users">Users</a>
-    <a href="/groups">Groups</a>
-    <a href="/projects">Projects</a>
-</div>
-<div class="container">
-    <h2>项目列表</h2>
-    <ul>
-        {% for project in projects %}
-        <li style="color: red;">{{ project.pname }} - {{ project.pinfo }}</li>
-        <li style="color: red;">aaa</li>
-        {% endfor %}
-    </ul>
-</div>
-
+    <div>
+        <a href="/">Home</a>
+        <a href="/users">Users</a>
+        <a href="/groups">Groups</a>
+        <a href="/projects">Projects</a>
+    </div>
+    <div class="container">
+        <h2>项目列表</h2>
+        <input type="text"
+               class="search"
+               placeholder="搜索项目..."
+               data-list-search
+               data-list-target=".project-list">
+        <select class="search" data-sort-target=".project-list">
+            <option value="name-asc">名称 ↑</option>
+            <option value="name-desc">名称 ↓</option>
+        </select>
+        <div class="button-group toolbar">
+            <label>
+                <input type="checkbox" data-select-all data-list-target=".project-list">
+                全选
+            </label>
+            <button class="btn" data-export-csv data-list-target=".project-list">导出CSV</button>
+            <button class="btn" data-view-toggle data-list-target=".project-list">切换视图</button>
+        </div>
+        <ul class="list project-list" data-page-size="10">
+            {% for project in projects %}
+                <li class="list-item">
+                    <input type="checkbox" data-select-item>
+                    <a href="/projects/{{ project.pid }}">{{ project.pname }}</a> - {{ project.pinfo }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

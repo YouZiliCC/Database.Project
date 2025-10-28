@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}工作组详情{% endblock %}
+{% block content %}
+    <div class="container">
+        <h2>{{ group.gname }}</h2>
+        <p>{{ group.ginfo }}</p>
+        <h3>成员</h3>
+        <ul class="list">
+            {% for u in group.users %}
+                <li class="list-item">
+                    {{ u.uname }}
+                    {% if group.leader_id == u.uid %}（组长）{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        <h3>项目</h3>
+        <ul class="list">
+            {% for p in group.projects %}<li class="list-item">{{ p.pname }} - {{ p.pinfo }}</li>{% endfor %}
+        </ul>
+        <div class="action-buttons">
+            {% if current_user.is_authenticated and (not current_user.gid) %}
+                <button class="btn" id="btn-join" data-gid="{{ group.gid }}">加入该组</button>
+            {% endif %}
+            {% if current_user.is_authenticated and current_user.gid and (current_user.gid == group.gid) %}
+                <button class="btn" id="btn-leave">退出该组</button>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

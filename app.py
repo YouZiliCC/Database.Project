@@ -50,6 +50,7 @@ def create_app():
     from blueprints.group import group_bp
     from blueprints.project import project_bp
     from blueprints.admin import admin_bp
+    from blueprints.api import api_bp
 
     # 将蓝图注册到应用
     app.register_blueprint(index_bp)
@@ -59,6 +60,7 @@ def create_app():
     app.register_blueprint(group_bp, url_prefix="/group")
     app.register_blueprint(project_bp, url_prefix="/project")
     app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(api_bp, url_prefix="/api")
 
     # 创建数据库表
     with app.app_context():

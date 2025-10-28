@@ -214,9 +214,14 @@ def edit_project(pid):
         return jsonify({"error": "项目不存在"}), 404
     form = ProjectForm(obj=project)
     if form.validate_on_submit():
-        pass
-        # TODO: 添加项目更新逻辑
-    if not update_project(project):
+        updated_project = update_project(
+            project,
+            pname=form.pname.data,
+            pinfo=form.pinfo.data,
+            port=form.port.data,
+            docker_port=form.docker_port.data,
+        )
+    if not updated_project:
         flash("更新项目失败", "error")
         return jsonify({"error": "更新项目失败"}), 500
     flash("项目已更新", "success")

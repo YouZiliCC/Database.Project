@@ -1,19 +1,22 @@
 {% extends "base.html" %}
 {% block title %}login - 数据库系统课程项目展示平台{% endblock %}
-
 {% block content %}
-<div class="container">
-    <h2>login</h2>
-    <form method="POST" action="{{ url_for('auth.login') }}">
-        {{ form.hidden_tag() }}
-        {{ form.account.label }}<br>
-        {{ form.account(size=32) }}<br><br>
-
-        {{ form.password.label }}<br>
-        {{ form.password(size=32) }}<br><br>
-
-        {{ form.remember_me.label }} {{ form.remember_me() }}
-
-        {{ form.submit(class="btn btn-primary") }}
-    </form>
+    <div class="container">
+        <h2>登录</h2>
+        <form method="POST" action="{{ url_for('auth.login') }}" class="form">
+            {{ form.hidden_tag() }}
+            <div class="form-row">
+                <label>{{ form.account.label }}</label>
+                {{ form.account(size=32, **{"data-validate":"required"}) }}
+            </div>
+            <div class="form-row">
+                <label>{{ form.password.label }}</label>
+                {{ form.password(size=32, **{"data-validate":"required|min:6"}) }}
+            </div>
+            <div class="form-row">
+                <label>{{ form.remember_me.label }}</label>
+                {{ form.remember_me() }}
+            </div>
+            <div class="form-row">{{ form.submit(class="btn") }}</div>
+        </form>
     {% endblock %}

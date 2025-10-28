@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% block title %}注册 - 数据库系统课程项目展示平台{% endblock %}
-
 {% block content %}
     <div class="container">
         <h2>创建新账户</h2>
-        <form method="POST" action="{{ url_for('auth.register') }}">
+        <form method="POST" action="{{ url_for('auth.register') }}" class="form">
             {{ form.hidden_tag() }}
-            {{ form.uname.label }}<br>
-            {{ form.uname(size=32) }}<br><br>
-
-            {{ form.email.label }}<br>
-            {{ form.email(size=64) }}<br><br>
-
-            {{ form.password.label }}<br>
-            {{ form.password(size=32) }}<br><br>
-
-            {{ form.password2.label }}<br>
-            {{ form.password2(size=32) }}<br><br>
-
-            {{ form.submit(class="btn btn-primary") }}
-
-            {% for flashes in get_flashed_messages() %}
-                <div class="flash-message">{{ flashes }}</div>
-            {% endfor %}
+            <div class="form-row">
+                <label>{{ form.uname.label }}</label>
+                {{ form.uname(size=32, **{"data-validate":"required|min:3"}) }}
+            </div>
+            <div class="form-row">
+                <label>{{ form.email.label }}</label>
+                {{ form.email(size=64, **{"data-validate":"required"}) }}
+            </div>
+            <div class="form-row">
+                <label>{{ form.password.label }}</label>
+                {{ form.password(size=32, **{"data-validate":"required|min:6"}) }}
+            </div>
+            <div class="form-row">
+                <label>{{ form.password2.label }}</label>
+                {{ form.password2(size=32, **{"data-validate":"required|min:6"}) }}
+            </div>
+            <div class="form-row">{{ form.submit(class="btn") }}</div>
+            {% for flashes in get_flashed_messages() %}<div class="flash-message">{{ flashes }}</div>{% endfor %}
         </form>
-{% endblock %}
+    {% endblock %}

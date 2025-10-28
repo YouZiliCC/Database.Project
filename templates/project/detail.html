@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}{{ project.project_name }} - 项目详情{% endblock %}
+{% block title %}{{ project.pname }} - 项目详情{% endblock %}
 {% block content %}
     <div class="container">
         <div class="breadcrumb">
-            <a href="/">首页</a> &gt; <span>{{ project.project_name }}</span>
+            <a href="/">首页</a> &gt; <span>{{ project.pname }}</span>
         </div>
         <section class="project-detail">
             <div class="detail-header">
-                <h2>{{ project.project_name }}</h2>
+                <h2>{{ project.pname }}</h2>
                 <span class="status-badge">运行中</span>
             </div>
             <div class="detail-content">
@@ -16,21 +16,21 @@
                     <table class="info-table">
                         <tr>
                             <td>
-                                <strong>学生姓名：</strong>
+                                <strong>所属组：</strong>
                             </td>
-                            <td>{{ project.name }}</td>
+                            <td>{{ project.group.gname if project.group else '-' }}</td>
                         </tr>
                         <tr>
                             <td>
                                 <strong>项目名称：</strong>
                             </td>
-                            <td>{{ project.project_name }}</td>
+                            <td>{{ project.pname }}</td>
                         </tr>
                         <tr>
                             <td>
                                 <strong>项目描述：</strong>
                             </td>
-                            <td>{{ project.description }}</td>
+                            <td>{{ project.pinfo }}</td>
                         </tr>
                         <tr>
                             <td>
@@ -45,47 +45,41 @@
                     <table class="info-table">
                         <tr>
                             <td>
-                                <strong>镜像名称：</strong>
+                                <strong>容器ID：</strong>
                             </td>
                             <td>
-                                <code>{{ project.docker_image }}</code>
+                                <code>{{ project.docker_id }}</code>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <strong>容器状态：</strong>
+                                <strong>容器端口：</strong>
                             </td>
-                            <td>
-                                <span class="status-running">运行中</span>
-                            </td>
+                            <td>{{ project.docker_port }}</td>
                         </tr>
                     </table>
                 </div>
                 <div class="info-section">
-                    <h3>🚀 部署命令</h3>
-                    <div class="code-block">
-                        <pre><code># 拉取镜像
-docker pull {{ project.docker_image }}
-
-# 运行容器
-docker run -d -p {{ project.port }}:5000 --name {{ project.project_name.lower().replace(' ', '-') }} {{ project.docker_image }}
-
-# 查看日志
-docker logs {{ project.project_name.lower().replace(' ', '-') }}
-
-# 停止容器
-docker stop {{ project.project_name.lower().replace(' ', '-') }}
-
-# 删除容器
-docker rm {{ project.project_name.lower().replace(' ', '-') }}</code></pre>
+                    <h3>🚀 访问与管理</h3>
+                    <div class="action-buttons">
+                        {% if project.port %}
+                            <button class="btn"
+                                    onclick="window.open('http://localhost:{{ project.port }}', '_blank')">
+                                🌐 访问应用
+                            </button>
+                        {% endif %}
+                        {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
+                            <a class="btn" href="/projects/{{ project.pid }}/edit">编辑</a>
+                            <button class="btn btn-danger"
+                                    data-action="delete_project"
+                                    data-url="/groups/{{ project.gid }}/projects/{{ project.pid }}/delete">
+                                删除项目
+                            </button>
+                        {% endif %}
                     </div>
-                </div>
-                <div class="action-buttons">
-                    <button class="btn"
-                            onclick="window.open('http://localhost:{{ project.port }}', '_blank')">🌐 访问应用</button>
-                    <a href="/" class="btn">← 返回首页</a>
                 </div>
             </div>
         </section>
     </div>
 {% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/group.js') }}"></script>{% endblock %}

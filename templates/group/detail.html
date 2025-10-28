@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}工作组详情{% endblock %}
+{% block content %}
+    <div class="container">
+        <h2>{{ group.gname }}</h2>
+        <p>{{ group.ginfo }}</p>
+        <h3>成员</h3>
+        <ul class="list">
+            {% for u in group.users %}
+                <li class="list-item">
+                    {{ u.uname }}
+                    {% if group.leader_id == u.uid %}（组长）{% endif %}
+                    {% if current_user.is_authenticated and current_user.uid == group.leader_id and u.uid != group.leader_id %}
+                        <button class="btn"
+                                data-action="remove_member"
+                                data-url="/groups/{{ group.gid }}/members/{{ u.uid }}/remove">移除</button>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="action-buttons">
+            {% if current_user.is_authenticated and (not current_user.gid) %}
+                <button class="btn" id="btn-join" data-gid="{{ group.gid }}">加入该组</button>
+            {% endif %}
+            {% if current_user.is_authenticated and current_user.gid and (current_user.gid == group.gid) %}
+                <button class="btn" id="btn-leave">退出该组</button>
+            {% endif %}
+            {% if current_user.is_authenticated and current_user.uid == group.leader_id %}
+                <a href="/groups/{{ group.gid }}/edit" class="btn">编辑</a>
+                <a href="/groups/{{ group.gid }}/change_leader" class="btn">更换组长</a>
+                <button class="btn btn-danger"
+                        data-action="delete_group"
+                        data-url="/groups/{{ group.gid }}/delete">删除工作组</button>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/user.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/group.js') }}"></script>
+{% endblock %}

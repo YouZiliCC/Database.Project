@@ -1,20 +1,32 @@
 {% extends "base.html" %}
 {% block title %}GROUP列表{% endblock %}
-
 {% block content %}
-<div>
-    <a href="/">Home</a>
-    <a href="/users">Users</a>
-    <a href="/groups">Groups</a>
-    <a href="/projects">Projects</a>
-</div>
-<div class="container">
-    <h2>GROUP列表</h2>
-    <ul>
-        {% for group in groups %}
-            <li>{{ group.name }} - {{ group.description }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
+    <div class="container">
+        <h2>GROUP列表</h2>
+        <input type="text"
+               class="search"
+               placeholder="搜索工作组..."
+               data-list-search
+               data-list-target=".group-list">
+        <select class="search" data-sort-target=".group-list">
+            <option value="name-asc">名称 ↑</option>
+            <option value="name-desc">名称 ↓</option>
+        </select>
+        <div class="button-group toolbar">
+            <label>
+                <input type="checkbox" data-select-all data-list-target=".group-list">
+                全选
+            </label>
+            <button class="btn" data-export-csv data-list-target=".group-list">导出CSV</button>
+            <button class="btn" data-view-toggle data-list-target=".group-list">切换视图</button>
+        </div>
+        <ul class="list group-list" data-page-size="10">
+            {% for group in groups %}
+                <li class="list-item">
+                    <input type="checkbox" data-select-item>
+                    <a href="/groups/{{ group.gid }}">{{ group.gname }}</a> - {{ group.ginfo }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}更换组长{% endblock %}
+{% block content %}
+    <div class="container">
+        <h2>更换组长</h2>
+        <form method="POST" class="form">
+            {{ form.hidden_tag() }}
+            <div class="form-row">
+                <label>{{ form.new_leader_name.label }}</label>
+                {{ form.new_leader_name() }}
+            </div>
+            <div class="form-row">{{ form.submit(class="btn") }}</div>
+        </form>
+    </div>
+{% endblock %}

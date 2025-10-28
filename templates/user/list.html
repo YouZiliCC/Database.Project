@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block title %}用户列表{% endblock %}
-
 {% block content %}
     <div>
         <a href="/">Home</a>
@@ -10,12 +9,30 @@
     </div>
     <div class="container">
         <h2>用户列表</h2>
-        <ul>
+        <input type="text"
+               class="search"
+               placeholder="搜索用户..."
+               data-list-search
+               data-list-target=".user-list">
+        <select class="search" data-sort-target=".user-list">
+            <option value="name-asc">名称 ↑</option>
+            <option value="name-desc">名称 ↓</option>
+        </select>
+        <div class="button-group toolbar">
+            <label>
+                <input type="checkbox" data-select-all data-list-target=".user-list">
+                全选
+            </label>
+            <button class="btn" data-export-csv data-list-target=".user-list">导出CSV</button>
+            <button class="btn" data-view-toggle data-list-target=".user-list">切换视图</button>
+        </div>
+        <ul class="list user-list" data-page-size="10">
             {% for user in users %}
-                <li style="color: red;">{{ user.uname }} - {{ user.email }}</li>
-                <li style="color: red;">aaa</li>
+                <li class="list-item">
+                    <input type="checkbox" data-select-item>
+                    <a href="/users/{{ user.uid }}">{{ user.uname }}</a> - {{ user.email }}
+                </li>
             {% endfor %}
         </ul>
     </div>
-
 {% endblock %}

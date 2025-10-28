@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}用户信息{% endblock %}
+{% block title %}用户详情{% endblock %}
 {% block content %}
     <div class="container">
         <h2>{{ user.uname }}</h2>
@@ -7,10 +7,13 @@
             <li class="list-item">邮箱：{{ user.email }}</li>
             <li class="list-item">学号：{{ user.sid }}</li>
             <li class="list-item">所属组：{{ user.group.gname if user.group else '未加入' }}</li>
+            <li class="list-item">管理员：{{ '是' if user.is_admin else '否' }}</li>
         </ul>
         <div class="action-buttons">
             {% if current_user.is_authenticated and (not current_user.gid) %}<a href="/groups" class="btn">加入一个工作组</a>{% endif %}
-            {% if current_user.is_authenticated %}<a href="/users/me/edit" class="btn">编辑个人信息</a>{% endif %}
+            {% if current_user.is_authenticated and (current_user.uid == user.uid) %}
+                <a href="/users/me/edit" class="btn">编辑个人信息</a>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
