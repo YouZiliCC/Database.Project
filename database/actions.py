@@ -69,82 +69,6 @@ def safe_delete(instance):
 # -------------------------------------------------------------------------------------------
 # 用户 (User) CRUD 操作
 # -------------------------------------------------------------------------------------------
-def get_user_by_username(uname):
-    """
-    根据用户名获取用户。
-
-    参数:
-        uname (str): 用户名。
-
-    返回:
-        User: 匹配的用户对象，未找到则返回None。
-    """
-    try:
-        return db.session.execute(
-            select(User).where(User.uname == uname)
-        ).scalar_one_or_none()
-    except Exception as e:
-        logger.error(f"get_user_by_username Failed: {e}", exc_info=True)
-        return None
-
-
-def get_user_by_email(email):
-    """
-    根据邮箱获取用户。
-
-    参数:
-        email (str): 邮箱。
-
-    返回:
-        User: 匹配的用户对象，未找到则返回None。
-    """
-    try:
-        return db.session.execute(
-            select(User).where(User.email == email)
-        ).scalar_one_or_none()
-    except Exception as e:
-        logger.error(f"get_user_by_email Failed: {e}", exc_info=True)
-        return None
-
-
-def get_user_by_id(uid):
-    """
-    根据用户ID获取用户。
-
-    参数:
-        uid (str): 用户ID。
-
-    返回:
-        User: 匹配的用户对象，未找到则返回None。
-    """
-    try:
-        return db.session.execute(
-            select(User).where(User.uid == uid)
-        ).scalar_one_or_none()
-    except Exception as e:
-        logger.error(f"get_user_by_id Failed: {e}", exc_info=True)
-        return None
-
-
-def get_user_by_sid(sid):
-    """
-    根据学号获取用户。
-
-    参数:
-        sid (str): 学号。
-
-    返回:
-        User: 匹配的用户对象，未找到则返回None。
-    """
-    try:
-        return db.session.execute(
-            select(User).where(User.sid == sid)
-        ).scalar_one_or_none()
-    except Exception as e:
-        logger.error(f"get_user_by_sid Failed: {e}", exc_info=True)
-        return None
-
-
 def create_user(uname, email, sid, password, uinfo=None, role=0):
     """
     创建新用户。
@@ -163,7 +87,7 @@ def create_user(uname, email, sid, password, uinfo=None, role=0):
         # 检查用户名和邮箱是否已存在
         if any(
             [
-                get_user_by_username(uname),
+                get_user_by_uname(uname),
                 get_user_by_email(email),
                 get_user_by_sid(sid),
             ]
@@ -198,6 +122,7 @@ def update_user(user, **kwargs):
         bool: 更新是否成功。
     """
     if not user:
+        logger.warning("update_user Failed: 用户对象为 None")
         return False
     try:
         for key, value in kwargs.items():
@@ -224,6 +149,7 @@ def delete_user(user):
         bool: 删除是否成功。
     """
     if not user:
+        logger.warning("delete_user Failed: 用户对象为 None")
         return False
     try:
         return safe_delete(user)
@@ -245,6 +171,82 @@ def list_all_users():
     except Exception as e:
         logger.error(f"list_all_users Failed: {e}", exc_info=True)
         return []
+    
+
+def get_user_by_uname(uname):
+    """
+    根据用户名获取用户。
+
+    参数:
+        uname (str): 用户名。
+
+    返回:
+        User: 匹配的用户对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(
+            select(User).where(User.uname == uname)
+        ).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_user_by_uname Failed: {e}", exc_info=True)
+        return None
+
+
+def get_user_by_email(email):
+    """
+    根据邮箱获取用户。
+
+    参数:
+        email (str): 邮箱。
+
+    返回:
+        User: 匹配的用户对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(
+            select(User).where(User.email == email)
+        ).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_user_by_email Failed: {e}", exc_info=True)
+        return None
+
+
+def get_user_by_uid(uid):
+    """
+    根据用户ID获取用户。
+
+    参数:
+        uid (str): 用户ID。
+
+    返回:
+        User: 匹配的用户对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(
+            select(User).where(User.uid == uid)
+        ).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_user_by_uid Failed: {e}", exc_info=True)
+        return None
+
+
+def get_user_by_sid(sid):
+    """
+    根据学号获取用户。
+
+    参数:
+        sid (str): 学号。
+
+    返回:
+        User: 匹配的用户对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(
+            select(User).where(User.sid == sid)
+        ).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_user_by_sid Failed: {e}", exc_info=True)
+        return None
 
 
 # -------------------------------------------------------------------------------------------
@@ -285,6 +287,7 @@ def update_group(group, **kwargs):
         bool: 更新是否成功。
     """
     if not group:
+        logger.warning("update_group Failed: 工作组对象为 None")
         return False
     try:
         for key, value in kwargs.items():
@@ -309,6 +312,7 @@ def delete_group(group):
         bool: 删除是否成功。
     """
     if not group:
+        logger.warning("delete_group Failed: 工作组对象为 None")
         return False
     try:
         return safe_delete(group)
@@ -332,7 +336,7 @@ def list_all_groups():
         return []
 
 
-def get_group_by_id(gid):
+def get_group_by_gid(gid):
     """
     根据工作组ID获取工作组。
 
@@ -347,7 +351,7 @@ def get_group_by_id(gid):
             select(Group).where(Group.gid == gid)
         ).scalar_one_or_none()
     except Exception as e:
-        logger.error(f"get_group_by_id Failed: {e}", exc_info=True)
+        logger.error(f"get_group_by_gid Failed: {e}", exc_info=True)
         return None
 
 
@@ -427,7 +431,21 @@ def delete_project(project):
         return False
 
 
-def get_project_by_id(pid):
+def list_all_projects():
+    """
+    列出所有项目。
+
+    返回:
+        list: 所有项目对象列表。
+    """
+    try:
+        return db.session.execute(select(Project)).scalars().all()
+    except Exception as e:
+        logger.error(f"list_all_projects Failed: {e}", exc_info=True)
+        return []
+
+
+def get_group_by_pid(pid):
     """
     根据项目ID获取项目。
 
@@ -442,22 +460,8 @@ def get_project_by_id(pid):
             select(Project).where(Project.pid == pid)
         ).scalar_one_or_none()
     except Exception as e:
-        logger.error(f"get_project_by_id Failed: {e}", exc_info=True)
+        logger.error(f"get_group_by_pid Failed: {e}", exc_info=True)
         return None
-
-
-def list_all_projects():
-    """
-    列出所有项目。
-
-    返回:
-        list: 所有项目对象列表。
-    """
-    try:
-        return db.session.execute(select(Project)).scalars().all()
-    except Exception as e:
-        logger.error(f"list_all_projects Failed: {e}", exc_info=True)
-        return []
 
 
 def get_projects_by_user(user):

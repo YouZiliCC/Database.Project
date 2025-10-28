@@ -49,7 +49,7 @@ class UserForm(FlaskForm):
 
     # 自定义验证器
     def validate_uname(self, uname):
-        if get_user_by_username(uname.data) or get_user_by_email(uname.data):
+        if get_user_by_uname(uname.data) or get_user_by_email(uname.data):
             raise ValidationError("该用户名已被使用，请选择其他用户名")
 
     def validate_email(self, email):
@@ -85,7 +85,7 @@ def user_me():
 def user_detail(uid):
     """用户详情页面"""
     uid = str(uid)
-    user = get_user_by_id(uid)
+    user = get_user_by_uid(uid)
     if not user:
         abort(404, description="用户不存在")
     return render_template("user/detail.html", user=user)

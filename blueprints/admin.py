@@ -3,6 +3,9 @@ from flask import Blueprint, jsonify, render_template, flash, abort
 from flask_login import login_required, current_user
 from functools import wraps
 from database.actions import *
+from user import UserForm
+from group import GroupForm, ChangeLeaderForm
+from project import ProjectForm
 
 # 管理员蓝图
 admin_bp = Blueprint("admin", __name__)
@@ -50,13 +53,13 @@ def dashboard():
     return render_template("admin/dashboard.html")
 
 
-@admin_bp.route("/delete_user/<uuid:uid>", methods=["POST"])
+@admin_bp.route("/del_user/<uuid:uid>", methods=["POST"])
 @login_required
 @admin_required
-def delete_user(uid):
+def del_user(uid):
     """删除用户"""
     uid = str(uid)
-    user = get_user_by_id(uid)
+    user = get_user_by_uid(uid)
     if not user:
         flash("用户不存在", "warning")
         return jsonify({"error": "用户不存在"}), 404
@@ -73,32 +76,57 @@ def delete_user(uid):
     return jsonify({"message": "用户删除成功"}), 200
 
 
-@admin_bp.route("/update_user/<uuid:uid>", methods=["POST"])
+@admin_bp.route("/edit_user/<uuid:uid>", methods=["POST"])
 @login_required
 @admin_required
-def update_user(uid):
+def edit_user(uid):
     """更新用户信息"""
     uid = str(uid)
-    user = get_user_by_id(uid)
+    user = get_user_by_uid(uid)
     if not user:
         flash("用户不存在", "warning")
         return jsonify({"error": "用户不存在"}), 404
-    # TODO: 这里可以添加更新用户信息的逻辑
-
-    if not update_user(user):
-        flash("更新用户信息失败", "error")
-        return jsonify({"error": "更新用户信息失败"}), 500
+    form = UserForm(obj=user)
+    if form.validate_on_submit():
+        updated_user = update_user(
+            user,
+            uname=form.uname.data,
+            email=form.email.data,
+            sid=form.sid.data,
+        )
+        if not updated_user(user):
+            flash("更新用户信息失败", "error")
+            return jsonify({"error": "更新用户信息失败"}), 500
     flash("用户信息已更新", "success")
     return jsonify({"message": "用户信息更新成功"}), 200
 
 
-@admin_bp.route("/delete_group/<uuid:gid>", methods=["POST"])
+@admin_bp.route("/reset_password/<uuid:uid>", methods=["POST"])
 @login_required
 @admin_required
-def delete_group(gid):
+def reset_password(uid):
+    """重置用户密码"""
+    uid = str(uid)
+    user = get_user_by_uid(uid)
+    if not user:
+        flash("用户不存在", "warning")
+        return jsonify({"error": "用户不存在"}), 404
+    form = UserForm()
+    if form.validate_on_submit():
+        if not update_user(user, password='default_password'):
+            flash("重置用户密码失败", "error")
+            return jsonify({"error": "重置用户密码失败"}), 500
+    flash("用户密码已重置", "success")
+    return jsonify({"message": "用户密码重置成功"}), 200
+
+
+@admin_bp.route("/del_group/<uuid:gid>", methods=["POST"])
+@login_required
+@admin_required
+def del_group(gid):
     """删除工作组"""
     gid = str(gid)
-    group = get_group_by_id(str(gid))
+    group = get_group_by_gid(str(gid))
     if not group:
         flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
@@ -109,32 +137,61 @@ def delete_group(gid):
     return jsonify({"message": "工作组删除成功"}), 200
 
 
-@admin_bp.route("/update_group/<uuid:gid>", methods=["POST"])
+@admin_bp.route("/edit_group/<uuid:gid>", methods=["POST"])
 @login_required
 @admin_required
-def update_group(gid):
+def edit_group(gid):
     """更新工作组信息"""
     gid = str(gid)
-    group = get_group_by_id(gid)
+    group = get_group_by_gid(gid)
     if not group:
         flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
-    # TODO: 这里可以添加更新工作组信息的逻辑
-
-    if not update_group(group):
-        flash("更新工作组信息失败", "error")
-        return jsonify({"error": "更新工作组信息失败"}), 500
+    form = GroupForm(obj=group)
+    if form.validate_on_submit():
+        updated_group = update_group(
+            group,
+            gname=form.gname.data,
+            ginfo=form.ginfo.data,
+        )
+        if not updated_group:
+            flash("更新工作组信息失败", "error")
+            return jsonify({"error": "更新工作组信息失败"}), 500
     flash("工作组信息已更新", "success")
     return jsonify({"message": "工作组信息更新成功"}), 200
 
 
-@admin_bp.route("/delete_projects/<uuid:pid>", methods=["POST"])
+@admin_bp.route("/change_leader/<uuid:gid>", methods=["POST"])
 @login_required
 @admin_required
-def delete_project(pid):
+def change_leader(gid):
+    """更换工作组负责人"""
+    gid = str(gid)
+    group = get_group_by_gid(gid)
+    if not group:
+        flash("工作组不存在", "warning")
+        return jsonify({"error": "工作组不存在"}), 404
+    form = ChangeLeaderForm()
+    form.new_leader_name.choices = [(user.uname, user.uname) for user in group.users]
+    if form.validate_on_submit():
+        new_leader = get_user_by_uname(form.new_leader_name.data)
+        if not new_leader:
+            flash("新组长不存在", "warning")
+            return jsonify({"error": "新组长不存在"}), 404
+        if not update_group(group, leader_id=new_leader.uid):
+            flash("更换工作组组长失败", "error")
+            return jsonify({"error": "更换工作组组长失败"}), 500
+    flash("工作组组长已更换", "success")
+    return jsonify({"message": "工作组组长更换成功"}), 200
+
+
+@admin_bp.route("/del_projects/<uuid:pid>", methods=["POST"])
+@login_required
+@admin_required
+def del_project(pid):
     """删除项目"""
     pid = str(pid)
-    project = get_project_by_id(pid)
+    project = get_group_by_pid(pid)
     if not project:
         flash("项目不存在", "warning")
         return jsonify({"error": "项目不存在"}), 404
@@ -145,18 +202,20 @@ def delete_project(pid):
     return jsonify({"message": "项目删除成功"}), 200
 
 
-@admin_bp.route("/update_project/<uuid:pid>", methods=["POST"])
+@admin_bp.route("/edit_project/<uuid:pid>", methods=["POST"])
 @login_required
 @admin_required
-def update_project(pid):
+def edit_project(pid):
     """更新项目"""
     pid = str(pid)
-    project = get_project_by_id(pid)
+    project = get_group_by_pid(pid)
     if not project:
         flash("项目不存在", "warning")
         return jsonify({"error": "项目不存在"}), 404
-    # TODO: 这里可以添加更新项目的逻辑
-
+    form = ProjectForm(obj=project)
+    if form.validate_on_submit():
+        pass
+        # TODO: 添加项目更新逻辑
     if not update_project(project):
         flash("更新项目失败", "error")
         return jsonify({"error": "更新项目失败"}), 500

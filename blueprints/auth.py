@@ -43,7 +43,7 @@ class RegisterForm(FlaskForm):
 
     # 自定义验证器
     def validate_uname(self, uname):
-        if get_user_by_username(uname.data) or get_user_by_email(uname.data):
+        if get_user_by_uname(uname.data) or get_user_by_email(uname.data):
             raise ValidationError("该用户名已被使用，请选择其他用户名")
 
     def validate_email(self, email):
@@ -68,7 +68,7 @@ def login():
         # 查找用户
         user = get_user_by_email(form.account.data)
         if not user:
-            user = get_user_by_username(form.account.data)
+            user = get_user_by_uname(form.account.data)
         # 验证用户和密码
         if user and user.check_password(form.password.data):
             # 检查是否只允许管理员登录且当前用户不是管理员

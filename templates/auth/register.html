@@ -6,8 +6,8 @@
         <h2>创建新账户</h2>
         <form method="POST" action="{{ url_for('auth.register') }}">
             {{ form.hidden_tag() }}
-            {{ form.username.label }}<br>
-            {{ form.username(size=32) }}<br><br>
+            {{ form.uname.label }}<br>
+            {{ form.uname(size=32) }}<br><br>
 
             {{ form.email.label }}<br>
             {{ form.email(size=64) }}<br><br>

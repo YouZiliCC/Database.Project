@@ -20,7 +20,28 @@ import logging
 project_bp = Blueprint("project", __name__)
 logger = logging.getLogger(__name__)
 
-# details
+
+class ProjectForm(FlaskForm):
+    pname = StringField(
+        "项目名称", validators=[DataRequired(), Length(min=3, max=100)]
+    )
+    pinfo = StringField("项目描述", validators=[Length(max=500)])
+    port = StringField(
+        "项目端口", validators=[DataRequired(), Length(min=2, max=10)]
+    )
+    docker_port = StringField(
+        "Docker端口", validators=[DataRequired(), Length(min=2, max=10)]
+    )
+    submit = SubmitField("保存")
+
+    # 自定义验证器
+    def validate_port(self, port):
+        if not port.data.isdigit() or not (1 <= int(port.data) <= 65535):
+            raise ValidationError("端口号必须是1到65535之间的数字")
+
+    def validate_docker_port(self, docker_port):
+        if not docker_port.data.isdigit() or not (1 <= int(docker_port.data) <= 65535):
+            raise ValidationError("Docker端口号必须是1到65535之间的数字")
 
 
 @project_bp.route("/", methods=["GET"])
@@ -34,7 +55,7 @@ def project_list():
 @project_bp.route("/<uuid:pid>", methods=["GET"])
 def project_detail(pid):
     """项目详情页面"""
-    project = get_project_by_id(pid)
+    project = get_group_by_pid(pid)
     if not project:
         abort(404, description="项目不存在")
     return render_template("project/detail.html", project=project)
@@ -42,4 +63,4 @@ def project_detail(pid):
 
 # TODO: terminal
 
-# TODO: iframe
+# TODO: iframe 或者别的实现方法

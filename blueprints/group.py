@@ -57,7 +57,7 @@ def leader_required(func):
     @wraps(func)
     def decorated(*args, **kwargs):
         gid = kwargs.get("gid")
-        group = get_group_by_id(gid)
+        group = get_group_by_gid(gid)
         if any(
             [
                 not current_user.is_authenticated,
@@ -111,7 +111,7 @@ def group_create():
 @login_required
 def my_group():
     """当前用户所属工作组页面"""
-    group = get_group_by_id(current_user.gid)
+    group = get_group_by_gid(current_user.gid)
     if not group:
         flash("您当前未加入任何工作组", "warning")
         return redirect(url_for("group.group_list"))
@@ -122,7 +122,7 @@ def my_group():
 def group_detail(gid):
     """工作组详情页面"""
     gid = str(gid)
-    group = get_group_by_id(gid)
+    group = get_group_by_gid(gid)
     if not group:
         abort(404, description="工作组不存在")
     return render_template("group/detail.html", group=group)
@@ -135,7 +135,7 @@ def group_detail(gid):
 def group_edit(gid):
     """工作组编辑页面"""
     gid = str(gid)
-    group = get_group_by_id(gid)
+    group = get_group_by_gid(gid)
     if not group:
         flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
@@ -165,25 +165,25 @@ def group_edit(gid):
 def leader_change(gid):
     """工作组组长更换"""
     gid = str(gid)
-    group = get_group_by_id(gid)
+    group = get_group_by_gid(gid)
     users = group.users if group else []
     if not group:
         flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
     form = ChangeLeaderForm()
-    form.new_leader_name.choices = [(user.uname, user.email) for user in users]
+    form.new_leader_name.choices = [(user.uname, user.uname) for user in users]
     if form.validate_on_submit():
-        new_leader_id = form.new_leader_name.data
-        if not new_leader_id:
-            flash("新组长ID不能为空", "warning")
-            return jsonify({"error": "新组长ID不能为空"}), 400
-        if not update_group(group, leader_id=new_leader_id):
+        new_leader = get_user_by_uname(form.new_leader_name.data)
+        if not new_leader:
+            flash("新组长不存在", "warning")
+            return jsonify({"error": "新组长不存在"}), 400
+        if not update_group(group, leader_id=new_leader.uid):
             flash("更换组长失败，请重试", "danger")
             logger.warning(f"更换组长失败: {group.gname} by user {current_user.uname}")
             return jsonify({"error": "更换组长失败"}), 500
-        flash("工作组组长更换成功", "success")
-        logger.info(f"工作组组长更换成功: {group.gname} by user {current_user.uname}")
-        return jsonify({"message": "工作组组长更换成功"}), 200
+        flash("组长更换成功", "success")
+        logger.info(f"组长更换成功: {group.gname} by user {current_user.uname}")
+        return jsonify({"message": "组长更换成功"}), 200
     return render_template("group/change_leader.html", form=form, group=group)
 
 
@@ -194,7 +194,7 @@ def leader_change(gid):
 def group_members(gid):
     """工作组成员管理"""
     gid = str(gid)
-    group = get_group_by_id(gid)
+    group = get_group_by_gid(gid)
     if not group:
         flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
@@ -208,11 +208,11 @@ def group_members(gid):
 def accept_member(gid, uid):
     """接受工作组成员"""
     gid = str(gid)
-    # group = get_group_by_id(gid)
+    # group = get_group_by_gid(gid)
     # if not group:
     #     flash("工作组不存在", "warning")
     #     return jsonify({"error": "工作组不存在"}), 404
-    # user = get_user_by_id(uid)
+    # user = get_user_by_uid(uid)
     # if not user:
     #     flash("用户不存在", "warning")
     #     return jsonify({"error": "用户不存在"}), 404
@@ -232,11 +232,11 @@ def accept_member(gid, uid):
 def remove_member(gid, uid):
     """移除工作组成员"""
     gid = str(gid)
-    # group = get_group_by_id(gid)
+    # group = get_group_by_gid(gid)
     # if not group:
     #     flash("工作组不存在", "warning")
     #     return jsonify({"error": "工作组不存在"}), 404
-    # user = get_user_by_id(uid)
+    # user = get_user_by_uid(uid)
     # if not user:
     #     flash("用户不存在", "warning")
     #     return jsonify({"error": "用户不存在"}), 404
@@ -256,7 +256,7 @@ def remove_member(gid, uid):
 def group_projects(gid):
     """工作组项目管理"""
     gid = str(gid)
-    group = get_group_by_id(gid)
+    group = get_group_by_gid(gid)
     if not group:
         flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404

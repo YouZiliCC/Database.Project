@@ -2,7 +2,7 @@ from datetime import timedelta
 from flask import Flask
 from flask_wtf import CSRFProtect
 from database.base import db, login_manager
-from database.actions import create_user, get_user_by_username
+from database.actions import create_user, get_user_by_uname
 from dotenv import load_dotenv
 import logging
 import os
@@ -72,7 +72,7 @@ def create_app():
             "role": int(os.getenv("INITIAL_ADMIN_ROLE", 1)),
             "sid": os.getenv("INITIAL_ADMIN_SID"),
         }
-        if initial_admin and not get_user_by_username(initial_admin["uname"]):
+        if initial_admin and not get_user_by_uname(initial_admin["uname"]):
             try:
                 admin = create_user(**initial_admin)
                 if admin and admin.is_admin:
