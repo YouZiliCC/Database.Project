@@ -1,6 +1,6 @@
 from .base import db
 from .models import User, Project, Group
-from sqlalchemy import select, update, or_, func
+from sqlalchemy import select
 from datetime import datetime
 import logging
 
@@ -171,7 +171,7 @@ def list_all_users():
     except Exception as e:
         logger.error(f"list_all_users Failed: {e}", exc_info=True)
         return []
-    
+
 
 def get_user_by_uname(uname):
     """
@@ -445,7 +445,7 @@ def list_all_projects():
         return []
 
 
-def get_group_by_pid(pid):
+def get_project_by_pid(pid):
     """
     根据项目ID获取项目。
 

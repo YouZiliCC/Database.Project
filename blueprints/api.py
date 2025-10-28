@@ -30,10 +30,10 @@ def api_users():
         {
             "uid": user.uid,
             "uname": user.uname,
+            "sid": user.sid,
             "email": user.email,
             "is_admin": user.is_admin,
             "gid": user.gid,
-            "sid": user.sid,
             "uimg": user.uimg,
         }
         for user in users

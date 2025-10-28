@@ -113,7 +113,7 @@ def reset_password(uid):
         return jsonify({"error": "用户不存在"}), 404
     form = UserForm()
     if form.validate_on_submit():
-        if not update_user(user, password='default_password'):
+        if not update_user(user, password="default_password"):
             flash("重置用户密码失败", "error")
             return jsonify({"error": "重置用户密码失败"}), 500
     flash("用户密码已重置", "success")
@@ -191,7 +191,7 @@ def change_leader(gid):
 def del_project(pid):
     """删除项目"""
     pid = str(pid)
-    project = get_group_by_pid(pid)
+    project = get_project_by_pid(pid)
     if not project:
         flash("项目不存在", "warning")
         return jsonify({"error": "项目不存在"}), 404
@@ -208,7 +208,7 @@ def del_project(pid):
 def edit_project(pid):
     """更新项目"""
     pid = str(pid)
-    project = get_group_by_pid(pid)
+    project = get_project_by_pid(pid)
     if not project:
         flash("项目不存在", "warning")
         return jsonify({"error": "项目不存在"}), 404

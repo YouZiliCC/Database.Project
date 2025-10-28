@@ -38,7 +38,11 @@ logger = logging.getLogger(__name__)
 #         logger.error(f"学号解析失败: {sid}")
 #         return {"error": "学号格式错误"}
 # 字段
-# 用户信息表单类
+
+
+# -------------------------------------------------------------------------------------------
+# User Forms
+# -------------------------------------------------------------------------------------------
 class UserForm(FlaskForm):
     uname = StringField("用户名", validators=[DataRequired(), Length(min=3, max=50)])
     email = StringField("邮箱", validators=[DataRequired(), Email(), Length(max=100)])
@@ -63,11 +67,24 @@ class UserForm(FlaskForm):
             raise ValidationError("学号格式不正确，应为10位数字")
 
 
+# -------------------------------------------------------------------------------------------
+# User Views
+# -------------------------------------------------------------------------------------------
 @user_bp.route("/", methods=["GET"])
 def user_list():
     """用户列表页面"""
     users = list_all_users()
     return render_template("user/list.html", users=users)
+
+
+@user_bp.route("/<uuid:uid>", methods=["GET"])
+def user_detail(uid):
+    """用户详情页面"""
+    uid = str(uid)
+    user = get_user_by_uid(uid)
+    if not user:
+        abort(404, description="用户不存在")
+    return render_template("user/detail.html", user=user)
 
 
 # TODO
@@ -81,16 +98,57 @@ def user_me():
     return render_template("user/detail.html", user=user)
 
 
-@user_bp.route("/<uuid:uid>", methods=["GET"])
-def user_detail(uid):
-    """用户详情页面"""
-    uid = str(uid)
-    user = get_user_by_uid(uid)
+# TODO: User's projects
+pass
+
+
+# -------------------------------------------------------------------------------------------
+# User Group Actions
+# -------------------------------------------------------------------------------------------
+# TODO: join group, as a button in groups list page (and in group detail page), while user is not in a group.
+@user_bp.route("/me/join/<uuid:gid>", methods=["POST"])
+@login_required
+def user_join_group(gid):
+    """当前用户加入工作组"""
+    gid = str(gid)
+    user = current_user
     if not user:
-        abort(404, description="用户不存在")
-    return render_template("user/detail.html", user=user)
+        flash("用户不存在", "warning")
+        return jsonify({"error": "用户不存在"}), 404
+    group = get_group_by_gid(gid)
+    if not group:
+        flash("工作组不存在", "warning")
+        return jsonify({"error": "工作组不存在"}), 404
+    if not update_user(user, gid=gid):
+        flash("加入工作组失败，请重试", "danger")
+        logger.warning(f"加入工作组失败: {user.uname} to group {group.gname}")
+        return jsonify({"error": "加入工作组失败"}), 500
+    flash(f"您已成功加入工作组 {group.gname}", "success")
+    logger.info(f"加入工作组成功: {user.uname} to group {group.gname}")
+    return jsonify({"message": f"您已成功加入工作组 {group.gname}"}), 200
 
 
+# TODO: leave group, as a button in user profile page
+@user_bp.route("/me/leave", methods=["POST"])
+@login_required
+def user_leave_group():
+    """当前用户退出工作组"""
+    user = current_user
+    if not user:
+        flash("用户不存在", "warning")
+        return jsonify({"error": "用户不存在"}), 404
+    if not update_user(user, gid=None):
+        flash("退出工作组失败，请重试", "danger")
+        logger.warning(f"退出工作组失败: {user.uname}")
+        return jsonify({"error": "退出工作组失败"}), 500
+    flash("您已成功退出工作组", "success")
+    logger.info(f"退出工作组成功: {user.uname}")
+    return jsonify({"message": "您已成功退出工作组"}), 200
+
+
+# -------------------------------------------------------------------------------------------
+# User Actions
+# -------------------------------------------------------------------------------------------
 # TODO: 模态窗口
 @user_bp.route("/me/edit", methods=["GET", "POST"])
 @login_required
@@ -120,14 +178,26 @@ def user_edit():
     return render_template("user/edit.html", form=form, user=user)
 
 
-# TODO: Password change
+# TODO: Password change (WAITING)
 
-# TODO: EMAIL change
+# TODO: EMAIL change (WAITING)
 
-# TODO: IMAGE upload
+# TODO: IMAGE upload (WAITING)
 
-# TODO: join group
 
-# TODO: leave group
-
-# TODO: delete account
+@user_bp.route("/me/delete", methods=["POST"])
+@login_required
+def user_delete():
+    """删除当前用户账号"""
+    user = current_user
+    if not user:
+        flash("用户不存在", "warning")
+        return jsonify({"error": "用户不存在"}), 404
+    if not delete_user(user):
+        flash("删除用户账号失败，请重试", "danger")
+        logger.warning(f"删除用户账号失败: {user.uname}")
+        return jsonify({"error": "删除用户账号失败"}), 500
+    logout_user()
+    flash("您的账号已成功删除", "success")
+    logger.info(f"删除用户账号成功: {user.uname}")
+    return jsonify({"message": "账号已成功删除"}), 200
