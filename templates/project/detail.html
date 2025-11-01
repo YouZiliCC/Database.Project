@@ -36,12 +36,6 @@
                         </tr>
                         <tr>
                             <td>
-                                <strong>项目描述：</strong>
-                            </td>
-                            <td>{{ project.pinfo if project.pinfo else '暂无描述' }}</td>
-                        </tr>
-                        <tr>
-                            <td>
                                 <strong>访问端口：</strong>
                             </td>
                             <td>
@@ -56,6 +50,12 @@
                         </tr>
                     </table>
                 </div>
+                {% if project.pinfo %}
+                    <div class="info-section">
+                        <h3>📝 项目描述</h3>
+                        <div class="markdown-content">{{ project.pinfo | markdown }}</div>
+                    </div>
+                {% endif %}
                 <div class="info-section">
                     <h3>🐳 Docker 配置</h3>
                     <table class="info-table">

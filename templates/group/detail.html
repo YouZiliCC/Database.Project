@@ -11,7 +11,6 @@
                 {% endif %}
                 <div>
                     <h2>{{ group.gname }}</h2>
-                    <p class="text-muted">{{ group.ginfo if group.ginfo else '暂无描述' }}</p>
                 </div>
             </div>
             <div class="info-content">
@@ -28,7 +27,13 @@
                     <span>{{ group.projects|length }} 个</span>
                 </div>
             </div>
-            <h3>成员列表</h3>
+            {% if group.ginfo %}
+                <div class="info-content">
+                    <h3>📄 工作组描述</h3>
+                    <div class="markdown-content">{{ group.ginfo | markdown }}</div>
+                </div>
+            {% endif %}
+            <h3>👥 成员列表</h3>
             {% if group.users %}
                 <div class="table-wrap">
                     <table class="table">
@@ -70,7 +75,7 @@
             {% else %}
                 <div class="empty">暂无成员</div>
             {% endif %}
-            <h3>项目列表</h3>
+            <h3>📦 项目列表</h3>
             {% if group.projects %}
                 <div class="grid-container">
                     {% for project in group.projects %}

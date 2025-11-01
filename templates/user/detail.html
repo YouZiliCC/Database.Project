@@ -32,10 +32,6 @@
                     <span>{{ user.sid }}</span>
                 </div>
                 <div class="info-row">
-                    <label>个人简介：</label>
-                    <span>{{ user.uinfo if user.uinfo else '暂无简介' }}</span>
-                </div>
-                <div class="info-row">
                     <label>所属工作组：</label>
                     <span>
                         {% if user.group %}
@@ -51,6 +47,12 @@
                     <span>{{ user.created_at.strftime("%Y-%m-%d %H:%M") if user.created_at else '未知' }}</span>
                 </div>
             </div>
+            {% if user.uinfo %}
+                <div class="info-content">
+                    <h3>📝 个人简介</h3>
+                    <div class="markdown-content">{{ user.uinfo | markdown }}</div>
+                </div>
+            {% endif %}
             <div class="button-group mt-16">
                 {% if current_user.is_authenticated %}
                     {% if current_user.uid == user.uid %}

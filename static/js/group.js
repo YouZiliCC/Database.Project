@@ -22,9 +22,11 @@
         if(!confirm('确认加入该工作组？')) return;
         try{
             await post(`/user/me/join/${gid}`);
-            alert('成功加入工作组！');
+            // 直接跳转，让服务器端 flash 显示
             location.reload();
-        }catch(e){ alert(e.message); }
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
     };
 
     // 全局函数：退出工作组
@@ -32,9 +34,11 @@
         if(!confirm('确认退出当前工作组？')) return;
         try{
             await post('/user/me/leave');
-            alert('已退出工作组');
+            // 直接跳转，让服务器端 flash 显示
             location.reload();
-        }catch(e){ alert(e.message); }
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
     };
 
     // 全局函数：移除成员
@@ -42,9 +46,11 @@
         if(!confirm('确认移除该成员？')) return;
         try{
             await post(`/group/${gid}/members/${uid}/remove`);
-            alert('成员已移除');
+            // 直接跳转，让服务器端 flash 显示
             location.reload();
-        }catch(e){ alert(e.message); }
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
     };
 
     // 全局函数：删除工作组
@@ -53,9 +59,11 @@
         if(!confirm('再次确认：真的要删除工作组吗？')) return;
         try{
             await post(`/group/${gid}/delete`);
-            alert('工作组已删除');
+            // 直接跳转，让服务器端 flash 显示
             location.href = '/group';
-        }catch(e){ alert(e.message); }
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
     };
 
     // 全局函数：删除项目
@@ -63,9 +71,11 @@
         if(!confirm('确认删除该项目？此操作不可恢复！')) return;
         try{
             await post(`/group/${gid}/projects/${pid}/delete`);
-            alert('项目已删除');
+            // 直接跳转，让服务器端 flash 显示
             location.reload();
-        }catch(e){ alert(e.message); }
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
     };
 
     // 通过 data-action/data-url 属性自动处理按钮点击
@@ -80,26 +90,32 @@
             if(!confirm('确认移除该成员？')) return;
             try{ 
                 await post(url); 
-                alert('成员已移除');
-                location.reload(); 
-            }catch(err){ alert(err.message); }
+                // 直接跳转，让服务器端 flash 显示
+                location.reload();
+            }catch(err){ 
+                showFlash(err.message, 'danger');
+            }
         }
         else if(action === 'delete_group'){
             if(!confirm('确认删除该工作组？此操作不可恢复！')) return;
             if(!confirm('再次确认：真的要删除吗？')) return;
             try{ 
                 await post(url); 
-                alert('工作组已删除');
-                location.href = '/group'; 
-            }catch(err){ alert(err.message); }
+                // 直接跳转，让服务器端 flash 显示
+                location.href = '/group';
+            }catch(err){ 
+                showFlash(err.message, 'danger');
+            }
         }
         else if(action === 'delete_project'){
             if(!confirm('确认删除该项目？此操作不可恢复！')) return;
             try{ 
                 await post(url); 
-                alert('项目已删除');
-                location.reload(); 
-            }catch(err){ alert(err.message); }
+                // 直接跳转，让服务器端 flash 显示
+                location.reload();
+            }catch(err){ 
+                showFlash(err.message, 'danger');
+            }
         }
     });
 

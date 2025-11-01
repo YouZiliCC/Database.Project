@@ -4,6 +4,53 @@
     const flashes = document.querySelectorAll('.flash');
     if(flashes.length){ setTimeout(()=> flashes.forEach(f=> f.remove()), 4000); }
 
+    // 客户端Flash消息显示函数
+    window.showFlash = function(message, category = 'info'){
+        // 检查是否已存在 flash-container
+        let container = document.querySelector('.flash-container');
+        if (!container) {
+            // 创建容器并插入到 main 元素开头
+            container = document.createElement('div');
+            container.className = 'flash-container';
+            const main = document.querySelector('main');
+            if (main) {
+                main.insertBefore(container, main.firstChild);
+            } else {
+                document.body.insertBefore(container, document.body.firstChild);
+            }
+        }
+
+        // 创建 flash 消息元素
+        const flash = document.createElement('div');
+        flash.className = `flash ${category}`;
+        flash.textContent = message;
+        flash.style.opacity = '0';
+        flash.style.transform = 'translateY(-10px)';
+        flash.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        
+        // 添加到容器
+        container.appendChild(flash);
+
+        // 平滑滚动到页面顶部
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
+        // 触发动画
+        setTimeout(() => {
+            flash.style.opacity = '1';
+            flash.style.transform = 'translateY(0)';
+        }, 10);
+
+        // 4秒后自动移除
+        setTimeout(() => {
+            flash.style.opacity = '0';
+            flash.style.transform = 'translateY(-10px)';
+            setTimeout(() => flash.remove(), 300);
+        }, 4000);
+    };
+
     // 主题切换（localStorage 持久化）
     // 注意：主题的初始应用已在 base.html 的 <head> 中完成，这里只处理切换
     const THEME_KEY = 'app_theme';
@@ -136,7 +183,10 @@
                 const cb = li.querySelector('[data-select-item]');
                 if(cb && cb.checked){ rows.push((li.innerText || '').trim()); }
             });
-            if(rows.length === 0){ alert('请先勾选要导出的项'); return; }
+            if(rows.length === 0){ 
+                showFlash('请先勾选要导出的项', 'warning'); 
+                return; 
+            }
             const csv = '\uFEFF' + rows.map(r => '"' + r.replace(/"/g,'""') + '"').join('\n');
             const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
             const a = document.createElement('a');
@@ -171,7 +221,7 @@
             });
             if(!ok){
                 e.preventDefault();
-                alert('请检查表单输入是否完整、长度是否达标');
+                showFlash('请检查表单输入是否完整、长度是否达标', 'warning');
             }
         });
     });

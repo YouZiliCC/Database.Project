@@ -5,3 +5,11 @@
 4.iframe 替代
 
 5. 嵌入markdown作为info
+
+6. pro group 的edit是否正常
+
+开发流程：git+远端仓库，格式化工具：black，djlint
+
+学号解析工具
+
+wsgi gunicorn 日志

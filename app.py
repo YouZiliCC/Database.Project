@@ -6,6 +6,8 @@ from database.actions import create_user, get_user_by_uname
 from dotenv import load_dotenv
 import logging
 import os
+import markdown
+from markupsafe import Markup
 
 
 def create_app():
@@ -61,6 +63,23 @@ def create_app():
     app.register_blueprint(project_bp, url_prefix="/project")
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(api_bp, url_prefix="/api")
+
+    # 注册 Markdown 过滤器
+    @app.template_filter("markdown")
+    def markdown_filter(text):
+        """将 Markdown 文本转换为 HTML"""
+        if not text:
+            return ""
+        md = markdown.Markdown(
+            extensions=[
+                "extra",  # 支持表格、代码块等扩展语法
+                "codehilite",  # 代码高亮
+                "fenced_code",  # 围栏代码块
+                "nl2br",  # 换行转 <br>
+                "sane_lists",  # 更好的列表支持
+            ]
+        )
+        return Markup(md.convert(text))
 
     # 创建数据库表
     with app.app_context():

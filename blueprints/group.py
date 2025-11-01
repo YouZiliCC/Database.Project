@@ -122,7 +122,6 @@ def group_members(gid):
     gid = str(gid)
     group = get_group_by_gid(gid)
     if not group:
-        flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
     pass
 
@@ -136,17 +135,13 @@ def accept_member(gid, uid):
     gid = str(gid)
     # group = get_group_by_gid(gid)
     # if not group:
-    #     flash("工作组不存在", "warning")
     #     return jsonify({"error": "工作组不存在"}), 404
     # user = get_user_by_uid(uid)
     # if not user:
-    #     flash("用户不存在", "warning")
     #     return jsonify({"error": "用户不存在"}), 404
     # if not add_user_to_group(user, group):
-    #     flash("添加用户失败，请重试", "danger")
     #     logger.warning(f"添加用户失败: {user.uname} to group {group.gname} by user {current_user.uname}")
     #     return jsonify({"error": "添加用户失败"}), 500
-    # flash("用户已成功加入工作组", "success")
     # logger.info(f"用户已成功加入工作组: {user.uname} to group {group.gname} by user {current_user.uname}")
     # return jsonify({"message": "用户已成功加入工作组"}), 200
 
@@ -160,19 +155,15 @@ def remove_member(gid, uid):
     gid = str(gid)
     group = get_group_by_gid(gid)
     if not group:
-        flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
     user = get_user_by_uid(uid)
     if not user:
-        flash("用户不存在", "warning")
         return jsonify({"error": "用户不存在"}), 404
     if not update_user(user, gid=None):
-        flash("移除用户失败，请重试", "danger")
         logger.warning(
             f"移除用户失败: {user.uname} from group {group.gname} by user {current_user.uname}"
         )
         return jsonify({"error": "移除用户失败"}), 500
-    flash("用户已成功移除工作组", "success")
     logger.info(
         f"用户已成功移除工作组: {user.uname} from group {group.gname} by user {current_user.uname}"
     )
@@ -189,20 +180,16 @@ def leader_change(gid):
     group = get_group_by_gid(gid)
     users = group.users if group else []
     if not group:
-        flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
     form = ChangeLeaderForm()
     form.new_leader_name.choices = [(user.uname, user.uname) for user in users]
     if form.validate_on_submit():
         new_leader = get_user_by_uname(form.new_leader_name.data)
         if not new_leader:
-            flash("新组长不存在", "warning")
             return jsonify({"error": "新组长不存在"}), 400
         if not update_group(group, leader_id=new_leader.uid):
-            flash("更换组长失败，请重试", "danger")
             logger.warning(f"更换组长失败: {group.gname} by user {current_user.uname}")
             return jsonify({"error": "更换组长失败"}), 500
-        flash("组长更换成功", "success")
         logger.info(f"组长更换成功: {group.gname} by user {current_user.uname}")
         return jsonify({"message": "组长更换成功"}), 200
     return render_template("group/change_leader.html", form=form, group=group)
@@ -220,7 +207,6 @@ def group_projects(gid):
     gid = str(gid)
     group = get_group_by_gid(gid)
     if not group:
-        flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
     pass
 
@@ -235,7 +221,7 @@ def project_create(gid):
     group = get_group_by_gid(gid)
     if not group:
         flash("工作组不存在", "warning")
-        return jsonify({"error": "工作组不存在"}), 404
+        return redirect(url_for("group.group_list"))
     form = ProjectForm()
     if form.validate_on_submit():
         project = create_project(
@@ -253,10 +239,9 @@ def project_create(gid):
             return render_template("project/create.html", form=form, group=group)
         flash("项目创建成功！", "success")
         logger.info(f"创建项目成功: {form.pname.data} by user {current_user.uname}")
-        return redirect(url_for("group.group_projects", gid=group.gid))
+        return redirect(url_for("group.group_detail", gid=group.gid))
 
 
-# TODO: 模态确认
 @group_bp.route("/<uuid:gid>/projects/<uuid:pid>/delete", methods=["POST"])
 @login_required
 @leader_required
@@ -265,17 +250,13 @@ def project_delete(gid, pid):
     gid = str(gid)
     group = get_group_by_gid(gid)
     if not group:
-        flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
     project = get_project_by_pid(pid)
     if not project or str(project.gid) != str(gid):
-        flash("项目不存在", "warning")
         return jsonify({"error": "项目不存在"}), 404
     if not delete_project(project):
-        flash("删除项目失败，请重试", "danger")
         logger.warning(f"删除项目失败: {project.pname} by user {current_user.uname}")
         return jsonify({"error": "删除项目失败"}), 500
-    flash("项目已成功删除", "success")
     logger.info(f"删除项目成功: {project.pname} by user {current_user.uname}")
     return jsonify({"message": "项目已成功删除"}), 200
 
@@ -311,7 +292,6 @@ def group_create():
     return render_template("group/create.html", form=form)
 
 
-# TODO: 模态框
 @group_bp.route("/<uuid:gid>/edit", methods=["GET", "POST"])
 @login_required
 @group_required
@@ -321,7 +301,7 @@ def group_edit(gid):
     group = get_group_by_gid(gid)
     if not group:
         flash("工作组不存在", "warning")
-        return jsonify({"error": "工作组不存在"}), 404
+        return redirect(url_for("group.group_list"))
     form = GroupForm(obj=group)
     if form.validate_on_submit():
         updated_group = update_group(
@@ -332,12 +312,12 @@ def group_edit(gid):
         if not updated_group:
             flash("更新工作组信息失败，请重试", "danger")
             logger.warning(f"更新工作组信息失败: {form.gname.data}")
-            return jsonify({"error": "更新工作组信息失败"}), 500
+            return render_template("group/edit.html", form=form, group=group)
         flash("工作组信息更新成功", "success")
         logger.info(
             f"更新工作组信息成功: {form.gname.data} by user {current_user.uname}"
         )
-        return jsonify({"message": "工作组信息更新成功"}), 200
+        return redirect(url_for("group.group_detail", gid=gid))
     return render_template("group/edit.html", form=form, group=group)
 
 
@@ -349,13 +329,10 @@ def group_delete(gid):
     gid = str(gid)
     group = get_group_by_gid(gid)
     if not group:
-        flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
     if not delete_group(group):
-        flash("删除工作组失败，请重试", "danger")
         logger.warning(f"删除工作组失败: {group.gname} by user {current_user.uname}")
         return jsonify({"error": "删除工作组失败"}), 500
-    flash("工作组已成功删除", "success")
     logger.info(f"删除工作组成功: {group.gname} by user {current_user.uname}")
     return jsonify({"message": "工作组已成功删除"}), 200  # 自动清空用户的gid字段
 
@@ -369,6 +346,5 @@ def group_upload_image(gid):
     gid = str(gid)
     group = get_group_by_gid(gid)
     if not group:
-        flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
     pass

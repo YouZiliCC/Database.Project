@@ -43,20 +43,25 @@ class UserForm(FlaskForm):
     uname = StringField("用户名", validators=[DataRequired(), Length(min=3, max=50)])
     email = StringField("邮箱", validators=[DataRequired(), Email(), Length(max=100)])
     sid = StringField("学号", validators=[DataRequired(), Length(min=10, max=10)])
-    # TODO uimg = StringField("用户头像URL", validators=[Length(max=200)])
     uinfo = TextAreaField("个人简介", validators=[Length(max=200)])
     submit = SubmitField("保存")
 
     # 自定义验证器
     def validate_uname(self, uname):
+        if current_user.is_authenticated and uname.data == current_user.uname:
+            return
         if get_user_by_uname(uname.data) or get_user_by_email(uname.data):
             raise ValidationError("该用户名已被使用，请选择其他用户名")
 
     def validate_email(self, email):
+        if current_user.is_authenticated and email.data == current_user.email:
+            return
         if get_user_by_email(email.data):
             raise ValidationError("该邮箱已被注册，请使用其他邮箱")
 
     def validate_sid(self, sid):
+        if current_user.is_authenticated and sid.data == current_user.sid:
+            return
         if get_user_by_sid(sid.data):
             raise ValidationError("该学号已被注册，请使用其他学号")
         if len(sid.data) != 10 or not sid.data.isdigit():
@@ -107,17 +112,13 @@ def user_join_group(gid):
     gid = str(gid)
     user = current_user
     if not user:
-        flash("用户不存在", "warning")
         return jsonify({"error": "用户不存在"}), 404
     group = get_group_by_gid(gid)
     if not group:
-        flash("工作组不存在", "warning")
         return jsonify({"error": "工作组不存在"}), 404
     if not update_user(user, gid=gid):
-        flash("加入工作组失败，请重试", "danger")
         logger.warning(f"加入工作组失败: {user.uname} to group {group.gname}")
         return jsonify({"error": "加入工作组失败"}), 500
-    flash(f"您已成功加入工作组 {group.gname}", "success")
     logger.info(f"加入工作组成功: {user.uname} to group {group.gname}")
     return jsonify({"message": f"您已成功加入工作组 {group.gname}"}), 200
 
@@ -128,19 +129,15 @@ def user_leave_group():
     """当前用户退出工作组"""
     user = current_user
     if not user:
-        flash("用户不存在", "warning")
         return jsonify({"error": "用户不存在"}), 404
     if user.is_leader:
-        flash("组长无法退出工作组，请先转让组长权限或删除工作组", "warning")
         return (
             jsonify({"error": "组长无法退出工作组，请先转让组长权限或删除工作组"}),
             403,
         )
     if not update_user(user, gid=None):
-        flash("退出工作组失败，请重试", "danger")
         logger.warning(f"退出工作组失败: {user.uname}")
         return jsonify({"error": "退出工作组失败"}), 500
-    flash("您已成功退出工作组", "success")
     logger.info(f"退出工作组成功: {user.uname}")
     return jsonify({"message": "您已成功退出工作组"}), 200
 
@@ -155,7 +152,7 @@ def user_edit():
     user = current_user
     if not user:
         flash("用户不存在", "warning")
-        return jsonify({"error": "用户不存在"}), 404
+        return redirect(url_for("index.index"))
     form = UserForm(obj=user)
     if form.validate_on_submit():
         updated_user = update_user(
@@ -164,15 +161,14 @@ def user_edit():
             email=form.email.data,
             sid=form.sid.data,
             uinfo=form.uinfo.data,
-            # TODO uimg=form.uimg.data,
         )
         if not updated_user:
             flash("更新用户信息失败，请重试", "danger")
             logger.warning(f"更新用户信息失败: {form.uname.data}")
-            return jsonify({"error": "更新用户信息失败"}), 500
+            return render_template("user/edit.html", form=form, user=user)
         flash("用户信息更新成功", "success")
         logger.info(f"更新用户信息成功: {form.uname.data} by user {current_user.uname}")
-        return jsonify({"message": "用户信息更新成功"}), 200
+        return redirect(url_for("user.user_me"))
     return render_template("user/edit.html", form=form, user=user)
 
 
@@ -189,13 +185,10 @@ def user_delete():
     """删除当前用户账号"""
     user = current_user
     if not user:
-        flash("用户不存在", "warning")
         return jsonify({"error": "用户不存在"}), 404
     if not delete_user(user):
-        flash("删除用户账号失败，请重试", "danger")
         logger.warning(f"删除用户账号失败: {user.uname}")
         return jsonify({"error": "删除用户账号失败"}), 500
     logout_user()
-    flash("您的账号已成功删除", "success")
     logger.info(f"删除用户账号成功: {user.uname}")
     return jsonify({"message": "账号已成功删除"}), 200

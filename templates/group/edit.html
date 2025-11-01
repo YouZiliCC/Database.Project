@@ -16,6 +16,7 @@
             <div class="form-row">
                 <label>{{ form.ginfo.label }}</label>
                 {{ form.ginfo(rows=4, placeholder="简单介绍一下工作组...", maxlength=200) }}
+                <small class="form-text text-muted">支持 Markdown 格式：**粗体**、*斜体*、`代码`、列表等</small>
                 {% if form.ginfo.errors %}<span class="error">{{ form.ginfo.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">

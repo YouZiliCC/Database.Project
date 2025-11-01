@@ -35,7 +35,6 @@ class User(db.Model, TimestampMixin, UserMixin):
     sid = db.Column(db.String(36), unique=True, nullable=False)
     email = db.Column(db.String(128), unique=True, nullable=False)
     passwd_hash = db.Column(db.String(128), nullable=False)
-    uimg = db.Column(db.String(256), nullable=True)
     gid = db.Column(
         db.String(36), db.ForeignKey("groups.gid", ondelete="SET NULL"), nullable=True
     )
@@ -69,7 +68,6 @@ class Group(db.Model, TimestampMixin):
     gid = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     gname = db.Column(db.String(64), nullable=False)
     ginfo = db.Column(db.Text, nullable=True)
-    gimg = db.Column(db.String(256), nullable=True)
     leader_id = db.Column(db.String(36), db.ForeignKey("users.uid"), nullable=False)
     users = db.relationship("User", backref="group", foreign_keys=[User.gid], lazy=True)
     projects = db.relationship(
@@ -92,7 +90,6 @@ class Project(db.Model, TimestampMixin):
     pid = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     pname = db.Column(db.String(100), nullable=False)
     pinfo = db.Column(db.Text, nullable=True)
-    pimg = db.Column(db.String(256), nullable=True)
     gid = db.Column(
         db.String(36), db.ForeignKey("groups.gid", ondelete="CASCADE"), nullable=False
     )

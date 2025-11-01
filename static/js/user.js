@@ -23,9 +23,11 @@
         try{
             const gid = joinBtn.dataset.gid;
             await post(`/user/me/join/${gid}`);
-            alert('成功加入工作组！');
+            // 直接跳转，让服务器端 flash 显示
             location.reload();
-        }catch(e){ alert(e.message); }
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
     });
 
     // 用户退出工作组
@@ -34,9 +36,11 @@
         if(!confirm('确认退出当前工作组？')) return;
         try{
             await post('/user/me/leave');
-            alert('已退出工作组');
+            // 直接跳转，让服务器端 flash 显示
             location.reload();
-        }catch(e){ alert(e.message); }
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
     });
 
     // 全局函数：退出工作组（供模板调用）
@@ -44,9 +48,11 @@
         if(!confirm('确认退出当前工作组？')) return;
         try{
             await post('/user/me/leave');
-            alert('已退出工作组');
+            // 直接跳转，让服务器端 flash 显示
             location.reload();
-        }catch(e){ alert(e.message); }
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
     };
 
     // 全局函数：删除用户（管理员）
@@ -54,9 +60,11 @@
         if(!confirm('确认删除该用户？此操作不可恢复！')) return;
         try{
             await post(`/admin/del_user/${uid}`);
-            alert('用户删除成功');
+            // 直接跳转，让服务器端 flash 显示
             location.href = '/user';
-        }catch(e){ alert(e.message); }
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
     };
 
     // 编辑表单提交确认
@@ -75,9 +83,11 @@
         if(!confirm('再次确认：真的要删除账号吗？')) return;
         try{
             await post('/user/me/delete');
-            alert('账号已删除');
+            // 直接跳转，让服务器端 flash 显示
             location.href = '/';
-        }catch(e){ alert(e.message); }
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
     };
 })();
 

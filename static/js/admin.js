@@ -231,10 +231,10 @@
             btnOk.disabled = true;
             await post(url);
             closeConfirm();
-            alert('操作成功');
+            showFlash('操作成功', 'success');
             await Promise.all([refresh(), loadStats()]);
         } catch (e) {
-            alert('操作失败：' + e.message);
+            showFlash('操作失败：' + e.message, 'danger');
         } finally {
             btnOk.disabled = false;
         }

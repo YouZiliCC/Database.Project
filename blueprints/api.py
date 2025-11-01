@@ -35,7 +35,6 @@ def api_users():
             "email": user.email,
             "is_admin": user.is_admin,
             "gid": user.gid,
-            "uimg": user.uimg,
         }
         for user in users
     ]
@@ -54,7 +53,6 @@ def api_groups():
             "gname": group.gname,
             "ginfo": group.ginfo,
             "leader_id": group.leader_id,
-            "gimg": group.gimg,
             "users": [user.uname for user in group.users],
             "projects": [project.pname for project in group.projects],
         }
@@ -77,7 +75,6 @@ def list_projects():
             "docker_id": project.docker_id,
             "port": project.port,
             "docker_port": project.docker_port,
-            "pimg": project.pimg,
         }
         for project in projects
     ]

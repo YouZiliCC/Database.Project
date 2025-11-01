@@ -92,7 +92,6 @@ def project_detail(pid):
 # -------------------------------------------------------------------------------------------
 # Project Actions
 # -------------------------------------------------------------------------------------------
-# TODO: 模态窗口
 @project_bp.route("/<uuid:pid>/edit", methods=["GET", "POST"])
 @login_required
 @group_required_pid
@@ -116,10 +115,10 @@ def project_edit(pid):
         if not updated_project:
             flash("更新项目失败，请重试", "danger")
             logger.warning(f"更新项目失败: {form.pname.data}")
-            return jsonify({"error": "更新项目失败"}), 500
+            return render_template("project/edit.html", form=form, project=project)
         flash("项目更新成功", "success")
         logger.info(f"更新项目成功: {form.pname.data} by user {current_user.uname}")
-        return jsonify({"message": "项目更新成功"}), 200
+        return redirect(url_for("project.project_detail", pid=pid))
     return render_template("project/edit.html", form=form, project=project)
 
 

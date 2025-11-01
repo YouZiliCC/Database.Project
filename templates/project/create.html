@@ -16,6 +16,7 @@
             <div class="form-row">
                 <label>{{ form.pinfo.label }}</label>
                 {{ form.pinfo(rows=4, placeholder="项目简介...", maxlength=500) }}
+                <small class="form-text text-muted">支持 Markdown 格式，可以编写详细的项目文档</small>
                 {% if form.pinfo.errors %}<span class="error">{{ form.pinfo.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
