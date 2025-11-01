@@ -63,7 +63,6 @@
                 <td><a href="/user/${u.uid}">${u.uname}</a></td>
                 <td>${u.email ?? ''}</td>
                 <td>${u.sid ?? ''}</td>
-                <td>${formatDescription(u.uinfo, 40)}</td>
                 <td>${u.is_admin ? '<span class="badge badge-admin">是</span>' : '否'}</td>
                 <td>
                     <button class="btn btn-sm btn-danger" data-action="del_user" data-id="${u.uid}">删除</button>
@@ -76,7 +75,7 @@
             <div class="table-wrap">
                 <table class="table">
                     <thead>
-                        <tr><th>用户名</th><th>邮箱</th><th>学号</th><th>简介</th><th>管理员</th><th>操作</th></tr>
+                        <tr><th>用户名</th><th>邮箱</th><th>学号</th><th>管理员</th><th>操作</th></tr>
                     </thead>
                     <tbody>${rows}</tbody>
                 </table>
@@ -93,7 +92,7 @@
             <tr>
                 <td><a href="/project/${p.pid}">${p.pname}</a></td>
                 <td>${formatDescription(p.pinfo, 50)}</td>
-                <td>${p.gid ?? ''}</td>
+                <td>${p.gname ?? ''}</td>
                 <td><code>${p.port ?? ''}</code></td>
                 <td><code>${p.docker_port ?? ''}</code></td>
                 <td>
@@ -106,7 +105,7 @@
             <div class="table-wrap">
                 <table class="table">
                     <thead>
-                        <tr><th>项目名</th><th>描述</th><th>组ID</th><th>端口</th><th>容器端口</th><th>操作</th></tr>
+                        <tr><th>项目名</th><th>描述</th><th>组名</th><th>端口</th><th>容器端口</th><th>操作</th></tr>
                     </thead>
                     <tbody>${rows}</tbody>
                 </table>
@@ -248,6 +247,3 @@
     // 页面加载时获取统计数据
     loadStats();
 })();
-
-
-

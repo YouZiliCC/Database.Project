@@ -27,7 +27,7 @@ class GroupForm(FlaskForm):
     gname = StringField(
         "工作组名称", validators=[DataRequired(), Length(min=3, max=50)]
     )
-    ginfo = TextAreaField("工作组描述", validators=[Length(max=200)])
+    ginfo = TextAreaField("工作组描述", validators=[Length(max=2000)])
     submit = SubmitField("保存")
 
 

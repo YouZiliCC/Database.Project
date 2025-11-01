@@ -72,6 +72,7 @@ def list_projects():
             "pid": project.pid,
             "pname": project.pname,
             "gid": project.gid,
+            "gname": project.group.gname,
             "docker_id": project.docker_id,
             "port": project.port,
             "docker_port": project.docker_port,

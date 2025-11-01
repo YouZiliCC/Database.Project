@@ -43,7 +43,7 @@ class UserForm(FlaskForm):
     uname = StringField("用户名", validators=[DataRequired(), Length(min=3, max=50)])
     email = StringField("邮箱", validators=[DataRequired(), Email(), Length(max=100)])
     sid = StringField("学号", validators=[DataRequired(), Length(min=10, max=10)])
-    uinfo = TextAreaField("个人简介", validators=[Length(max=200)])
+    uinfo = TextAreaField("个人简介", validators=[Length(max=2000)])
     submit = SubmitField("保存")
 
     # 自定义验证器
