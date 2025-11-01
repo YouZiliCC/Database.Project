@@ -11,7 +11,7 @@ from flask import (
 )
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
 from database.actions import *
 from blueprints.auth import login_required
@@ -19,9 +19,6 @@ import logging
 
 user_bp = Blueprint("user", __name__)
 logger = logging.getLogger(__name__)
-
-# details
-
 
 # TODO: 学号解析工具
 # def parse_student_id(sid: str) -> dict:
@@ -37,7 +34,6 @@ logger = logging.getLogger(__name__)
 #     except ValueError:
 #         logger.error(f"学号解析失败: {sid}")
 #         return {"error": "学号格式错误"}
-# 字段
 
 
 # -------------------------------------------------------------------------------------------
@@ -48,7 +44,7 @@ class UserForm(FlaskForm):
     email = StringField("邮箱", validators=[DataRequired(), Email(), Length(max=100)])
     sid = StringField("学号", validators=[DataRequired(), Length(min=10, max=10)])
     # TODO uimg = StringField("用户头像URL", validators=[Length(max=200)])
-    uinfo = StringField("个人简介", validators=[Length(max=200)])
+    uinfo = TextAreaField("个人简介", validators=[Length(max=200)])
     submit = SubmitField("保存")
 
     # 自定义验证器
@@ -70,11 +66,11 @@ class UserForm(FlaskForm):
 # -------------------------------------------------------------------------------------------
 # User Views
 # -------------------------------------------------------------------------------------------
-@user_bp.route("/", methods=["GET"])
-def user_list():
-    """用户列表页面"""
-    users = list_all_users()
-    return render_template("user/list.html", users=users)
+# @user_bp.route("/", methods=["GET"])
+# def user_list():
+#     """用户列表页面"""
+#     users = list_all_users()
+#     return render_template("user/list.html", users=users)
 
 
 @user_bp.route("/<uuid:uid>", methods=["GET"])
@@ -87,7 +83,6 @@ def user_detail(uid):
     return render_template("user/detail.html", user=user)
 
 
-# TODO
 @user_bp.route("/me", methods=["GET"])
 @login_required
 def user_me():
@@ -105,7 +100,6 @@ pass
 # -------------------------------------------------------------------------------------------
 # User Group Actions
 # -------------------------------------------------------------------------------------------
-# TODO: join group, as a button in groups list page (and in group detail page), while user is not in a group.
 @user_bp.route("/me/join/<uuid:gid>", methods=["POST"])
 @login_required
 def user_join_group(gid):
@@ -128,7 +122,6 @@ def user_join_group(gid):
     return jsonify({"message": f"您已成功加入工作组 {group.gname}"}), 200
 
 
-# TODO: leave group, as a button in user profile page
 @user_bp.route("/me/leave", methods=["POST"])
 @login_required
 def user_leave_group():
@@ -137,6 +130,12 @@ def user_leave_group():
     if not user:
         flash("用户不存在", "warning")
         return jsonify({"error": "用户不存在"}), 404
+    if user.is_leader:
+        flash("组长无法退出工作组，请先转让组长权限或删除工作组", "warning")
+        return (
+            jsonify({"error": "组长无法退出工作组，请先转让组长权限或删除工作组"}),
+            403,
+        )
     if not update_user(user, gid=None):
         flash("退出工作组失败，请重试", "danger")
         logger.warning(f"退出工作组失败: {user.uname}")
@@ -149,7 +148,6 @@ def user_leave_group():
 # -------------------------------------------------------------------------------------------
 # User Actions
 # -------------------------------------------------------------------------------------------
-# TODO: 模态窗口
 @user_bp.route("/me/edit", methods=["GET", "POST"])
 @login_required
 def user_edit():

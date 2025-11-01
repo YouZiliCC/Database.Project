@@ -76,29 +76,29 @@ def del_user(uid):
     return jsonify({"message": "用户删除成功"}), 200
 
 
-@admin_bp.route("/edit_user/<uuid:uid>", methods=["POST"])
-@login_required
-@admin_required
-def edit_user(uid):
-    """更新用户信息"""
-    uid = str(uid)
-    user = get_user_by_uid(uid)
-    if not user:
-        flash("用户不存在", "warning")
-        return jsonify({"error": "用户不存在"}), 404
-    form = UserForm(obj=user)
-    if form.validate_on_submit():
-        updated_user = update_user(
-            user,
-            uname=form.uname.data,
-            email=form.email.data,
-            sid=form.sid.data,
-        )
-        if not updated_user(user):
-            flash("更新用户信息失败", "error")
-            return jsonify({"error": "更新用户信息失败"}), 500
-    flash("用户信息已更新", "success")
-    return jsonify({"message": "用户信息更新成功"}), 200
+# @admin_bp.route("/edit_user/<uuid:uid>", methods=["POST"])
+# @login_required
+# @admin_required
+# def edit_user(uid):
+#     """更新用户信息"""
+#     uid = str(uid)
+#     user = get_user_by_uid(uid)
+#     if not user:
+#         flash("用户不存在", "warning")
+#         return jsonify({"error": "用户不存在"}), 404
+#     form = UserForm(obj=user)
+#     if form.validate_on_submit():
+#         updated_user = update_user(
+#             user,
+#             uname=form.uname.data,
+#             email=form.email.data,
+#             sid=form.sid.data,
+#         )
+#         if not updated_user(user):
+#             flash("更新用户信息失败", "error")
+#             return jsonify({"error": "更新用户信息失败"}), 500
+#     flash("用户信息已更新", "success")
+#     return jsonify({"message": "用户信息更新成功"}), 200
 
 
 @admin_bp.route("/reset_password/<uuid:uid>", methods=["POST"])
@@ -137,52 +137,52 @@ def del_group(gid):
     return jsonify({"message": "工作组删除成功"}), 200
 
 
-@admin_bp.route("/edit_group/<uuid:gid>", methods=["POST"])
-@login_required
-@admin_required
-def edit_group(gid):
-    """更新工作组信息"""
-    gid = str(gid)
-    group = get_group_by_gid(gid)
-    if not group:
-        flash("工作组不存在", "warning")
-        return jsonify({"error": "工作组不存在"}), 404
-    form = GroupForm(obj=group)
-    if form.validate_on_submit():
-        updated_group = update_group(
-            group,
-            gname=form.gname.data,
-            ginfo=form.ginfo.data,
-        )
-        if not updated_group:
-            flash("更新工作组信息失败", "error")
-            return jsonify({"error": "更新工作组信息失败"}), 500
-    flash("工作组信息已更新", "success")
-    return jsonify({"message": "工作组信息更新成功"}), 200
+# @admin_bp.route("/edit_group/<uuid:gid>", methods=["POST"])
+# @login_required
+# @admin_required
+# def edit_group(gid):
+#     """更新工作组信息"""
+#     gid = str(gid)
+#     group = get_group_by_gid(gid)
+#     if not group:
+#         flash("工作组不存在", "warning")
+#         return jsonify({"error": "工作组不存在"}), 404
+#     form = GroupForm(obj=group)
+#     if form.validate_on_submit():
+#         updated_group = update_group(
+#             group,
+#             gname=form.gname.data,
+#             ginfo=form.ginfo.data,
+#         )
+#         if not updated_group:
+#             flash("更新工作组信息失败", "error")
+#             return jsonify({"error": "更新工作组信息失败"}), 500
+#     flash("工作组信息已更新", "success")
+#     return jsonify({"message": "工作组信息更新成功"}), 200
 
 
-@admin_bp.route("/change_leader/<uuid:gid>", methods=["POST"])
-@login_required
-@admin_required
-def change_leader(gid):
-    """更换工作组负责人"""
-    gid = str(gid)
-    group = get_group_by_gid(gid)
-    if not group:
-        flash("工作组不存在", "warning")
-        return jsonify({"error": "工作组不存在"}), 404
-    form = ChangeLeaderForm()
-    form.new_leader_name.choices = [(user.uname, user.uname) for user in group.users]
-    if form.validate_on_submit():
-        new_leader = get_user_by_uname(form.new_leader_name.data)
-        if not new_leader:
-            flash("新组长不存在", "warning")
-            return jsonify({"error": "新组长不存在"}), 404
-        if not update_group(group, leader_id=new_leader.uid):
-            flash("更换工作组组长失败", "error")
-            return jsonify({"error": "更换工作组组长失败"}), 500
-    flash("工作组组长已更换", "success")
-    return jsonify({"message": "工作组组长更换成功"}), 200
+# @admin_bp.route("/change_leader/<uuid:gid>", methods=["POST"])
+# @login_required
+# @admin_required
+# def change_leader(gid):
+#     """更换工作组负责人"""
+#     gid = str(gid)
+#     group = get_group_by_gid(gid)
+#     if not group:
+#         flash("工作组不存在", "warning")
+#         return jsonify({"error": "工作组不存在"}), 404
+#     form = ChangeLeaderForm()
+#     form.new_leader_name.choices = [(user.uname, user.uname) for user in group.users]
+#     if form.validate_on_submit():
+#         new_leader = get_user_by_uname(form.new_leader_name.data)
+#         if not new_leader:
+#             flash("新组长不存在", "warning")
+#             return jsonify({"error": "新组长不存在"}), 404
+#         if not update_group(group, leader_id=new_leader.uid):
+#             flash("更换工作组组长失败", "error")
+#             return jsonify({"error": "更换工作组组长失败"}), 500
+#     flash("工作组组长已更换", "success")
+#     return jsonify({"message": "工作组组长更换成功"}), 200
 
 
 @admin_bp.route("/del_projects/<uuid:pid>", methods=["POST"])
@@ -202,27 +202,27 @@ def del_project(pid):
     return jsonify({"message": "项目删除成功"}), 200
 
 
-@admin_bp.route("/edit_project/<uuid:pid>", methods=["POST"])
-@login_required
-@admin_required
-def edit_project(pid):
-    """更新项目"""
-    pid = str(pid)
-    project = get_project_by_pid(pid)
-    if not project:
-        flash("项目不存在", "warning")
-        return jsonify({"error": "项目不存在"}), 404
-    form = ProjectForm(obj=project)
-    if form.validate_on_submit():
-        updated_project = update_project(
-            project,
-            pname=form.pname.data,
-            pinfo=form.pinfo.data,
-            port=form.port.data,
-            docker_port=form.docker_port.data,
-        )
-    if not updated_project:
-        flash("更新项目失败", "error")
-        return jsonify({"error": "更新项目失败"}), 500
-    flash("项目已更新", "success")
-    return jsonify({"message": "项目更新成功"}), 200
+# @admin_bp.route("/edit_project/<uuid:pid>", methods=["POST"])
+# @login_required
+# @admin_required
+# def edit_project(pid):
+#     """更新项目"""
+#     pid = str(pid)
+#     project = get_project_by_pid(pid)
+#     if not project:
+#         flash("项目不存在", "warning")
+#         return jsonify({"error": "项目不存在"}), 404
+#     form = ProjectForm(obj=project)
+#     if form.validate_on_submit():
+#         updated_project = update_project(
+#             project,
+#             pname=form.pname.data,
+#             pinfo=form.pinfo.data,
+#             port=form.port.data,
+#             docker_port=form.docker_port.data,
+#         )
+#     if not updated_project:
+#         flash("更新项目失败", "error")
+#         return jsonify({"error": "更新项目失败"}), 500
+#     flash("项目已更新", "success")
+#     return jsonify({"message": "项目更新成功"}), 200

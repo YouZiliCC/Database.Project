@@ -17,6 +17,16 @@
     const statGroups = document.getElementById('stat-groups');
     const statProjects = document.getElementById('stat-projects');
 
+    // 格式化描述文本：截断过长文本并添加省略号
+    function formatDescription(text, maxLength = 50) {
+        if (!text) return '<span class="text-muted">无</span>';
+        const escaped = String(text).replace(/[<>&"']/g, c => ({
+            '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+        if (escaped.length <= maxLength) return `<span class="description">${escaped}</span>`;
+        return `<span class="description" title="${escaped}">${escaped.substring(0, maxLength)}...</span>`;
+    }
+
     function showLoading() {
         resultEl.innerHTML = '<div class="spinner" aria-label="加载中"></div>';
     }
@@ -53,6 +63,7 @@
                 <td><a href="/user/${u.uid}">${u.uname}</a></td>
                 <td>${u.email ?? ''}</td>
                 <td>${u.sid ?? ''}</td>
+                <td>${formatDescription(u.uinfo, 40)}</td>
                 <td>${u.is_admin ? '<span class="badge badge-admin">是</span>' : '否'}</td>
                 <td>
                     <button class="btn btn-sm btn-danger" data-action="del_user" data-id="${u.uid}">删除</button>
@@ -65,7 +76,7 @@
             <div class="table-wrap">
                 <table class="table">
                     <thead>
-                        <tr><th>用户名</th><th>邮箱</th><th>学号</th><th>管理员</th><th>操作</th></tr>
+                        <tr><th>用户名</th><th>邮箱</th><th>学号</th><th>简介</th><th>管理员</th><th>操作</th></tr>
                     </thead>
                     <tbody>${rows}</tbody>
                 </table>
@@ -81,6 +92,7 @@
         const rows = projects.map(p => `
             <tr>
                 <td><a href="/project/${p.pid}">${p.pname}</a></td>
+                <td>${formatDescription(p.pinfo, 50)}</td>
                 <td>${p.gid ?? ''}</td>
                 <td><code>${p.port ?? ''}</code></td>
                 <td><code>${p.docker_port ?? ''}</code></td>
@@ -94,7 +106,7 @@
             <div class="table-wrap">
                 <table class="table">
                     <thead>
-                        <tr><th>项目名</th><th>组ID</th><th>端口</th><th>容器端口</th><th>操作</th></tr>
+                        <tr><th>项目名</th><th>描述</th><th>组ID</th><th>端口</th><th>容器端口</th><th>操作</th></tr>
                     </thead>
                     <tbody>${rows}</tbody>
                 </table>
@@ -110,7 +122,7 @@
         const rows = groups.map(g => `
             <tr>
                 <td><a href="/group/${g.gid}">${g.gname}</a></td>
-                <td>${g.ginfo ?? ''}</td>
+                <td>${formatDescription(g.ginfo, 50)}</td>
                 <td>${g.users?.length ?? 0}</td>
                 <td>${g.projects?.length ?? 0}</td>
                 <td>

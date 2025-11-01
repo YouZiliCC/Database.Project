@@ -12,7 +12,7 @@ from flask import (
 )
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
 from database.actions import *
 import logging
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------
 class ProjectForm(FlaskForm):
     pname = StringField("项目名称", validators=[DataRequired(), Length(min=3, max=100)])
-    pinfo = StringField("项目描述", validators=[Length(max=500)])
+    pinfo = TextAreaField("项目描述", validators=[Length(max=500)])
     port = StringField("项目端口", validators=[DataRequired(), Length(min=2, max=10)])
     docker_port = StringField(
         "Docker端口", validators=[DataRequired(), Length(min=2, max=10)]

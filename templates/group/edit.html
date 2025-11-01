@@ -15,7 +15,7 @@
             </div>
             <div class="form-row">
                 <label>{{ form.ginfo.label }}</label>
-                {{ form.ginfo(size=100, maxlength=200) }}
+                {{ form.ginfo(rows=4, placeholder="简单介绍一下工作组...", maxlength=200) }}
                 {% if form.ginfo.errors %}<span class="error">{{ form.ginfo.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">

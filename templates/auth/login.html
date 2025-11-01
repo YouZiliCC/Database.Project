@@ -15,8 +15,11 @@
                 {{ form.password(size=32, **{"data-validate":"required|min:6"}) }}
                 {% if form.password.errors %}<span class="error">{{ form.password.errors[0] }}</span>{% endif %}
             </div>
-            <div class="form-row">
-                <label>{{ form.remember_me() }} {{ form.remember_me.label }}</label>
+            <div class="form-row checkbox-row">
+                <label>
+                    {{ form.remember_me() }}
+                    <span>{{ form.remember_me.label.text }}</span>
+                </label>
             </div>
             <div class="form-row">
                 {{ form.submit(class="btn") }}

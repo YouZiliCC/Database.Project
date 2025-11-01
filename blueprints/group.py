@@ -10,7 +10,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
+from wtforms import StringField, SubmitField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Length
 from database.actions import *
 from blueprints.project import ProjectForm
@@ -27,7 +27,7 @@ class GroupForm(FlaskForm):
     gname = StringField(
         "工作组名称", validators=[DataRequired(), Length(min=3, max=50)]
     )
-    ginfo = StringField("工作组描述", validators=[Length(max=200)])
+    ginfo = TextAreaField("工作组描述", validators=[Length(max=200)])
     submit = SubmitField("保存")
 
 

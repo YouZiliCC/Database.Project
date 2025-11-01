@@ -25,7 +25,7 @@
             </div>
             <div class="form-row">
                 <label>{{ form.uinfo.label }}</label>
-                {{ form.uinfo(size=80, maxlength=200, placeholder="简单介绍一下自己...") }}
+                {{ form.uinfo(rows=4, placeholder="简单介绍一下自己...", maxlength=200) }}
                 {% if form.uinfo.errors %}<span class="error">{{ form.uinfo.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
