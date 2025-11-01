@@ -1,38 +1,61 @@
 {% extends "base.html" %}
-{% block title %}项目列表{% endblock %}
+{% block title %}项目展台 - DBSYS{% endblock %}
 {% block content %}
-    <div>
-        <a href="/">Home</a>
-        <a href="/users">Users</a>
-        <a href="/groups">Groups</a>
-        <a href="/projects">Projects</a>
-    </div>
     <div class="container">
-        <h2>项目列表</h2>
-        <input type="text"
-               class="search"
-               placeholder="搜索项目..."
-               data-list-search
-               data-list-target=".project-list">
-        <select class="search" data-sort-target=".project-list">
-            <option value="name-asc">名称 ↑</option>
-            <option value="name-desc">名称 ↓</option>
-        </select>
-        <div class="button-group toolbar">
-            <label>
-                <input type="checkbox" data-select-all data-list-target=".project-list">
-                全选
-            </label>
-            <button class="btn" data-export-csv data-list-target=".project-list">导出CSV</button>
-            <button class="btn" data-view-toggle data-list-target=".project-list">切换视图</button>
+        <h2>项目展台</h2>
+        <div class="mb-16">
+            <input type="text"
+                   class="search"
+                   placeholder="搜索项目名称..."
+                   data-list-search
+                   data-list-target=".project-list">
+            <select class="search" data-sort-target=".project-list">
+                <option value="name-asc">名称 ↑</option>
+                <option value="name-desc">名称 ↓</option>
+            </select>
         </div>
-        <ul class="list project-list" data-page-size="10">
-            {% for project in projects %}
-                <li class="list-item">
-                    <input type="checkbox" data-select-item>
-                    <a href="/projects/{{ project.pid }}">{{ project.pname }}</a> - {{ project.pinfo }}
-                </li>
-            {% endfor %}
-        </ul>
+        {% if projects %}
+            <div class="grid-container project-list">
+                {% for project in projects %}
+                    <div class="card project-card">
+                        <div class="card-header">
+                            {% if project.pimg %}
+                                <img src="{{ project.pimg }}"
+                                     alt="{{ project.pname }}"
+                                     class="project-img">
+                            {% else %}
+                                <div class="project-img-placeholder">{{ project.pname[0].upper() }}</div>
+                            {% endif %}
+                            <h3>
+                                <a href="{{ url_for('project.project_detail', pid=project.pid) }}">{{ project.pname }}</a>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="project-info">{{ project.pinfo if project.pinfo else '暂无描述' }}</p>
+                            <div class="project-meta">
+                                <span class="meta-item">
+                                    <strong>所属组：</strong>
+                                    <a href="{{ url_for('group.group_detail', gid=project.gid) }}">{{ project.group.gname }}</a>
+                                </span>
+                                <span class="meta-item">
+                                    <strong>端口：</strong>{{ project.port }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ url_for('project.project_detail', pid=project.pid) }}"
+                               class="btn btn-sm">查看详情</a>
+                            {% if project.port %}
+                                <a href="http://localhost:{{ project.port }}"
+                                   target="_blank"
+                                   class="btn btn-sm btn-primary">访问应用</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">暂无项目</div>
+        {% endif %}
     </div>
 {% endblock %}

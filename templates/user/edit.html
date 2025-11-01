@@ -1,27 +1,39 @@
 {% extends "base.html" %}
-{% block title %}编辑个人信息{% endblock %}
+{% block title %}编辑个人信息 - DBSYS{% endblock %}
 {% block content %}
     <div class="container">
         <h2>编辑个人信息</h2>
-        <form method="POST" class="form">
+        <form method="POST"
+              action="{{ url_for('user.user_edit') }}"
+              class="form"
+              id="edit-user-form">
             {{ form.hidden_tag() }}
             <div class="form-row">
                 <label>{{ form.uname.label }}</label>
-                {{ form.uname(size=32, **{"data-validate":"required|min:3"}) }}
+                {{ form.uname(size=32, **{"data-validate":"required|min:3|max:50"}) }}
+                {% if form.uname.errors %}<span class="error">{{ form.uname.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.email.label }}</label>
-                {{ form.email(size=64, **{"data-validate":"required"}) }}
+                {{ form.email(size=64, type="email", **{"data-validate":"required|email"}) }}
+                {% if form.email.errors %}<span class="error">{{ form.email.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.sid.label }}</label>
-                {{ form.sid(size=10, **{"data-validate":"required|min:10"}) }}
+                {{ form.sid(size=10, **{"data-validate":"required|length:10"}) }}
+                {% if form.sid.errors %}<span class="error">{{ form.sid.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.uinfo.label }}</label>
-                {{ form.uinfo(size=80) }}
+                {{ form.uinfo(size=80, maxlength=200, placeholder="简单介绍一下自己...") }}
+                {% if form.uinfo.errors %}<span class="error">{{ form.uinfo.errors[0] }}</span>{% endif %}
             </div>
-            <div class="form-row">{{ form.submit(class="btn") }}</div>
+            <div class="form-row">
+                {{ form.submit(class="btn", value="保存更改") }}
+                <a href="{{ url_for('user.user_me') }}" class="btn btn-secondary">取消</a>
+                <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()">删除账号</button>
+            </div>
         </form>
     </div>
 {% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/user.js') }}"></script>{% endblock %}

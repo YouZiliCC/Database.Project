@@ -1,27 +1,40 @@
 {% extends "base.html" %}
-{% block title %}编辑项目{% endblock %}
+{% block title %}编辑项目 - DBSYS{% endblock %}
 {% block content %}
     <div class="container">
         <h2>编辑项目</h2>
-        <form method="POST" class="form">
+        <form method="POST"
+              action="{{ url_for('project.project_edit', pid=project.pid) }}"
+              class="form"
+              id="edit-project-form">
             {{ form.hidden_tag() }}
             <div class="form-row">
                 <label>{{ form.pname.label }}</label>
-                {{ form.pname(size=40, **{"data-validate":"required|min:3"}) }}
+                {{ form.pname(size=40, **{"data-validate":"required|min:3|max:100"}) }}
+                {% if form.pname.errors %}<span class="error">{{ form.pname.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.pinfo.label }}</label>
-                {{ form.pinfo(size=80) }}
+                {{ form.pinfo(size=80, maxlength=500) }}
+                {% if form.pinfo.errors %}<span class="error">{{ form.pinfo.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.port.label }}</label>
-                {{ form.port(size=10, **{"data-validate":"required|min:2"}) }}
+                {{ form.port(size=10, **{"data-validate":"required|min:1|max:65535"}) }}
+                {% if form.port.errors %}<span class="error">{{ form.port.errors[0] }}</span>{% endif %}
+                <small class="form-help">应用对外访问端口 (1-65535)</small>
             </div>
             <div class="form-row">
                 <label>{{ form.docker_port.label }}</label>
-                {{ form.docker_port(size=10, **{"data-validate":"required|min:2"}) }}
+                {{ form.docker_port(size=10, **{"data-validate":"required|min:1|max:65535"}) }}
+                {% if form.docker_port.errors %}<span class="error">{{ form.docker_port.errors[0] }}</span>{% endif %}
+                <small class="form-help">Docker容器内部端口 (1-65535)</small>
             </div>
-            <div class="form-row">{{ form.submit(class="btn") }}</div>
+            <div class="form-row">
+                {{ form.submit(class="btn", value="保存更改") }}
+                <a href="{{ url_for('project.project_detail', pid=project.pid) }}"
+                   class="btn btn-secondary">取消</a>
+            </div>
         </form>
     </div>
 {% endblock %}

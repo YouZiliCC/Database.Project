@@ -1,15 +1,24 @@
 {% extends "base.html" %}
-{% block title %}更换组长{% endblock %}
+{% block title %}更换组长 - DBSYS{% endblock %}
 {% block content %}
     <div class="container">
         <h2>更换组长</h2>
-        <form method="POST" class="form">
+        <p class="text-muted">将 {{ group.gname }} 的组长权限转移给其他成员</p>
+        <form method="POST"
+              action="{{ url_for('group.leader_change', gid=group.gid) }}"
+              class="form">
             {{ form.hidden_tag() }}
             <div class="form-row">
                 <label>{{ form.new_leader_name.label }}</label>
-                {{ form.new_leader_name() }}
+                {{ form.new_leader_name(class="form-select", **{"data-validate":"required"}) }}
+                {% if form.new_leader_name.errors %}<span class="error">{{ form.new_leader_name.errors[0] }}</span>{% endif %}
+                <small class="form-help">请选择一个工作组成员作为新组长</small>
             </div>
-            <div class="form-row">{{ form.submit(class="btn") }}</div>
+            <div class="form-row">
+                {{ form.submit(class="btn btn-primary", value="确认更换") }}
+                <a href="{{ url_for('group.group_detail', gid=group.gid) }}"
+                   class="btn btn-secondary">取消</a>
+            </div>
         </form>
     </div>
 {% endblock %}

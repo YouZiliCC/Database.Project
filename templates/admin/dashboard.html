@@ -1,27 +1,49 @@
 {% extends "base.html" %}
-{% block title %}DBSYS_DASHBOARD{% endblock %}
+{% block title %}管理员仪表盘 - DBSYS{% endblock %}
 {% block content %}
     <div class="container">
         <h2>管理员仪表盘</h2>
-        <p>管理用户与项目（点击按钮异步加载，不跳转）</p>
+        <p class="text-muted">系统管理与数据统计</p>
+        <!-- 隐藏的 CSRF token 表单 -->
+        <form id="csrf-form" style="display:none;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        </form>
+        <div class="stats-grid mb-16">
+            <div class="stat-card">
+                <h3 id="stat-users">-</h3>
+                <p>用户总数</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="stat-groups">-</h3>
+                <p>工作组总数</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="stat-projects">-</h3>
+                <p>项目总数</p>
+            </div>
+        </div>
         <div class="button-group mb-16">
-            <button class="btn"
+            <button class="btn btn-primary"
                     data-endpoint="{{ url_for('api.api_users') }}"
                     id="btn-users">管理用户</button>
-            <button class="btn"
-                    data-endpoint="{{ url_for('api.list_projects') }}"
-                    id="btn-projects">管理项目</button>
-            <button class="btn"
+            <button class="btn btn-primary"
                     data-endpoint="{{ url_for('api.api_groups') }}"
                     id="btn-groups">管理工作组</button>
+            <button class="btn btn-primary"
+                    data-endpoint="{{ url_for('api.list_projects') }}"
+                    id="btn-projects">管理项目</button>
         </div>
-        <div id="admin-result" class="admin-result"></div>
+        <div id="admin-result" class="admin-result">
+            <p class="text-muted">点击上方按钮查看和管理数据</p>
+        </div>
+        <!-- 确认对话框 -->
         <div id="confirm-modal" class="modal hidden">
             <div class="modal-card">
+                <h3>确认操作</h3>
                 <p id="confirm-text">确认删除？</p>
                 <div class="modal-actions">
-                    <button id="confirm-cancel" class="btn">取消</button>
-                    <button id="confirm-ok" class="btn btn-danger">确认</button>
+                    <button id="confirm-cancel" class="btn btn-secondary">取消</button>
+                    <button id="confirm-ok" class="btn btn-danger">确认删除</button>
                 </div>
             </div>
         </div>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}login - 数据库系统课程项目展示平台{% endblock %}
+{% block title %}登录 - 数据库系统课程项目展示平台{% endblock %}
 {% block content %}
     <div class="container">
         <h2>登录</h2>
@@ -8,15 +8,20 @@
             <div class="form-row">
                 <label>{{ form.account.label }}</label>
                 {{ form.account(size=32, **{"data-validate":"required"}) }}
+                {% if form.account.errors %}<span class="error">{{ form.account.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.password.label }}</label>
                 {{ form.password(size=32, **{"data-validate":"required|min:6"}) }}
+                {% if form.password.errors %}<span class="error">{{ form.password.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
-                <label>{{ form.remember_me.label }}</label>
-                {{ form.remember_me() }}
+                <label>{{ form.remember_me() }} {{ form.remember_me.label }}</label>
             </div>
-            <div class="form-row">{{ form.submit(class="btn") }}</div>
+            <div class="form-row">
+                {{ form.submit(class="btn") }}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">还没有账号？去注册</a>
+            </div>
         </form>
-    {% endblock %}
+    </div>
+{% endblock %}

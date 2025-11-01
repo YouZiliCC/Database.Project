@@ -2,26 +2,38 @@
 {% block title %}注册 - 数据库系统课程项目展示平台{% endblock %}
 {% block content %}
     <div class="container">
-        <h2>创建新账户</h2>
+        <h2>用户注册</h2>
         <form method="POST" action="{{ url_for('auth.register') }}" class="form">
             {{ form.hidden_tag() }}
             <div class="form-row">
                 <label>{{ form.uname.label }}</label>
-                {{ form.uname(size=32, **{"data-validate":"required|min:3"}) }}
+                {{ form.uname(size=32, **{"data-validate":"required|min:3|max:20"}) }}
+                {% if form.uname.errors %}<span class="error">{{ form.uname.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.email.label }}</label>
-                {{ form.email(size=64, **{"data-validate":"required"}) }}
+                {{ form.email(size=32, type="email", **{"data-validate":"required|email"}) }}
+                {% if form.email.errors %}<span class="error">{{ form.email.errors[0] }}</span>{% endif %}
+            </div>
+            <div class="form-row">
+                <label>{{ form.sid.label }}</label>
+                {{ form.sid(size=32, **{"data-validate":"required|length:10"}) }}
+                {% if form.sid.errors %}<span class="error">{{ form.sid.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.password.label }}</label>
                 {{ form.password(size=32, **{"data-validate":"required|min:6"}) }}
+                {% if form.password.errors %}<span class="error">{{ form.password.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.password2.label }}</label>
-                {{ form.password2(size=32, **{"data-validate":"required|min:6"}) }}
+                {{ form.password2(size=32, **{"data-validate":"required"}) }}
+                {% if form.password2.errors %}<span class="error">{{ form.password2.errors[0] }}</span>{% endif %}
             </div>
-            <div class="form-row">{{ form.submit(class="btn") }}</div>
-            {% for flashes in get_flashed_messages() %}<div class="flash-message">{{ flashes }}</div>{% endfor %}
+            <div class="form-row">
+                {{ form.submit(class="btn") }}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">已有账号？去登录</a>
+            </div>
         </form>
-    {% endblock %}
+    </div>
+{% endblock %}

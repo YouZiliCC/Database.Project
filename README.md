@@ -7,3 +7,6 @@ Users
 Projects
 
 -pid pname pinfo docker_id port docker_port
+
+
+djlint . --reformat --profile=jinja

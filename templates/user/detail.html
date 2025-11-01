@@ -1,19 +1,73 @@
 {% extends "base.html" %}
-{% block title %}用户详情{% endblock %}
+{% block title %}{{ user.uname }} - 用户详情{% endblock %}
 {% block content %}
     <div class="container">
-        <h2>{{ user.uname }}</h2>
-        <ul class="list">
-            <li class="list-item">邮箱：{{ user.email }}</li>
-            <li class="list-item">学号：{{ user.sid }}</li>
-            <li class="list-item">所属组：{{ user.group.gname if user.group else '未加入' }}</li>
-            <li class="list-item">管理员：{{ '是' if user.is_admin else '否' }}</li>
-        </ul>
-        <div class="action-buttons">
-            {% if current_user.is_authenticated and (not current_user.gid) %}<a href="/groups" class="btn">加入一个工作组</a>{% endif %}
-            {% if current_user.is_authenticated and (current_user.uid == user.uid) %}
-                <a href="/users/me/edit" class="btn">编辑个人信息</a>
-            {% endif %}
+        <div class="info-section">
+            <div class="info-header">
+                {% if user.uimg %}
+                    <img src="{{ user.uimg }}" alt="{{ user.uname }}" class="user-avatar">
+                {% else %}
+                    <div class="user-avatar-placeholder">{{ user.uname[0].upper() }}</div>
+                {% endif %}
+                <div>
+                    <h2>{{ user.uname }}</h2>
+                    <p class="text-muted">
+                        {% if user.is_admin %}
+                            <span class="badge badge-admin">管理员</span>
+                        {% elif user.is_leader %}
+                            <span class="badge badge-leader">组长</span>
+                        {% else %}
+                            <span class="badge">普通用户</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="info-content">
+                <div class="info-row">
+                    <label>邮箱：</label>
+                    <span>{{ user.email }}</span>
+                </div>
+                <div class="info-row">
+                    <label>学号：</label>
+                    <span>{{ user.sid }}</span>
+                </div>
+                <div class="info-row">
+                    <label>个人简介：</label>
+                    <span>{{ user.uinfo if user.uinfo else '暂无简介' }}</span>
+                </div>
+                <div class="info-row">
+                    <label>所属工作组：</label>
+                    <span>
+                        {% if user.group %}
+                            <a href="{{ url_for('group.group_detail', gid=user.gid) }}">{{ user.group.gname }}</a>
+                            {% if user.is_leader %}<span class="text-success">（组长）</span>{% endif %}
+                        {% else %}
+                            <span class="text-muted">未加入工作组</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <label>注册时间：</label>
+                    <span>{{ user.created_at.strftime("%Y-%m-%d %H:%M") if user.created_at else '未知' }}</span>
+                </div>
+            </div>
+            <div class="button-group mt-16">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.uid == user.uid %}
+                        <a href="{{ url_for('user.user_edit') }}" class="btn">编辑个人信息</a>
+                        {% if current_user.gid %}
+                            <button class="btn btn-danger" onclick="leaveGroup()">退出工作组</button>
+                        {% else %}
+                            <a href="{{ url_for('group.group_list') }}" class="btn">加入工作组</a>
+                        {% endif %}
+                        <a href="{{ url_for('group.my_group') }}" class="btn">我的工作组</a>
+                    {% endif %}
+                    {% if current_user.is_admin %}
+                        <button class="btn btn-danger" onclick="deleteUser('{{ user.uid }}')">删除用户</button>
+                    {% endif %}
+                {% endif %}
+                <a href="{{ url_for('user.user_list') }}" class="btn btn-secondary">返回用户列表</a>
+            </div>
         </div>
     </div>
 {% endblock %}

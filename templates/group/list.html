@@ -1,32 +1,70 @@
 {% extends "base.html" %}
-{% block title %}GROUP列表{% endblock %}
+{% block title %}工作组列表 - DBSYS{% endblock %}
 {% block content %}
     <div class="container">
-        <h2>GROUP列表</h2>
-        <input type="text"
-               class="search"
-               placeholder="搜索工作组..."
-               data-list-search
-               data-list-target=".group-list">
-        <select class="search" data-sort-target=".group-list">
-            <option value="name-asc">名称 ↑</option>
-            <option value="name-desc">名称 ↓</option>
-        </select>
-        <div class="button-group toolbar">
-            <label>
-                <input type="checkbox" data-select-all data-list-target=".group-list">
-                全选
-            </label>
-            <button class="btn" data-export-csv data-list-target=".group-list">导出CSV</button>
-            <button class="btn" data-view-toggle data-list-target=".group-list">切换视图</button>
+        <div class="page-header">
+            <h2>工作组列表</h2>
+            {% if current_user.is_authenticated and not current_user.gid %}
+                <a href="{{ url_for('group.group_create') }}" class="btn">创建工作组</a>
+            {% endif %}
         </div>
-        <ul class="list group-list" data-page-size="10">
-            {% for group in groups %}
-                <li class="list-item">
-                    <input type="checkbox" data-select-item>
-                    <a href="/groups/{{ group.gid }}">{{ group.gname }}</a> - {{ group.ginfo }}
-                </li>
-            {% endfor %}
-        </ul>
+        <div class="mb-16">
+            <input type="text"
+                   class="search"
+                   placeholder="搜索工作组..."
+                   data-list-search
+                   data-list-target=".group-list">
+            <select class="search" data-sort-target=".group-list">
+                <option value="name-asc">名称 ↑</option>
+                <option value="name-desc">名称 ↓</option>
+            </select>
+        </div>
+        {% if groups %}
+            <div class="grid-container">
+                {% for group in groups %}
+                    <div class="card group-card">
+                        <div class="card-header">
+                            {% if group.gimg %}
+                                <img src="{{ group.gimg }}" alt="{{ group.gname }}" class="group-img">
+                            {% else %}
+                                <div class="group-img-placeholder">{{ group.gname[0].upper() }}</div>
+                            {% endif %}
+                            <h3>
+                                <a href="{{ url_for('group.group_detail', gid=group.gid) }}">{{ group.gname }}</a>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="group-info">{{ group.ginfo if group.ginfo else '暂无描述' }}</p>
+                            <div class="group-meta">
+                                <span class="meta-item">
+                                    <strong>组长：</strong>
+                                    {% for user in group.users %}
+                                        {% if user.uid == group.leader_id %}
+                                            <a href="{{ url_for('user.user_detail', uid=user.uid) }}">{{ user.uname }}</a>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                <span class="meta-item">
+                                    <strong>成员数：</strong>{{ group.users|length }}
+                                </span>
+                                <span class="meta-item">
+                                    <strong>项目数：</strong>{{ group.projects|length }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ url_for('group.group_detail', gid=group.gid) }}"
+                               class="btn btn-sm">查看详情</a>
+                            {% if current_user.is_authenticated and not current_user.gid %}
+                                <button class="btn btn-sm btn-primary" onclick="joinGroup('{{ group.gid }}')">加入</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">暂无工作组，快来创建第一个吧！</div>
+        {% endif %}
     </div>
 {% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/group.js') }}"></script>{% endblock %}

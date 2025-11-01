@@ -1,41 +1,126 @@
 {% extends "base.html" %}
-{% block title %}工作组详情{% endblock %}
+{% block title %}{{ group.gname }} - 工作组详情{% endblock %}
 {% block content %}
     <div class="container">
-        <h2>{{ group.gname }}</h2>
-        <p>{{ group.ginfo }}</p>
-        <h3>成员</h3>
-        <ul class="list">
-            {% for u in group.users %}
-                <li class="list-item">
-                    {{ u.uname }}
-                    {% if group.leader_id == u.uid %}（组长）{% endif %}
-                    {% if current_user.is_authenticated and current_user.uid == group.leader_id and u.uid != group.leader_id %}
-                        <button class="btn"
-                                data-action="remove_member"
-                                data-url="/groups/{{ group.gid }}/members/{{ u.uid }}/remove">移除</button>
+        <div class="info-section">
+            <div class="info-header">
+                {% if group.gimg %}
+                    <img src="{{ group.gimg }}" alt="{{ group.gname }}" class="group-avatar">
+                {% else %}
+                    <div class="group-avatar-placeholder">{{ group.gname[0].upper() }}</div>
+                {% endif %}
+                <div>
+                    <h2>{{ group.gname }}</h2>
+                    <p class="text-muted">{{ group.ginfo if group.ginfo else '暂无描述' }}</p>
+                </div>
+            </div>
+            <div class="info-content">
+                <div class="info-row">
+                    <label>创建时间：</label>
+                    <span>{{ group.created_at.strftime("%Y-%m-%d %H:%M") if group.created_at else '未知' }}</span>
+                </div>
+                <div class="info-row">
+                    <label>成员数量：</label>
+                    <span>{{ group.users|length }} 人</span>
+                </div>
+                <div class="info-row">
+                    <label>项目数量：</label>
+                    <span>{{ group.projects|length }} 个</span>
+                </div>
+            </div>
+            <h3>成员列表</h3>
+            {% if group.users %}
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>用户名</th>
+                                <th>邮箱</th>
+                                <th>角色</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in group.users %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('user.user_detail', uid=u.uid) }}">{{ u.uname }}</a>
+                                    </td>
+                                    <td>{{ u.email }}</td>
+                                    <td>
+                                        {% if group.leader_id == u.uid %}
+                                            <span class="badge badge-leader">组长</span>
+                                        {% else %}
+                                            <span class="badge">成员</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if current_user.is_authenticated and current_user.uid == group.leader_id and u.uid != group.leader_id %}
+                                            <button class="btn btn-sm btn-danger"
+                                                    onclick="removeMember('{{ group.gid }}', '{{ u.uid }}')">
+                                                移除
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty">暂无成员</div>
+            {% endif %}
+            <h3>项目列表</h3>
+            {% if group.projects %}
+                <div class="grid-container">
+                    {% for project in group.projects %}
+                        <div class="card project-card">
+                            <div class="card-header">
+                                <h4>
+                                    <a href="{{ url_for('project.project_detail', pid=project.pid) }}">{{ project.pname }}</a>
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <p>{{ project.pinfo if project.pinfo else '暂无描述' }}</p>
+                                <div class="project-meta">
+                                    <span>端口: {{ project.port }}</span>
+                                    <span>Docker: {{ project.docker_port }}</span>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('project.project_detail', pid=project.pid) }}"
+                                   class="btn btn-sm">查看</a>
+                                {% if current_user.is_authenticated and current_user.uid == group.leader_id %}
+                                    <a href="{{ url_for('project.project_edit', pid=project.pid) }}"
+                                       class="btn btn-sm">编辑</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty">暂无项目</div>
+            {% endif %}
+            <div class="button-group mt-16">
+                {% if current_user.is_authenticated %}
+                    {% if not current_user.gid %}
+                        <button class="btn btn-primary" onclick="joinGroup('{{ group.gid }}')">加入该组</button>
+                    {% elif current_user.gid == group.gid %}
+                        {% if current_user.uid == group.leader_id %}
+                            <a href="{{ url_for('group.group_edit', gid=group.gid) }}" class="btn">编辑工作组</a>
+                            <a href="{{ url_for('group.project_create', gid=group.gid) }}"
+                               class="btn">创建项目</a>
+                            <a href="{{ url_for('group.leader_change', gid=group.gid) }}"
+                               class="btn">更换组长</a>
+                            <button class="btn btn-danger" onclick="deleteGroup('{{ group.gid }}')">删除工作组</button>
+                        {% else %}
+                            <button class="btn btn-danger" onclick="leaveGroup()">退出该组</button>
+                        {% endif %}
                     {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-        <div class="action-buttons">
-            {% if current_user.is_authenticated and (not current_user.gid) %}
-                <button class="btn" id="btn-join" data-gid="{{ group.gid }}">加入该组</button>
-            {% endif %}
-            {% if current_user.is_authenticated and current_user.gid and (current_user.gid == group.gid) %}
-                <button class="btn" id="btn-leave">退出该组</button>
-            {% endif %}
-            {% if current_user.is_authenticated and current_user.uid == group.leader_id %}
-                <a href="/groups/{{ group.gid }}/edit" class="btn">编辑</a>
-                <a href="/groups/{{ group.gid }}/change_leader" class="btn">更换组长</a>
-                <button class="btn btn-danger"
-                        data-action="delete_group"
-                        data-url="/groups/{{ group.gid }}/delete">删除工作组</button>
-            {% endif %}
+                {% endif %}
+                <a href="{{ url_for('group.group_list') }}" class="btn btn-secondary">返回列表</a>
+            </div>
         </div>
     </div>
 {% endblock %}
-{% block scripts %}
-    <script src="{{ url_for('static', filename='js/user.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/group.js') }}"></script>
-{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/group.js') }}"></script>{% endblock %}

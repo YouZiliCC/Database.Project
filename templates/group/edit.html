@@ -1,19 +1,29 @@
 {% extends "base.html" %}
-{% block title %}编辑工作组{% endblock %}
+{% block title %}编辑工作组 - DBSYS{% endblock %}
 {% block content %}
     <div class="container">
-        <h2>编辑工作组</h2>
-        <form method="POST" class="form">
+        <h2>编辑工作组信息</h2>
+        <form method="POST"
+              action="{{ url_for('group.group_edit', gid=group.gid) }}"
+              class="form"
+              id="edit-group-form">
             {{ form.hidden_tag() }}
             <div class="form-row">
                 <label>{{ form.gname.label }}</label>
-                {{ form.gname(size=32, **{"data-validate":"required|min:3"}) }}
+                {{ form.gname(size=32, **{"data-validate":"required|min:3|max:50"}) }}
+                {% if form.gname.errors %}<span class="error">{{ form.gname.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.ginfo.label }}</label>
-                {{ form.ginfo(size=100) }}
+                {{ form.ginfo(size=100, maxlength=200) }}
+                {% if form.ginfo.errors %}<span class="error">{{ form.ginfo.errors[0] }}</span>{% endif %}
             </div>
-            <div class="form-row">{{ form.submit(class="btn") }}</div>
+            <div class="form-row">
+                {{ form.submit(class="btn", value="保存更改") }}
+                <a href="{{ url_for('group.group_detail', gid=group.gid) }}"
+                   class="btn btn-secondary">取消</a>
+            </div>
         </form>
     </div>
 {% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/group.js') }}"></script>{% endblock %}

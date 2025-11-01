@@ -1,4 +1,4 @@
-// 管理员仪表盘前端逻辑：异步拉取列表 + 操作确认模态
+// 管理员仪表盘前端逻辑：异步拉取列表 + 操作确认模态 + 统计数据
 (function () {
     const resultEl = document.getElementById('admin-result');
     const btnUsers = document.getElementById('btn-users');
@@ -12,6 +12,11 @@
 
     let pendingAction = null;
 
+    // 统计元素
+    const statUsers = document.getElementById('stat-users');
+    const statGroups = document.getElementById('stat-groups');
+    const statProjects = document.getElementById('stat-projects');
+
     function showLoading() {
         resultEl.innerHTML = '<div class="spinner" aria-label="加载中"></div>';
     }
@@ -22,24 +27,41 @@
         return await res.json();
     }
 
+    // 加载统计数据
+    async function loadStats() {
+        try {
+            const [users, groups, projects] = await Promise.all([
+                fetchJson(btnUsers?.dataset.endpoint || '/api/users'),
+                fetchJson(btnGroups?.dataset.endpoint || '/api/groups'),
+                fetchJson(btnProjects?.dataset.endpoint || '/api/projects')
+            ]);
+            if(statUsers) statUsers.textContent = users.length || 0;
+            if(statGroups) statGroups.textContent = groups.length || 0;
+            if(statProjects) statProjects.textContent = projects.length || 0;
+        } catch (e) {
+            console.error('加载统计失败:', e);
+        }
+    }
+
     function renderUsers(users) {
         if (!Array.isArray(users) || users.length === 0) {
-            resultEl.innerHTML = '<p>暂无用户</p>';
+            resultEl.innerHTML = '<p class="empty">暂无用户</p>';
             return;
         }
         const rows = users.map(u => `
             <tr>
-                <td><a href="/users/${u.uid}">${u.uname}</a></td>
+                <td><a href="/user/${u.uid}">${u.uname}</a></td>
                 <td>${u.email ?? ''}</td>
                 <td>${u.sid ?? ''}</td>
-                <td>${u.is_admin ? '是' : '否'}</td>
+                <td>${u.is_admin ? '<span class="badge badge-admin">是</span>' : '否'}</td>
                 <td>
-                    <button class="btn btn-danger" data-action="del_user" data-id="${u.uid}">删除</button>
-                    <button class="btn" data-action="reset_password" data-id="${u.uid}">重置密码</button>
+                    <button class="btn btn-sm btn-danger" data-action="del_user" data-id="${u.uid}">删除</button>
+                    <button class="btn btn-sm" data-action="reset_password" data-id="${u.uid}">重置密码</button>
                 </td>
             </tr>
         `).join('');
         resultEl.innerHTML = `
+            <h3>用户管理</h3>
             <div class="table-wrap">
                 <table class="table">
                     <thead>
@@ -53,21 +75,22 @@
 
     function renderProjects(projects) {
         if (!Array.isArray(projects) || projects.length === 0) {
-            resultEl.innerHTML = '<p>暂无项目</p>';
+            resultEl.innerHTML = '<p class="empty">暂无项目</p>';
             return;
         }
         const rows = projects.map(p => `
             <tr>
-                <td><a href="/projects/${p.pid}">${p.pname}</a></td>
+                <td><a href="/project/${p.pid}">${p.pname}</a></td>
                 <td>${p.gid ?? ''}</td>
-                <td>${p.port ?? ''}</td>
-                <td>${p.docker_port ?? ''}</td>
+                <td><code>${p.port ?? ''}</code></td>
+                <td><code>${p.docker_port ?? ''}</code></td>
                 <td>
-                    <button class="btn btn-danger" data-action="del_projects" data-id="${p.pid}">删除</button>
+                    <button class="btn btn-sm btn-danger" data-action="del_projects" data-id="${p.pid}">删除</button>
                 </td>
             </tr>
         `).join('');
         resultEl.innerHTML = `
+            <h3>项目管理</h3>
             <div class="table-wrap">
                 <table class="table">
                     <thead>
@@ -81,21 +104,22 @@
 
     function renderGroups(groups) {
         if (!Array.isArray(groups) || groups.length === 0) {
-            resultEl.innerHTML = '<p>暂无工作组</p>';
+            resultEl.innerHTML = '<p class="empty">暂无工作组</p>';
             return;
         }
         const rows = groups.map(g => `
             <tr>
-                <td><a href="/groups/${g.gid}">${g.gname}</a></td>
+                <td><a href="/group/${g.gid}">${g.gname}</a></td>
                 <td>${g.ginfo ?? ''}</td>
                 <td>${g.users?.length ?? 0}</td>
                 <td>${g.projects?.length ?? 0}</td>
                 <td>
-                    <button class="btn btn-danger" data-action="del_group" data-id="${g.gid}">删除</button>
+                    <button class="btn btn-sm btn-danger" data-action="del_group" data-id="${g.gid}">删除</button>
                 </td>
             </tr>
         `).join('');
         resultEl.innerHTML = `
+            <h3>工作组管理</h3>
             <div class="table-wrap">
                 <table class="table">
                     <thead>
@@ -113,7 +137,7 @@
             const data = await fetchJson(btnUsers.dataset.endpoint);
             renderUsers(data);
         } catch (e) {
-            resultEl.innerHTML = `<p>加载失败：${e.message}</p>`;
+            resultEl.innerHTML = `<p class="error">加载失败：${e.message}</p>`;
         }
     }
 
@@ -123,7 +147,7 @@
             const data = await fetchJson(btnProjects.dataset.endpoint);
             renderProjects(data);
         } catch (e) {
-            resultEl.innerHTML = `<p>加载失败：${e.message}</p>`;
+            resultEl.innerHTML = `<p class="error">加载失败：${e.message}</p>`;
         }
     }
 
@@ -133,7 +157,7 @@
             const data = await fetchJson(btnGroups.dataset.endpoint);
             renderGroups(data);
         } catch (e) {
-            resultEl.innerHTML = `<p>加载失败：${e.message}</p>`;
+            resultEl.innerHTML = `<p class="error">加载失败：${e.message}</p>`;
         }
     }
 
@@ -142,13 +166,19 @@
         pendingAction = action;
         modal.classList.remove('hidden');
     }
+    
     function closeConfirm() {
         modal.classList.add('hidden');
         pendingAction = null;
     }
 
     async function post(url) {
-        const res = await fetch(url, { method: 'POST', credentials: 'same-origin' });
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
+        const res = await fetch(url, { 
+            method: 'POST', 
+            credentials: 'same-origin',
+            headers: token ? { 'X-CSRFToken': token } : {}
+        });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || '请求失败');
         return data;
@@ -171,16 +201,16 @@
         switch (action) {
             case 'del_user':
                 url = `/admin/del_user/${id}`;
-                return openConfirm('确认删除该用户？', () => doAction(url, loadUsers));
+                return openConfirm('确认删除该用户？此操作不可恢复！', () => doAction(url, loadUsers));
             case 'reset_password':
                 url = `/admin/reset_password/${id}`;
-                return openConfirm('确认重置该用户密码？', () => doAction(url, loadUsers));
+                return openConfirm('确认重置该用户密码为默认密码？', () => doAction(url, loadUsers));
             case 'del_group':
                 url = `/admin/del_group/${id}`;
-                return openConfirm('确认删除该工作组？', () => doAction(url, loadGroups));
+                return openConfirm('确认删除该工作组？此操作不可恢复！', () => doAction(url, loadGroups));
             case 'del_projects':
                 url = `/admin/del_projects/${id}`;
-                return openConfirm('确认删除该项目？', () => doAction(url, loadProjects));
+                return openConfirm('确认删除该项目？此操作不可恢复！', () => doAction(url, loadProjects));
         }
     });
 
@@ -189,9 +219,10 @@
             btnOk.disabled = true;
             await post(url);
             closeConfirm();
-            await refresh();
+            alert('操作成功');
+            await Promise.all([refresh(), loadStats()]);
         } catch (e) {
-            alert(e.message);
+            alert('操作失败：' + e.message);
         } finally {
             btnOk.disabled = false;
         }
@@ -201,6 +232,10 @@
     btnOk?.addEventListener('click', () => {
         if (pendingAction) pendingAction();
     });
+
+    // 页面加载时获取统计数据
+    loadStats();
 })();
+
 
 

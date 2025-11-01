@@ -1,27 +1,40 @@
 {% extends "base.html" %}
-{% block title %}创建项目{% endblock %}
+{% block title %}创建项目 - DBSYS{% endblock %}
 {% block content %}
     <div class="container">
         <h2>创建项目</h2>
-        <form method="POST" class="form">
+        <p class="text-muted">为工作组 {{ group.gname }} 创建新项目</p>
+        <form method="POST"
+              action="{{ url_for('group.project_create', gid=group.gid) }}"
+              class="form">
             {{ form.hidden_tag() }}
             <div class="form-row">
                 <label>{{ form.pname.label }}</label>
-                {{ form.pname(size=40, **{"data-validate":"required|min:3"}) }}
+                {{ form.pname(size=40, **{"data-validate":"required|min:3|max:100", "placeholder":"输入项目名称"}) }}
+                {% if form.pname.errors %}<span class="error">{{ form.pname.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.pinfo.label }}</label>
-                {{ form.pinfo(size=80) }}
+                {{ form.pinfo(size=80, maxlength=500, placeholder="项目简介...") }}
+                {% if form.pinfo.errors %}<span class="error">{{ form.pinfo.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.port.label }}</label>
-                {{ form.port(size=10, **{"data-validate":"required|min:2"}) }}
+                {{ form.port(size=10, **{"data-validate":"required|min:1|max:65535", "placeholder":"如: 8080"}) }}
+                {% if form.port.errors %}<span class="error">{{ form.port.errors[0] }}</span>{% endif %}
+                <small class="form-help">应用对外访问端口 (1-65535)</small>
             </div>
             <div class="form-row">
                 <label>{{ form.docker_port.label }}</label>
-                {{ form.docker_port(size=10, **{"data-validate":"required|min:2"}) }}
+                {{ form.docker_port(size=10, **{"data-validate":"required|min:1|max:65535", "placeholder":"如: 3000"}) }}
+                {% if form.docker_port.errors %}<span class="error">{{ form.docker_port.errors[0] }}</span>{% endif %}
+                <small class="form-help">Docker容器内部端口 (1-65535)</small>
             </div>
-            <div class="form-row">{{ form.submit(class="btn") }}</div>
+            <div class="form-row">
+                {{ form.submit(class="btn", value="创建项目") }}
+                <a href="{{ url_for('group.group_detail', gid=group.gid) }}"
+                   class="btn btn-secondary">取消</a>
+            </div>
         </form>
     </div>
 {% endblock %}

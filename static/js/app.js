@@ -5,10 +5,9 @@
     if(flashes.length){ setTimeout(()=> flashes.forEach(f=> f.remove()), 4000); }
 
     // 主题切换（localStorage 持久化）
+    // 注意：主题的初始应用已在 base.html 的 <head> 中完成，这里只处理切换
     const THEME_KEY = 'app_theme';
     const root = document.documentElement;
-    const current = localStorage.getItem(THEME_KEY) || 'light';
-    if(current === 'dark') root.classList.add('theme-dark');
     const toggleBtn = document.getElementById('theme-toggle');
     toggleBtn?.addEventListener('click', () => {
         const isDark = root.classList.toggle('theme-dark');

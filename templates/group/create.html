@@ -1,19 +1,27 @@
 {% extends "base.html" %}
-{% block title %}创建工作组{% endblock %}
+{% block title %}创建工作组 - DBSYS{% endblock %}
 {% block content %}
     <div class="container">
         <h2>创建工作组</h2>
-        <form method="POST" class="form">
+        <p class="text-muted">创建工作组后，您将自动成为该组的组长</p>
+        <form method="POST"
+              action="{{ url_for('group.group_create') }}"
+              class="form">
             {{ form.hidden_tag() }}
             <div class="form-row">
                 <label>{{ form.gname.label }}</label>
-                {{ form.gname(size=32, **{"data-validate":"required|min:3"}) }}
+                {{ form.gname(size=32, **{"data-validate":"required|min:3|max:50", "placeholder":"输入工作组名称"}) }}
+                {% if form.gname.errors %}<span class="error">{{ form.gname.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
                 <label>{{ form.ginfo.label }}</label>
-                {{ form.ginfo(size=100) }}
+                {{ form.ginfo(size=100, maxlength=200, placeholder="简单介绍一下工作组...") }}
+                {% if form.ginfo.errors %}<span class="error">{{ form.ginfo.errors[0] }}</span>{% endif %}
             </div>
-            <div class="form-row">{{ form.submit(class="btn") }}</div>
+            <div class="form-row">
+                {{ form.submit(class="btn", value="创建工作组") }}
+                <a href="{{ url_for('group.group_list') }}" class="btn btn-secondary">取消</a>
+            </div>
         </form>
     </div>
 {% endblock %}
