@@ -29,14 +29,14 @@ class User(db.Model, TimestampMixin, UserMixin):
     # 用户表
     __tablename__ = "users"
     # 字段
-    uid = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    uname = db.Column(db.String(64), unique=True, nullable=False)
+    uid = db.Column(db.String(512), primary_key=True, default=generate_uuid)
+    uname = db.Column(db.String(512), unique=True, nullable=False)
     uinfo = db.Column(db.Text, nullable=True)
-    sid = db.Column(db.String(36), unique=True, nullable=False)
-    email = db.Column(db.String(128), unique=True, nullable=False)
-    passwd_hash = db.Column(db.String(128), nullable=False)
+    sid = db.Column(db.String(512), unique=True, nullable=False)
+    email = db.Column(db.String(512), unique=True, nullable=False)
+    passwd_hash = db.Column(db.String(512), nullable=False)
     gid = db.Column(
-        db.String(36), db.ForeignKey("groups.gid", ondelete="SET NULL"), nullable=True
+        db.String(512), db.ForeignKey("groups.gid", ondelete="SET NULL"), nullable=True
     )
     role = db.Column(db.Integer, default=0)  # 0: 普通用户, 1: 管理员
 
@@ -65,10 +65,10 @@ class Group(db.Model, TimestampMixin):
     # 工作组表
     __tablename__ = "groups"
     # 字段
-    gid = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    gname = db.Column(db.String(64), nullable=False)
+    gid = db.Column(db.String(512), primary_key=True, default=generate_uuid)
+    gname = db.Column(db.String(512), nullable=False)
     ginfo = db.Column(db.Text, nullable=True)
-    leader_id = db.Column(db.String(36), db.ForeignKey("users.uid"), nullable=False)
+    leader_id = db.Column(db.String(512), db.ForeignKey("users.uid"), nullable=False)
     users = db.relationship("User", backref="group", foreign_keys=[User.gid], lazy=True)
     projects = db.relationship(
         "Project",
@@ -87,13 +87,13 @@ class Project(db.Model, TimestampMixin):
     # 项目表
     __tablename__ = "projects"
     # 字段
-    pid = db.Column(db.String(36), primary_key=True, default=generate_uuid)
-    pname = db.Column(db.String(100), nullable=False)
+    pid = db.Column(db.String(512), primary_key=True, default=generate_uuid)
+    pname = db.Column(db.String(512), nullable=False)
     pinfo = db.Column(db.Text, nullable=True)
     gid = db.Column(
-        db.String(36), db.ForeignKey("groups.gid", ondelete="CASCADE"), nullable=False
+        db.String(512), db.ForeignKey("groups.gid", ondelete="CASCADE"), nullable=False
     )
-    docker_id = db.Column(db.String(64), unique=True, default=generate_uuid)
+    docker_id = db.Column(db.String(512), unique=True, default=generate_uuid)
     port = db.Column(db.Integer, unique=True, nullable=True)
     docker_port = db.Column(db.Integer, unique=True, nullable=True)
 
