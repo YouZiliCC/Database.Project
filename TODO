@@ -13,3 +13,8 @@
 学号解析工具
 
 wsgi gunicorn 日志
+
+部署：
+nginx+gunicorn+flask+mysql+letsencrypt
+ Nginx 80 → Certbot 一键签发 443 → 自动续期
+; +redis

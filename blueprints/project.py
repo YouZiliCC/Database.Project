@@ -36,12 +36,12 @@ class ProjectForm(FlaskForm):
 
     # 自定义验证器
     def validate_port(self, port):
-        if not port.data.isdigit() or not (1 <= int(port.data) <= 65535):
-            raise ValidationError("端口号必须是1到65535之间的数字")
+        if not port.data.isdigit() or not (10000 <= int(port.data) <= 65535):
+            raise ValidationError("端口号必须是10000到65535之间的数字")
 
     def validate_docker_port(self, docker_port):
-        if not docker_port.data.isdigit() or not (1 <= int(docker_port.data) <= 65535):
-            raise ValidationError("Docker端口号必须是1到65535之间的数字")
+        if not docker_port.data.isdigit() or not (1024 <= int(docker_port.data) <= 65535):
+            raise ValidationError("Docker端口号必须是1024到65535之间的数字")
 
 
 # -------------------------------------------------------------------------------------------

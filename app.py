@@ -4,10 +4,10 @@ from flask_wtf import CSRFProtect
 from database.base import db, login_manager
 from database.actions import create_user, get_user_by_uname
 from dotenv import load_dotenv
+from markupsafe import Markup
 import logging
 import os
 import markdown
-from markupsafe import Markup
 
 
 def create_app():
@@ -25,6 +25,15 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.getenv(
         "SQLALCHEMY_TRACK_MODIFICATIONS"
     )
+    
+    # MySQL 连接池配置（提升性能）
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_size": os.getenv("SQLALCHEMY_ENGINE_OPTIONS_POOL_SIZE"),          # 连接池大小
+        "pool_recycle": os.getenv("SQLALCHEMY_ENGINE_OPTIONS_POOL_RECYCLE"),     # 连接回收时间
+        "pool_pre_ping": os.getenv("SQLALCHEMY_ENGINE_OPTIONS_POOL_PRE_PING"),    # 连接前检查是否有效，防止 MySQL has gone away
+        "max_overflow": os.getenv("SQLALCHEMY_ENGINE_OPTIONS_MAX_OVERFLOW"),       # 超过 pool_size 后最多再创建的连接数
+    }
+    
     app.config["LOG_LEVEL"] = os.getenv("LOG_LEVEL")
     app.config["ADMIN_ONLY_LOGIN"] = os.getenv("ADMIN_ONLY_LOGIN", "False") == "True"
     app.config["PORT"] = int(os.getenv("PORT", 5000))
