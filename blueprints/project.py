@@ -46,11 +46,6 @@ class ProjectForm(FlaskForm):
             raise ValidationError("Docker端口号必须是1024到65535之间的数字")
 
 
-class ProjectCommentForm(FlaskForm):
-    content = TextAreaField(
-        "评论内容", validators=[DataRequired(), Length(min=1, max=2000)]
-    )
-    submit = SubmitField("确认")
 # -------------------------------------------------------------------------------------------
 # Group Decorators
 # -------------------------------------------------------------------------------------------
@@ -93,22 +88,22 @@ def project_detail(pid):
     project = get_project_by_pid(pid)
     if not project:
         abort(404, description="项目不存在")
-    
+
     # 获取评论列表
     comments = get_ordered_project_comments_by_pid(pid)
-    
+
     # 获取点赞数和当前用户点赞状态
     star_count = get_project_star_count_by_pid(pid)
     user_starred = False
     if current_user.is_authenticated:
         user_starred = check_user_starred(current_user.uid, pid)
-    
+
     return render_template(
         "project/detail.html",
         project=project,
         comments=comments,
         star_count=star_count,
-        user_starred=user_starred
+        user_starred=user_starred,
     )
 
 
@@ -133,12 +128,17 @@ def project_star(pid):
             return jsonify({"success": False, "message": "取消点赞失败"}), 500
         # get fresh count
         star_count = get_project_star_count_by_pid(pid)
-        return jsonify({
-            "success": True,
-            "message": "取消点赞成功",
-            "star_count": star_count,
-            "starred": False,
-        }), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "取消点赞成功",
+                    "star_count": star_count,
+                    "starred": False,
+                }
+            ),
+            200,
+        )
 
     # 未点赞，添加点赞
     new_star = create_project_star(current_user.uid, project.pid)
@@ -146,12 +146,17 @@ def project_star(pid):
         logger.warning("点赞失败")
         return jsonify({"success": False, "message": "点赞失败"}), 500
     star_count = get_project_star_count_by_pid(pid)
-    return jsonify({
-        "success": True,
-        "message": "点赞成功",
-        "star_count": star_count,
-        "starred": True,
-    }), 200
+    return (
+        jsonify(
+            {
+                "success": True,
+                "message": "点赞成功",
+                "star_count": star_count,
+                "starred": True,
+            }
+        ),
+        200,
+    )
 
 
 # -------------------------------------------------------------------------------------------
@@ -170,9 +175,9 @@ def project_comment(pid):
     content = None
     if request.is_json:
         data = request.get_json(silent=True) or {}
-        content = data.get('content')
+        content = data.get("content")
     else:
-        content = request.form.get('content')
+        content = request.form.get("content")
 
     if not content or not content.strip():
         return jsonify({"success": False, "message": "评论不能为空"}), 400
@@ -182,17 +187,22 @@ def project_comment(pid):
         return jsonify({"success": False, "message": "创建评论失败"}), 500
 
     # respond with comment data for client-side rendering
-    return jsonify({
-        "success": True,
-        "message": "评论已发布",
-        "comment": {
-            "pcid": created.pcid,
-            "uid": created.uid,
-            "uname": created.user.uname if created.user else current_user.uname,
-            "content": created.content,
-            "created_at": created.created_at.strftime("%Y-%m-%d %H:%M"),
-        }
-    }), 200
+    return (
+        jsonify(
+            {
+                "success": True,
+                "message": "评论已发布",
+                "comment": {
+                    "pcid": created.pcid,
+                    "uid": created.uid,
+                    "uname": created.user.uname if created.user else current_user.uname,
+                    "content": created.content,
+                    "created_at": created.created_at.strftime("%Y-%m-%d %H:%M"),
+                },
+            }
+        ),
+        200,
+    )
 
 
 @project_bp.route("/<uuid:pid>/comment/<pcid>", methods=["PUT", "PATCH"])
@@ -200,34 +210,39 @@ def project_comment(pid):
 def project_comment_edit(pid, pcid):
     """编辑评论"""
     from database.actions import get_comment_by_pcid, update_comment
-    
+
     comment = get_comment_by_pcid(pcid)
     if not comment:
         return jsonify({"success": False, "message": "评论不存在"}), 404
-    
+
     # 只允许作者编辑自己的评论
     if str(comment.uid) != str(current_user.uid):
         return jsonify({"success": False, "message": "无权编辑此评论"}), 403
-    
+
     # 获取新内容
     data = request.get_json(silent=True) or {}
-    content = data.get('content', '').strip()
-    
+    content = data.get("content", "").strip()
+
     if not content:
         return jsonify({"success": False, "message": "评论内容不能为空"}), 400
-    
+
     # 更新评论
     if not update_comment(comment, content=content):
         return jsonify({"success": False, "message": "更新评论失败"}), 500
-    
-    return jsonify({
-        "success": True,
-        "message": "评论已更新",
-        "comment": {
-            "pcid": comment.pcid,
-            "content": comment.content,
-        }
-    }), 200
+
+    return (
+        jsonify(
+            {
+                "success": True,
+                "message": "评论已更新",
+                "comment": {
+                    "pcid": comment.pcid,
+                    "content": comment.content,
+                },
+            }
+        ),
+        200,
+    )
 
 
 @project_bp.route("/<uuid:pid>/comment/<pcid>", methods=["DELETE"])
@@ -235,23 +250,20 @@ def project_comment_edit(pid, pcid):
 def project_comment_delete(pid, pcid):
     """删除评论"""
     from database.actions import get_comment_by_pcid
-    
+
     comment = get_comment_by_pcid(pcid)
     if not comment:
         return jsonify({"success": False, "message": "评论不存在"}), 404
-    
+
     # 只允许作者删除自己的评论
     if str(comment.uid) != str(current_user.uid):
         return jsonify({"success": False, "message": "无权删除此评论"}), 403
-    
+
     # 删除评论
     if not delete_project_comment(comment):
         return jsonify({"success": False, "message": "删除评论失败"}), 500
-    
-    return jsonify({
-        "success": True,
-        "message": "评论已删除"
-    }), 200
+
+    return jsonify({"success": True, "message": "评论已删除"}), 200
 
 
 # -------------------------------------------------------------------------------------------

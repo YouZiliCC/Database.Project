@@ -58,12 +58,12 @@
             <div class="button-group mt-16">
                 {% if current_user.is_authenticated %}
                     {% if current_user.uid == user.uid %}
-                        <a href="{{ url_for("user.user_edit") }}" class="btn">编辑个人信息</a>
+                        <a href="{{ url_for('user.user_edit') }}" class="btn">编辑个人信息</a>
                         {% if current_user.gid %}
-                            <a href="{{ url_for("group.my_group") }}" class="btn">我的工作组</a>
+                            <a href="{{ url_for('group.my_group') }}" class="btn">我的工作组</a>
                             <button class="btn btn-danger" onclick="leaveGroup()">退出工作组</button>
                         {% else %}
-                            <a href="{{ url_for("group.group_list") }}" class="btn">加入工作组</a>
+                            <a href="{{ url_for('group.group_list') }}" class="btn">加入工作组</a>
                         {% endif %}
                     {% endif %}
                     {% if current_user.is_admin %}

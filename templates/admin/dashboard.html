@@ -24,13 +24,13 @@
         </div>
         <div class="button-group mb-16">
             <button class="btn btn-primary"
-                    data-endpoint="{{ url_for("api.api_users") }}"
+                    data-endpoint="{{ url_for('api.api_users') }}"
                     id="btn-users">管理用户</button>
             <button class="btn btn-primary"
-                    data-endpoint="{{ url_for("api.api_groups") }}"
+                    data-endpoint="{{ url_for('api.api_groups') }}"
                     id="btn-groups">管理工作组</button>
             <button class="btn btn-primary"
-                    data-endpoint="{{ url_for("api.list_projects") }}"
+                    data-endpoint="{{ url_for('api.list_projects') }}"
                     id="btn-projects">管理项目</button>
         </div>
         <div id="admin-result" class="admin-result">

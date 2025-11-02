@@ -678,7 +678,8 @@ def create_project_star(uid, pid):
         logger.error(f"创建项目点赞记录失败: {e}", exc_info=True)
         db.session.rollback()
         return None
-    
+
+
 def delete_project_star(project_star):
     """
     删除项目点赞记录。
@@ -700,7 +701,7 @@ def delete_project_star(project_star):
         logger.error(f"删除项目点赞记录失败: {e}", exc_info=True)
         db.session.rollback()
         return False
-    
+
 
 def get_project_star_count_by_pid(pid):
     """
@@ -715,15 +716,15 @@ def get_project_star_count_by_pid(pid):
     try:
         from .models import ProjectStar
         from sqlalchemy import func
+
         count = db.session.execute(
-            select(func.count(ProjectStar.psid))
-            .where(ProjectStar.pid == pid)
+            select(func.count(ProjectStar.psid)).where(ProjectStar.pid == pid)
         ).scalar()
         return count or 0
     except Exception as e:
         logger.error(f"get_project_star_count_by_pid Failed: {e}", exc_info=True)
         return 0
-    
+
 
 def check_user_starred(uid, pid):
     """
@@ -738,15 +739,15 @@ def check_user_starred(uid, pid):
     """
     try:
         from .models import ProjectStar
+
         star = db.session.execute(
-            select(ProjectStar)
-            .where(ProjectStar.uid == uid, ProjectStar.pid == pid)
+            select(ProjectStar).where(ProjectStar.uid == uid, ProjectStar.pid == pid)
         ).scalar_one_or_none()
         return star is not None
     except Exception as e:
         logger.error(f"check_user_starred Failed: {e}", exc_info=True)
         return False
-    
+
 
 # -------------------------------------------------------------------------------------------
 # ProjectComment CRUD 操作
@@ -854,6 +855,7 @@ def get_ordered_project_comments_by_pid(pid):
     try:
         # 先获取所有评论并 join user 表来判断是否是教师
         from .models import User
+
         comments = (
             db.session.execute(
                 select(ProjectComment)
@@ -861,7 +863,7 @@ def get_ordered_project_comments_by_pid(pid):
                 .where(ProjectComment.pid == pid)
                 .order_by(
                     User.role.desc(),  # role=1 (教师) 排在前面
-                    ProjectComment.created_at.desc()  # 然后按时间倒序
+                    ProjectComment.created_at.desc(),  # 然后按时间倒序
                 )
             )
             .scalars()

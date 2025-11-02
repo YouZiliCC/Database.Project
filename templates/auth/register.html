@@ -3,7 +3,7 @@
 {% block content %}
     <div class="container">
         <h2>用户注册</h2>
-        <form method="POST" action="{{ url_for("auth.register") }}" class="form">
+        <form method="POST" action="{{ url_for('auth.register') }}" class="form">
             {{ form.hidden_tag() }}
             <div class="form-row">
                 <label>{{ form.uname.label }}</label>
@@ -37,7 +37,7 @@
             </div>
             <div class="form-row">
                 {{ form.submit(class="btn") }}
-                <a href="{{ url_for("auth.login") }}" class="btn btn-secondary">登录已有账号</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">登录已有账号</a>
             </div>
         </form>
     </div>

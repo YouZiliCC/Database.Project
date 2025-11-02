@@ -5,7 +5,7 @@
         <h2>创建工作组</h2>
         <p class="text-muted">创建工作组后，您将自动成为该组的组长</p>
         <form method="POST"
-              action="{{ url_for("group.group_create") }}"
+              action="{{ url_for('group.group_create') }}"
               class="form">
             {{ form.hidden_tag() }}
             <div class="form-row">
@@ -21,7 +21,7 @@
             </div>
             <div class="form-row">
                 {{ form.submit(class="btn", value="创建工作组") }}
-                <a href="{{ url_for("group.group_list") }}" class="btn btn-secondary">取消</a>
+                <a href="{{ url_for('group.group_list') }}" class="btn btn-secondary">取消</a>
             </div>
         </form>
     </div>

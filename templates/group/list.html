@@ -5,7 +5,7 @@
         <div class="page-header">
             <h2>工作组列表</h2>
             {% if current_user.is_authenticated and not current_user.gid %}
-                <a href="{{ url_for("group.group_create") }}" class="btn">创建工作组</a>
+                <a href="{{ url_for('group.group_create') }}" class="btn">创建工作组</a>
             {% endif %}
         </div>
         <div class="mb-16">
@@ -34,9 +34,8 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <p class="group-info">{{ group.ginfo if group.ginfo else '暂无描述' }}</p>
                             <div class="group-meta">
-                                <span class="meta-item">
+                                <span class="meta-item" style="display: block; width: 100%;">
                                     <strong>组长：</strong>
                                     {% for user in group.users %}
                                         {% if user.uid == group.leader_id %}

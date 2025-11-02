@@ -71,13 +71,6 @@ class UserForm(FlaskForm):
 # -------------------------------------------------------------------------------------------
 # User Views
 # -------------------------------------------------------------------------------------------
-# @user_bp.route("/", methods=["GET"])
-# def user_list():
-#     """用户列表页面"""
-#     users = list_all_users()
-#     return render_template("user/list.html", users=users)
-
-
 @user_bp.route("/<uuid:uid>", methods=["GET"])
 def user_detail(uid):
     """用户详情页面"""

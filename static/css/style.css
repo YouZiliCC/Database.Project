@@ -377,6 +377,19 @@ input[type="checkbox"]:focus {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     margin-bottom: 16px;
 }
+.info-section h3 {
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+/* 项目详情页的 info-section 特殊处理：h3 靠近上边框 */
+.project-detail .info-section {
+    padding: 16px 24px 24px 24px;
+    margin-bottom: 24px;
+}
+.project-detail .info-section h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
 .info-header {
     display: flex;
     align-items: center;
@@ -661,7 +674,7 @@ input[type="checkbox"]:focus {
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
-    margin-top: 12px;
+    margin-top: 0;
     font-size: 14px;
     color: #6b7280;
 }
@@ -1281,7 +1294,7 @@ footer svg {
 }
 
 .comment-item { 
-    padding: 16px 0; 
+    padding: 16px; 
     border-bottom: 1px solid #f3f4f6; 
 }
 

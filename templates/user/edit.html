@@ -4,7 +4,7 @@
     <div class="container">
         <h2>编辑个人信息</h2>
         <form method="POST"
-              action="{{ url_for("user.user_edit") }}"
+              action="{{ url_for('user.user_edit') }}"
               class="form"
               id="edit-user-form">
             {{ form.hidden_tag() }}
@@ -31,7 +31,7 @@
             </div>
             <div class="form-row">
                 {{ form.submit(class="btn", value="保存更改") }}
-                <a href="{{ url_for("user.user_me") }}" class="btn btn-secondary">取消</a>
+                <a href="{{ url_for('user.user_me') }}" class="btn btn-secondary">取消</a>
                 <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()">删除账号</button>
             </div>
         </form>

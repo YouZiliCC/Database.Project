@@ -124,10 +124,18 @@
                                 </h4>
                             </div>
                             <div class="card-body">
-                                <p>{{ project.pinfo if project.pinfo else '暂无描述' }}</p>
                                 <div class="project-meta">
-                                    <span>端口: {{ project.port }}</span>
-                                    <span>Docker: {{ project.docker_port }}</span>
+                                    <span class="meta-item">
+                                        <strong>端口：</strong>{{ project.port }}
+                                    </span>
+                                    <span class="meta-item">
+                                        <strong>Docker：</strong>{{ project.docker_port }}
+                                    </span>
+                                </div>
+                                <div class="project-stars">
+                                    <span class="star-icon">★</span>
+                                    <span class="star-count">{{ project.stars|length if project.stars else 0 }}</span>
+                                    <span class="star-label">Stars</span>
                                 </div>
                             </div>
                             <div class="card-footer">
@@ -165,7 +173,7 @@
                         {% endif %}
                     {% endif %}
                 {% endif %}
-                <a href="{{ url_for("group.group_list") }}" class="btn btn-secondary">返回列表</a>
+                <a href="{{ url_for('group.group_list') }}" class="btn btn-secondary">返回列表</a>
             </div>
         </div>
     </div>

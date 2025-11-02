@@ -82,7 +82,6 @@ def create_app():
     from blueprints.project import project_bp
     from blueprints.admin import admin_bp
     from blueprints.api import api_bp
-    from blueprints.comment import comment_bp
 
     # 将蓝图注册到应用
     app.register_blueprint(index_bp)
@@ -93,7 +92,6 @@ def create_app():
     app.register_blueprint(project_bp, url_prefix="/project")
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(api_bp, url_prefix="/api")
-    app.register_blueprint(comment_bp, url_prefix="/comment")
 
     # 注册 Markdown 过滤器
     @app.template_filter("markdown")

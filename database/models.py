@@ -146,7 +146,9 @@ class ProjectStar(db.Model, TimestampMixin):
         db.String(512), db.ForeignKey("users.uid", ondelete="CASCADE"), nullable=False
     )
     pid = db.Column(
-        db.String(512), db.ForeignKey("projects.pid", ondelete="CASCADE"), nullable=False
+        db.String(512),
+        db.ForeignKey("projects.pid", ondelete="CASCADE"),
+        nullable=False,
     )
 
     user = db.relationship(
@@ -173,7 +175,9 @@ class ProjectComment(db.Model, TimestampMixin):
         db.String(512), db.ForeignKey("users.uid", ondelete="CASCADE"), nullable=False
     )
     pid = db.Column(
-        db.String(512), db.ForeignKey("projects.pid", ondelete="CASCADE"), nullable=False
+        db.String(512),
+        db.ForeignKey("projects.pid", ondelete="CASCADE"),
+        nullable=False,
     )
     content = db.Column(db.Text, nullable=False)
 
@@ -187,7 +191,7 @@ class ProjectComment(db.Model, TimestampMixin):
         backref=db.backref("comments", passive_deletes=True),
         foreign_keys=[pid],
     )
-    
+
     @property
     def is_teacher_comment(self):
         return self.user.is_teacher
