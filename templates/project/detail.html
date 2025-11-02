@@ -8,7 +8,7 @@
             <span>{{ project.pname }}</span>
         </div>
         <!-- 右侧浮窗 -->
-        <aside class="project-info-sidebar">
+        <aside class="project-info-sidebar" id="project-sidebar">
             <div class="sidebar-content">
                 {% set project_img = '/static/img/projects/' + project.pid + '.png' %}
                 <div class="sidebar-image">
@@ -47,6 +47,13 @@
                 </div>
             </div>
         </aside>
+        <!-- 侧边栏切换按钮 -->
+        <button class="sidebar-toggle-btn"
+                id="sidebar-toggle"
+                onclick="toggleSidebar()"
+                title="切换侧边栏">
+            <span id="sidebar-toggle-icon">📋</span>
+        </button>
         <section class="project-detail">
             <div class="detail-header">
                 <h2>{{ project.pname }}</h2>

@@ -711,6 +711,7 @@ input[type="checkbox"]:focus {
     z-index: 50;
     transition: all 0.3s ease;
     overflow-y: auto;
+    overflow-x: hidden; /* 防止横向溢出 */
     border: 1px solid #e5e7eb;
 }
 
@@ -722,6 +723,7 @@ input[type="checkbox"]:focus {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    max-width: 100%; /* 防止内容溢出 */
 }
 
 .sidebar-image {
@@ -790,10 +792,8 @@ input[type="checkbox"]:focus {
 
 .sidebar-info-item:hover {
     background: #f9fafb;
-    margin: 0 -12px;
-    padding-left: 12px;
-    padding-right: 12px;
     border-radius: 8px;
+    padding: 14px 12px;
 }
 
 .info-label {
@@ -839,10 +839,59 @@ input[type="checkbox"]:focus {
     font-weight: 600;
 }
 
-/* 响应式：在中等屏幕上隐藏浮窗 */
+/* 响应式：在中等屏幕上折叠浮窗 */
 @media (max-width: 1600px) {
     .project-info-sidebar {
-        display: none;
+        left: -380px; /* 隐藏到屏幕外 */
+        transition: left 0.3s ease;
+    }
+    
+    .project-info-sidebar.sidebar-open {
+        left: 20px; /* 展开时显示 */
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+}
+
+/* 侧边栏切换按钮 */
+.sidebar-toggle-btn {
+    display: none; /* 默认隐藏，只在小屏幕显示 */
+    position: fixed;
+    left: 20px;
+    top: 120px;
+    width: 48px;
+    height: 48px;
+    background: #0d6efd;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s ease;
+    color: white;
+    font-size: 1.5rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-toggle-btn:hover {
+    background: #0b5ed7;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.4);
+}
+
+.sidebar-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+/* 在小屏幕上显示切换按钮 */
+@media (max-width: 1600px) {
+    .sidebar-toggle-btn {
+        display: flex; /* 小屏幕时显示 */
+    }
+    
+    /* 当侧边栏打开时，按钮移到侧边栏旁边 */
+    .sidebar-open ~ .sidebar-toggle-btn {
+        left: 400px;
     }
 }
 
@@ -1016,6 +1065,17 @@ input[type="checkbox"]:focus {
 
 .theme-dark .project-info-sidebar::-webkit-scrollbar-thumb:hover {
     background: #64748b;
+}
+
+/* 侧边栏切换按钮暗色主题 */
+.theme-dark .sidebar-toggle-btn {
+    background: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.theme-dark .sidebar-toggle-btn:hover {
+    background: #2563eb;
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
 }
 
 .theme-dark .card:hover {

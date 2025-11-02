@@ -159,4 +159,37 @@
              .replace(/\'/g, "&#039;");
     }
 
+    // Toggle sidebar visibility (responsive)
+    window.toggleSidebar = function(){
+        const sidebar = document.getElementById('project-sidebar');
+        const toggleIcon = document.getElementById('sidebar-toggle-icon');
+        if(!sidebar) return;
+        
+        if(sidebar.classList.contains('sidebar-open')){
+            sidebar.classList.remove('sidebar-open');
+            if(toggleIcon) toggleIcon.textContent = '📋';
+        }else{
+            sidebar.classList.add('sidebar-open');
+            if(toggleIcon) toggleIcon.textContent = '✕';
+        }
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(e){
+        if(window.innerWidth > 1600) return; // Only on mobile
+        
+        const sidebar = document.getElementById('project-sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+        
+        if(!sidebar || !sidebar.classList.contains('sidebar-open')) return;
+        
+        // If click is outside sidebar and toggle button, close sidebar
+        if(!sidebar.contains(e.target) && !toggleBtn.contains(e.target)){
+            sidebar.classList.remove('sidebar-open');
+            const toggleIcon = document.getElementById('sidebar-toggle-icon');
+            if(toggleIcon) toggleIcon.textContent = '📋';
+        }
+    });
+
 })();
+
