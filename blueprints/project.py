@@ -57,15 +57,6 @@ class ProjectForm(FlaskForm):
             1024 <= int(docker_port.data) <= 65535
         ):
             raise ValidationError("Docker端口号必须是1024到65535之间的数字")
-        # 如果端口号没有改变，跳过验证
-        if self.original_docker_port and int(docker_port.data) == int(
-            self.original_docker_port
-        ):
-            return
-        # 检查端口是否被其他项目占用
-        existing_project = get_projects_by_docker_port(docker_port.data)
-        if existing_project:
-            raise ValidationError("Docker端口号已被占用")
 
 
 # -------------------------------------------------------------------------------------------

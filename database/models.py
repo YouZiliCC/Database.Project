@@ -99,7 +99,7 @@ class Project(db.Model, TimestampMixin):
     )
     docker_id = db.Column(db.String(512), unique=True, default=generate_uuid)
     port = db.Column(db.Integer, unique=True, nullable=True)
-    docker_port = db.Column(db.Integer, unique=True, nullable=True)
+    docker_port = db.Column(db.Integer, unique=False, nullable=True)
 
     def __repr__(self):
         return f"<Project {self.pname} ({self.port}:{self.docker_port})>"
