@@ -4,11 +4,11 @@
     <div class="container">
         <div class="info-section">
             <div class="info-header">
-                {% if group.gimg %}
-                    <img src="{{ group.gimg }}" alt="{{ group.gname }}" class="group-avatar">
-                {% else %}
-                    <div class="group-avatar-placeholder">{{ group.gname[0].upper() }}</div>
-                {% endif %}
+                {% set group_img = '/static/img/groups/' + group.gid + '.png' %}
+                <img src="{{ group_img }}"
+                     alt="{{ group.gname }}"
+                     class="group-avatar"
+                     onerror="this.src='/static/img/group.png';">
                 <div>
                     <h2>{{ group.gname }}</h2>
                 </div>

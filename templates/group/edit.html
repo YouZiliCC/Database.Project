@@ -6,6 +6,7 @@
         <form method="POST"
               action="{{ url_for('group.group_edit', gid=group.gid) }}"
               class="form"
+              enctype="multipart/form-data"
               id="edit-group-form">
             {{ form.hidden_tag() }}
             <div class="form-row">
@@ -20,6 +21,22 @@
                 {% if form.ginfo.errors %}<span class="error">{{ form.ginfo.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
+                <label for="gimg">工作组图片</label>
+                {% set group_img = '/static/img/groups/' + group.gid + '.png' %}
+                <div class="image-preview">
+                    <img src="{{ group_img }}"
+                         alt="当前图片"
+                         id="current-image"
+                         onerror="this.src='/static/img/group.png';">
+                </div>
+                <input type="file"
+                       id="gimg"
+                       name="gimg"
+                       accept="image/*"
+                       onchange="previewImage(this)">
+                <small class="form-text text-muted">支持 PNG, JPG, JPEG, GIF, WEBP 格式</small>
+            </div>
+            <div class="form-row">
                 {{ form.submit(class="btn", value="保存更改") }}
                 <a href="{{ url_for('group.group_detail', gid=group.gid) }}"
                    class="btn btn-secondary">取消</a>
@@ -27,4 +44,19 @@
         </form>
     </div>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/group.js') }}"></script>{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/group.js') }}"></script>
+    <script>
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('current-image');
+            img.src = e.target.result;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+    </script>
+{% endblock %}

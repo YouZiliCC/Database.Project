@@ -4,11 +4,11 @@
     <div class="container">
         <div class="info-section">
             <div class="info-header">
-                {% if user.uimg %}
-                    <img src="{{ user.uimg }}" alt="{{ user.uname }}" class="user-avatar">
-                {% else %}
-                    <div class="user-avatar-placeholder">{{ user.uname[0].upper() }}</div>
-                {% endif %}
+                {% set user_img = '/static/img/users/' + user.uid + '.png' %}
+                <img src="{{ user_img }}"
+                     alt="{{ user.uname }}"
+                     class="user-avatar"
+                     onerror="this.src='/static/img/user.png';">
                 <div>
                     <h2>{{ user.uname }}</h2>
                     <p class="text-muted">

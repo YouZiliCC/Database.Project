@@ -2,7 +2,9 @@
 {% block title %}项目展台 - DBSYS{% endblock %}
 {% block content %}
     <div class="container">
-        <h2>项目展台</h2>
+        <div class="page-header">
+            <h2>项目展台</h2>
+        </div>
         <div class="mb-16">
             <input type="text"
                    class="search"
@@ -19,13 +21,11 @@
                 {% for project in projects %}
                     <div class="card project-card">
                         <div class="card-header">
-                            {% if project.pimg %}
-                                <img src="{{ project.pimg }}"
-                                     alt="{{ project.pname }}"
-                                     class="project-img">
-                            {% else %}
-                                <div class="project-img-placeholder">{{ project.pname[0].upper() }}</div>
-                            {% endif %}
+                            {% set project_img = '/static/img/projects/' + project.pid + '.png' %}
+                            <img src="{{ project_img }}"
+                                 alt="{{ project.pname }}"
+                                 class="project-img"
+                                 onerror="this.src='/static/img/project.png';">
                             <h3>
                                 <a href="{{ url_for('project.project_detail', pid=project.pid) }}">{{ project.pname }}</a>
                             </h3>

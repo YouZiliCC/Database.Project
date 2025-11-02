@@ -6,6 +6,7 @@
         <form method="POST"
               action="{{ url_for('user.user_edit') }}"
               class="form"
+              enctype="multipart/form-data"
               id="edit-user-form">
             {{ form.hidden_tag() }}
             <div class="form-row">
@@ -30,6 +31,22 @@
                 {% if form.uinfo.errors %}<span class="error">{{ form.uinfo.errors[0] }}</span>{% endif %}
             </div>
             <div class="form-row">
+                <label for="uimg">个人头像</label>
+                {% set user_img = '/static/img/users/' + user.uid + '.png' %}
+                <div class="image-preview">
+                    <img src="{{ user_img }}"
+                         alt="当前头像"
+                         id="current-image"
+                         onerror="this.src='/static/img/user.png';">
+                </div>
+                <input type="file"
+                       id="uimg"
+                       name="uimg"
+                       accept="image/*"
+                       onchange="previewImage(this)">
+                <small class="form-text text-muted">支持 PNG, JPG, JPEG, GIF, WEBP 格式</small>
+            </div>
+            <div class="form-row">
                 {{ form.submit(class="btn", value="保存更改") }}
                 <a href="{{ url_for('user.user_me') }}" class="btn btn-secondary">取消</a>
                 <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()">删除账号</button>
@@ -37,4 +54,19 @@
         </form>
     </div>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/user.js') }}"></script>{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/user.js') }}"></script>
+    <script>
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('current-image');
+            img.src = e.target.result;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+    </script>
+{% endblock %}

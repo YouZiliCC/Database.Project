@@ -24,11 +24,11 @@
                 {% for group in groups %}
                     <div class="card group-card">
                         <div class="card-header">
-                            {% if group.gimg %}
-                                <img src="{{ group.gimg }}" alt="{{ group.gname }}" class="group-img">
-                            {% else %}
-                                <div class="group-img-placeholder">{{ group.gname[0].upper() }}</div>
-                            {% endif %}
+                            {% set group_img = '/static/img/groups/' + group.gid + '.png' %}
+                            <img src="{{ group_img }}"
+                                 alt="{{ group.gname }}"
+                                 class="group-img"
+                                 onerror="this.src='/static/img/group.png';">
                             <h3>
                                 <a href="{{ url_for('group.group_detail', gid=group.gid) }}">{{ group.gname }}</a>
                             </h3>

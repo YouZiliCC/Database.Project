@@ -13,3 +13,6 @@ wheels/
 .env
 
 instance/
+static/img/users/
+static/img/groups/
+static/img/projects/

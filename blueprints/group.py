@@ -7,6 +7,7 @@ from flask import (
     flash,
     jsonify,
     abort,
+    request,
 )
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
@@ -15,6 +16,7 @@ from wtforms.validators import DataRequired, Length
 from database.actions import *
 from blueprints.project import ProjectForm
 import logging
+import os
 
 group_bp = Blueprint("group", __name__)
 logger = logging.getLogger(__name__)
@@ -401,6 +403,25 @@ def group_edit(gid):
         return redirect(url_for("group.group_list"))
     form = GroupForm(obj=group)
     if form.validate_on_submit():
+        # 处理图片上传
+        if "gimg" in request.files:
+            file = request.files["gimg"]
+            if file and file.filename:
+                # 检查文件扩展名
+                allowed_extensions = {"png", "jpg", "jpeg", "gif", "webp"}
+                if (
+                    "." in file.filename
+                    and file.filename.rsplit(".", 1)[1].lower() in allowed_extensions
+                ):
+                    # 保存为 {gid}.png
+                    img_folder = "static/img/groups"
+                    os.makedirs(img_folder, exist_ok=True)
+                    img_path = os.path.join(img_folder, f"{gid}.png")
+                    file.save(img_path)
+                    flash("图片上传成功", "success")
+                else:
+                    flash("不支持的图片格式", "warning")
+
         updated_group = update_group(
             group,
             gname=form.gname.data,

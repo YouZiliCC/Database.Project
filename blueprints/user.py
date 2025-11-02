@@ -16,6 +16,7 @@ from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationE
 from database.actions import *
 from blueprints.auth import login_required
 import logging
+import os
 
 user_bp = Blueprint("user", __name__)
 logger = logging.getLogger(__name__)
@@ -130,6 +131,25 @@ def user_edit():
         return redirect(url_for("index.index"))
     form = UserForm(obj=user)
     if form.validate_on_submit():
+        # 处理图片上传
+        if "uimg" in request.files:
+            file = request.files["uimg"]
+            if file and file.filename:
+                # 检查文件扩展名
+                allowed_extensions = {"png", "jpg", "jpeg", "gif", "webp"}
+                if (
+                    "." in file.filename
+                    and file.filename.rsplit(".", 1)[1].lower() in allowed_extensions
+                ):
+                    # 保存为 {uid}.png
+                    img_folder = "static/img/users"
+                    os.makedirs(img_folder, exist_ok=True)
+                    img_path = os.path.join(img_folder, f"{user.uid}.png")
+                    file.save(img_path)
+                    flash("头像上传成功", "success")
+                else:
+                    flash("不支持的图片格式", "warning")
+
         updated_user = update_user(
             user,
             uname=form.uname.data,
@@ -150,8 +170,6 @@ def user_edit():
 # TODO: Password change (WAITING)
 
 # TODO: EMAIL change (WAITING)
-
-# TODO: IMAGE upload (WAITING)
 
 
 @user_bp.route("/me/delete", methods=["POST"])

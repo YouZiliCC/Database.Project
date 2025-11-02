@@ -463,6 +463,44 @@ def get_project_by_pid(pid):
         return None
 
 
+def get_projects_by_port(port):
+    """
+    根据端口获取项目列表。
+
+    参数:
+        port (int): 端口号。
+
+    返回:
+        list: 匹配的项目对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(
+            select(Project).where(Project.port == port)
+        ).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_projects_by_port Failed: {e}", exc_info=True)
+        return None
+
+
+def get_projects_by_docker_port(docker_port):
+    """
+    根据Docker映射端口获取项目列表。
+
+    参数:
+        docker_port (int): Docker映射端口号。
+
+    返回:
+        list: 匹配的项目对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(
+            select(Project).where(Project.docker_port == docker_port)
+        ).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_projects_by_docker_port Failed: {e}", exc_info=True)
+        return None
+
+
 def get_projects_by_user(user):
     """
     根据用户获取项目列表。

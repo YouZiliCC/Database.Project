@@ -16,6 +16,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextA
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
 from database.actions import *
 import logging
+import os
 
 # 项目蓝图
 project_bp = Blueprint("project", __name__)
@@ -34,16 +35,37 @@ class ProjectForm(FlaskForm):
     )
     submit = SubmitField("保存")
 
+    def __init__(self, *args, **kwargs):
+        self.original_port = kwargs.pop("original_port", None)
+        self.original_docker_port = kwargs.pop("original_docker_port", None)
+        super(ProjectForm, self).__init__(*args, **kwargs)
+
     # 自定义验证器
     def validate_port(self, port):
         if not port.data.isdigit() or not (10000 <= int(port.data) <= 65535):
             raise ValidationError("端口号必须是10000到65535之间的数字")
+        # 如果端口号没有改变，跳过验证
+        if self.original_port and int(port.data) == int(self.original_port):
+            return
+        # 检查端口是否被其他项目占用
+        existing_project = get_projects_by_port(port.data)
+        if existing_project:
+            raise ValidationError("端口号已被占用")
 
     def validate_docker_port(self, docker_port):
         if not docker_port.data.isdigit() or not (
             1024 <= int(docker_port.data) <= 65535
         ):
             raise ValidationError("Docker端口号必须是1024到65535之间的数字")
+        # 如果端口号没有改变，跳过验证
+        if self.original_docker_port and int(docker_port.data) == int(
+            self.original_docker_port
+        ):
+            return
+        # 检查端口是否被其他项目占用
+        existing_project = get_projects_by_docker_port(docker_port.data)
+        if existing_project:
+            raise ValidationError("Docker端口号已被占用")
 
 
 # -------------------------------------------------------------------------------------------
@@ -280,8 +302,31 @@ def project_edit(pid):
         flash("项目不存在", "warning")
         abort(404, description="项目不存在")
 
-    form = ProjectForm(obj=project)
+    form = ProjectForm(
+        obj=project,
+        original_port=project.port,
+        original_docker_port=project.docker_port,
+    )
     if form.validate_on_submit():
+        # 处理图片上传
+        if "pimg" in request.files:
+            file = request.files["pimg"]
+            if file and file.filename:
+                # 检查文件扩展名
+                allowed_extensions = {"png", "jpg", "jpeg", "gif", "webp"}
+                if (
+                    "." in file.filename
+                    and file.filename.rsplit(".", 1)[1].lower() in allowed_extensions
+                ):
+                    # 保存为 {pid}.png
+                    img_folder = "static/img/projects"
+                    os.makedirs(img_folder, exist_ok=True)
+                    img_path = os.path.join(img_folder, f"{pid}.png")
+                    file.save(img_path)
+                    flash("图片上传成功", "success")
+                else:
+                    flash("不支持的图片格式", "warning")
+
         updated_project = update_project(
             project,
             pname=form.pname.data,
