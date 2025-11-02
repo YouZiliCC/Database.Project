@@ -1,5 +1,17 @@
 // 工作组相关前端交互：成员管理、项目管理、删除工作组等
 (function(){
+    // 检查是否需要登录并重定向
+    function checkAuthAndRedirect(status) {
+        if(status === 401) {
+            showFlash('请先登录', 'warning');
+            setTimeout(() => {
+                window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname)}`;
+            }, 1000);
+            return true;
+        }
+        return false;
+    }
+
     // 通用POST请求函数（带CSRF保护）
     async function post(url, data = null){
         const token = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -12,6 +24,12 @@
             body: data ? JSON.stringify(data) : undefined,
             credentials: 'same-origin'
         });
+        
+        // 处理未登录情况
+        if(checkAuthAndRedirect(res.status)) {
+            throw new Error('需要登录');
+        }
+        
         const json = await res.json().catch(()=>({}));
         if(!res.ok){ throw new Error(json.error || `请求失败 (${res.status})`); }
         return json;
@@ -25,7 +43,9 @@
             showFlash(result.message || '申请已提交', 'success');
             setTimeout(() => location.reload(), 1000);
         }catch(e){ 
-            showFlash(e.message, 'danger');
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
         }
     };
 
@@ -40,7 +60,9 @@
             if(row) row.remove();
             setTimeout(() => location.reload(), 1000);
         }catch(e){ 
-            showFlash(e.message, 'danger');
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
         }
     };
 
@@ -54,7 +76,9 @@
             const row = document.getElementById(`application-${gaid}`);
             if(row) row.remove();
         }catch(e){ 
-            showFlash(e.message, 'danger');
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
         }
     };
 
@@ -66,7 +90,9 @@
             // 直接跳转，让服务器端 flash 显示
             location.reload();
         }catch(e){ 
-            showFlash(e.message, 'danger');
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
         }
     };
 
@@ -78,7 +104,9 @@
             // 直接跳转，让服务器端 flash 显示
             location.reload();
         }catch(e){ 
-            showFlash(e.message, 'danger');
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
         }
     };
 
@@ -91,7 +119,9 @@
             // 直接跳转，让服务器端 flash 显示
             location.href = '/group';
         }catch(e){ 
-            showFlash(e.message, 'danger');
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
         }
     };
 
@@ -103,7 +133,9 @@
             // 直接跳转，让服务器端 flash 显示
             location.reload();
         }catch(e){ 
-            showFlash(e.message, 'danger');
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
         }
     };
 

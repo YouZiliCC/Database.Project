@@ -26,22 +26,34 @@
     <body>
         <header class="site-header">
             <nav class="navbar">
-                <a href="/" class="nav-link brand">DBSYS</a>
-                <div class="nav-links">
-                    <a href="/group" class="nav-link">工作组</a>
-                    <a href="/project" class="nav-link">项目展台</a>
+                <div class="navbar-header">
+                    <a href="/" class="nav-link brand">DBSYS</a>
+                    <!-- 汉堡菜单按钮 (仅在移动端显示) -->
+                    <button class="navbar-toggle" id="navbar-toggle" aria-label="切换导航菜单">
+                        <span class="navbar-toggle-icon"></span>
+                        <span class="navbar-toggle-icon"></span>
+                        <span class="navbar-toggle-icon"></span>
+                    </button>
                 </div>
-                <div class="nav-right">
-                    {% if current_user.is_admin %}<a href="/admin/dashboard" class="nav-link">管理员面板</a>{% endif %}
-                    {% if current_user.is_authenticated %}
-                        <a href="/group/my_group" class="nav-link">我的小组</a>
-                        <a href="/user/me" class="nav-link">{{ current_user.uname }}</a>
-                        <a href="/auth/logout" class="nav-link nav-logout">登出</a>
-                    {% else %}
-                        <a href="/auth/login" class="nav-link">登录</a>
-                        <a href="/auth/register" class="nav-link">注册</a>
-                    {% endif %}
-                    <button id="theme-toggle" class="btn btn-theme" aria-label="切换主题">🌓</button>
+                
+                <!-- 导航菜单 -->
+                <div class="navbar-menu" id="navbar-menu">
+                    <div class="nav-links">
+                        <a href="/group" class="nav-link">工作组</a>
+                        <a href="/project" class="nav-link">项目展台</a>
+                    </div>
+                    <div class="nav-right">
+                        {% if current_user.is_admin %}<a href="/admin/dashboard" class="nav-link">管理员面板</a>{% endif %}
+                        {% if current_user.is_authenticated %}
+                            <a href="/group/my_group" class="nav-link">我的小组</a>
+                            <a href="/user/me" class="nav-link">{{ current_user.uname }}</a>
+                            <a href="/auth/logout" class="nav-link nav-logout">登出</a>
+                        {% else %}
+                            <a href="/auth/login" class="nav-link">登录</a>
+                            <a href="/auth/register" class="nav-link">注册</a>
+                        {% endif %}
+                        <button id="theme-toggle" class="btn btn-theme" aria-label="切换主题">🌓</button>
+                    </div>
                 </div>
             </nav>
         </header>

@@ -61,6 +61,49 @@
         localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
     });
 
+    // 移动端导航栏切换
+    const navbarToggle = document.getElementById('navbar-toggle');
+    const navbarMenu = document.getElementById('navbar-menu');
+    
+    if (navbarToggle && navbarMenu) {
+        // 点击汉堡按钮切换菜单
+        navbarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navbarToggle.classList.toggle('active');
+            navbarMenu.classList.toggle('active');
+        });
+        
+        // 点击菜单项后关闭菜单
+        const navLinks = navbarMenu.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    navbarToggle.classList.remove('active');
+                    navbarMenu.classList.remove('active');
+                }
+            });
+        });
+        
+        // 点击菜单外部关闭菜单
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && 
+                navbarMenu.classList.contains('active') &&
+                !navbarMenu.contains(e.target) && 
+                !navbarToggle.contains(e.target)) {
+                navbarToggle.classList.remove('active');
+                navbarMenu.classList.remove('active');
+            }
+        });
+        
+        // 窗口大小改变时自动关闭移动端菜单
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                navbarToggle.classList.remove('active');
+                navbarMenu.classList.remove('active');
+            }
+        });
+    }
+
     // 列表搜索（页面内简单过滤）——支持 ul/li 列表和卡片网格（.card/.project-card）
     const searchInputs = document.querySelectorAll('[data-list-search]');
     const LIST_ITEM_SELECTOR = 'li, .card, .project-card, .list-item, .item';

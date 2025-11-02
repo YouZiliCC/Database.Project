@@ -1,8 +1,23 @@
 (function(){
+    // 检查是否需要登录并重定向
+    function checkAuthAndRedirect(status) {
+        if(status === 401) {
+            showFlash('请先登录', 'warning');
+            setTimeout(() => {
+                window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname)}`;
+            }, 1000);
+            return true;
+        }
+        return false;
+    }
+
     // helper POST with CSRF
     async function post(url, data=null){
         const token = document.querySelector('meta[name="csrf-token"]')?.content;
-        const headers = { 'X-CSRFToken': token };
+        const headers = { 
+            'X-CSRFToken': token,
+            'Accept': 'application/json'  // 明确表示这是 AJAX 请求
+        };
         if(data) headers['Content-Type'] = 'application/json';
         const res = await fetch(url, {
             method: 'POST',
@@ -10,6 +25,12 @@
             body: data ? JSON.stringify(data) : undefined,
             credentials: 'same-origin'
         });
+        
+        // 处理未登录情况 (401 Unauthorized)
+        if(checkAuthAndRedirect(res.status)) {
+            throw new Error('需要登录');
+        }
+        
         const json = await res.json().catch(()=>({}));
         if(!res.ok) throw new Error(json.message || `请求失败 (${res.status})`);
         return json;
@@ -45,7 +66,12 @@
             }
             if(count) count.textContent = res.star_count || 0;
             showFlash(res.message || '操作成功', 'success');
-        }catch(e){ showFlash(e.message, 'danger'); }
+        }catch(e){ 
+            // 如果是"需要登录"错误，不显示消息（已在post函数中处理）
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
+        }
     }
 
     window.postProjectComment = async function(pid){
@@ -59,7 +85,11 @@
                 // 刷新页面以显示新评论（确保教师评论排序正确）
                 window.location.reload();
             }
-        }catch(e){ showFlash(e.message, 'danger'); }
+        }catch(e){ 
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
+        }
     }
 
     // Edit comment
@@ -101,18 +131,26 @@
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': token
+                    'X-CSRFToken': token,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ content: newContent }),
                 credentials: 'same-origin'
             });
+            
+            // 处理未登录情况
+            if(checkAuthAndRedirect(res.status)) return;
             
             const data = await res.json();
             if(!res.ok) throw new Error(data.message || '更新失败');
             
             // 刷新页面
             window.location.reload();
-        }catch(e){ showFlash(e.message, 'danger'); }
+        }catch(e){ 
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
+        }
     }
 
     // Cancel edit
@@ -136,10 +174,14 @@
             const res = await fetch(`/project/${pid}/comment/${pcid}`, {
                 method: 'DELETE',
                 headers: {
-                    'X-CSRFToken': token
+                    'X-CSRFToken': token,
+                    'Accept': 'application/json'
                 },
                 credentials: 'same-origin'
             });
+            
+            // 处理未登录情况
+            if(checkAuthAndRedirect(res.status)) return;
             
             const data = await res.json();
             if(!res.ok) throw new Error(data.message || '删除失败');
@@ -147,7 +189,11 @@
             showFlash(data.message || '评论已删除', 'success');
             // 刷新页面
             setTimeout(() => window.location.reload(), 500);
-        }catch(e){ showFlash(e.message, 'danger'); }
+        }catch(e){ 
+            if(e.message !== '需要登录') {
+                showFlash(e.message, 'danger');
+            }
+        }
     }
 
     function escapeHtml(unsafe) {

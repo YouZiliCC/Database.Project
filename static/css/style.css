@@ -47,7 +47,59 @@ code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: '
     align-items: center; 
     justify-content: space-between;
     gap: 20px;
+    position: relative;
 }
+
+/* 汉堡菜单按钮 (默认隐藏) */
+.navbar-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    z-index: 101;
+}
+
+.navbar-toggle-icon {
+    display: block;
+    width: 24px;
+    height: 3px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* 汉堡按钮动画 (展开时变成 X) */
+.navbar-toggle.active .navbar-toggle-icon:nth-child(1) {
+    transform: rotate(45deg) translateY(8px);
+}
+
+.navbar-toggle.active .navbar-toggle-icon:nth-child(2) {
+    opacity: 0;
+}
+
+.navbar-toggle.active .navbar-toggle-icon:nth-child(3) {
+    transform: rotate(-45deg) translateY(-8px);
+}
+
+/* 导航菜单容器 */
+.navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+}
+
+/* 导航栏头部（品牌 + 汉堡按钮） */
+.navbar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
 .brand { 
     color: #e5e7eb; 
     font-weight: 700; 
@@ -701,9 +753,9 @@ input[type="checkbox"]:focus {
 .project-info-sidebar {
     position: fixed;
     left: 20px;
-    top: 120px;
+    top: 80px; /* 调整为导航栏高度 + 一些间距 */
     width: 360px;
-    max-height: calc(100vh - 140px);
+    max-height: calc(100vh - 100px);
     background: #ffffff;
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.12);
@@ -857,7 +909,7 @@ input[type="checkbox"]:focus {
     display: none; /* 默认隐藏，只在小屏幕显示 */
     position: fixed;
     left: 20px;
-    top: 120px;
+    top: 80px; /* 与侧边栏对齐 */
     width: 48px;
     height: 48px;
     background: #0d6efd;
@@ -982,6 +1034,20 @@ input[type="checkbox"]:focus {
 .theme-dark .navbar .nav-link:hover { color: #ffffff; background: rgba(255,255,255,0.15); }
 .theme-dark .nav-logout { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
 .theme-dark .nav-logout:hover { background: rgba(239, 68, 68, 0.3); color: #fee2e2; }
+
+/* 移动端导航菜单暗色主题 */
+.theme-dark .navbar-menu {
+    background: #0a0f1e;
+    border-top-color: rgba(255,255,255,0.1);
+}
+
+.theme-dark .navbar-toggle-icon {
+    background: #cbd5e1;
+}
+
+.theme-dark .nav-right {
+    border-top-color: rgba(255,255,255,0.1);
+}
 
 /* 标题和文字颜色 */
 .theme-dark h1,
@@ -1224,26 +1290,88 @@ input[type="checkbox"]:focus {
 
 /* ==================== 响应式 ==================== */
 @media (max-width: 768px) {
-    .grid-container {
-        grid-template-columns: 1fr;
+    /* 导航栏头部在移动端占据全宽 */
+    .navbar-header {
+        width: 100%;
+        justify-content: space-between; /* 移动端时品牌和按钮两端对齐 */
     }
-    .navbar {
+    
+    /* 显示汉堡菜单按钮 */
+    .navbar-toggle {
+        display: flex;
+    }
+    
+    /* 导航菜单默认隐藏 */
+    .navbar-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #0b1020;
         flex-direction: column;
-        gap: 12px;
-        align-items: stretch;
+        gap: 0;
+        padding: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        border-top: 1px solid rgba(255,255,255,0.1);
+        max-height: calc(100vh - 60px);
+        overflow-y: auto;
     }
+    
+    /* 展开状态 */
+    .navbar-menu.active {
+        display: flex;
+    }
+    
+    .navbar {
+        flex-wrap: wrap;
+    }
+    
     .nav-links {
         flex-direction: column;
         width: 100%;
+        gap: 0;
     }
+    
     .nav-right {
         flex-direction: column;
         width: 100%;
         margin-left: 0;
+        gap: 0;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 12px;
+        margin-top: 12px;
     }
+    
     .nav-link {
-        text-align: center;
+        text-align: left;
         width: 100%;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin: 4px 0;
+    }
+    
+    .nav-link:hover {
+        background: rgba(255,255,255,0.15);
+    }
+    
+    .btn-theme {
+        width: 100%;
+        text-align: center;
+        margin-top: 8px;
+    }
+    
+    /* 移动端调整项目侧边栏和切换按钮位置 */
+    .project-info-sidebar {
+        top: 100px; /* 移动端时向下移动，避免被折叠导航栏遮挡 */
+    }
+    
+    .sidebar-toggle-btn {
+        top: 100px; /* 与侧边栏对齐 */
+    }
+    
+    .grid-container {
+        grid-template-columns: 1fr;
     }
     .info-header {
         flex-direction: column;

@@ -73,6 +73,28 @@ def create_app():
     login_manager.login_message = "请登录以访问此页面"
     login_manager.login_message_category = "warning"
     login_manager.remember_cookie_duration = timedelta(days=7)
+    
+    # 自定义未授权处理器：对 AJAX 请求返回 401，对普通请求重定向到登录页面
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        from flask import request, jsonify, redirect, url_for, flash
+        # 检查是否是 AJAX/API 请求
+        # 1. 检查 Accept 头是否包含 application/json
+        # 2. 检查 Content-Type 是否为 application/json
+        # 3. 检查 X-Requested-With 头（兼容旧代码）
+        is_ajax = (
+            request.is_json or 
+            'application/json' in request.headers.get('Accept', '') or
+            request.headers.get('X-Requested-With') == 'XMLHttpRequest' or
+            request.headers.get('X-CSRFToken')  # fetch 请求通常会带 CSRF token
+        )
+        
+        if is_ajax:
+            return jsonify({"success": False, "message": "请先登录"}), 401
+        
+        # 普通请求重定向到登录页面
+        flash("请登录以访问此页面", "warning")
+        return redirect(url_for("auth.login", next=request.url))
 
     # 注册蓝图
     from blueprints.index import index_bp
