@@ -17,21 +17,21 @@
 
 ### 1. 数据库模型 (database/models.py)
 - 新增 `GroupApplication` 模型
-- 包含字段：aid, uid, gid, status, message, created_at, updated_at
+- 包含字段：gaid, uid, gid, status, message, created_at, updated_at
 
 ### 2. 数据库操作 (database/actions.py)
 - `create_group_application()` - 创建申请
 - `update_group_application()` - 更新申请状态
 - `delete_group_application()` - 删除申请
-- `get_application_by_aid()` - 根据ID获取申请
+- `get_application_by_gaid()` - 根据ID获取申请
 - `get_pending_application()` - 获取用户对某工作组的待审核申请
 - `get_group_pending_applications()` - 获取工作组的所有待审核申请
 - `get_user_applications()` - 获取用户的所有申请
 
 ### 3. 路由和视图 (blueprints/group.py)
 - `POST /group/<gid>/apply` - 用户申请加入
-- `POST /group/<gid>/applications/<aid>/accept` - 组长接受申请
-- `POST /group/<gid>/applications/<aid>/reject` - 组长拒绝申请
+- `POST /group/<gid>/applications/<gaid>/accept` - 组长接受申请
+- `POST /group/<gid>/applications/<gaid>/reject` - 组长拒绝申请
 - 更新 `group_detail()` 视图，传递申请数据到模板
 
 ### 4. 前端模板 (templates/group/detail.html)
@@ -42,8 +42,8 @@
 
 ### 5. JavaScript交互 (static/js/group.js)
 - `applyToGroup(gid)` - 申请加入工作组
-- `acceptApplication(gid, aid)` - 接受申请
-- `rejectApplication(gid, aid)` - 拒绝申请
+- `acceptApplication(gid, gaid)` - 接受申请
+- `rejectApplication(gid, gaid)` - 拒绝申请
 
 ## 使用流程
 

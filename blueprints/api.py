@@ -34,6 +34,7 @@ def api_users():
             "sid": user.sid,
             "email": user.email,
             "is_admin": user.is_admin,
+            "is_teacher": user.is_teacher,
             "gid": user.gid,
         }
         for user in users
@@ -76,6 +77,7 @@ def list_projects():
             "docker_id": project.docker_id,
             "port": project.port,
             "docker_port": project.docker_port,
+            "star_count": len(project.stars),
         }
         for project in projects
     ]

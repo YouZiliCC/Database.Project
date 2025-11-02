@@ -61,17 +61,20 @@
         localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
     });
 
-    // 列表搜索（页面内简单过滤）
+    // 列表搜索（页面内简单过滤）——支持 ul/li 列表和卡片网格（.card/.project-card）
     const searchInputs = document.querySelectorAll('[data-list-search]');
+    const LIST_ITEM_SELECTOR = 'li, .card, .project-card, .list-item, .item';
     searchInputs.forEach(input => {
         const targetSelector = input.getAttribute('data-list-target');
         const list = document.querySelector(targetSelector);
         if(!list) return;
         input.addEventListener('input', () => {
             const q = input.value.trim().toLowerCase();
-            list.querySelectorAll('li').forEach(li => {
-                const text = li.textContent.toLowerCase();
-                li.style.display = text.includes(q) ? '' : 'none';
+            const items = Array.from(list.querySelectorAll(LIST_ITEM_SELECTOR)).length ?
+                Array.from(list.querySelectorAll(LIST_ITEM_SELECTOR)) : Array.from(list.children);
+            items.forEach(el => {
+                const text = (el.textContent || '').toLowerCase();
+                el.style.display = text.includes(q) ? '' : 'none';
             });
             applyPagination(list);
         });
@@ -81,7 +84,8 @@
     function applyPagination(list){
         const pageSizeAttr = list.getAttribute('data-page-size');
         const pageSize = pageSizeAttr ? parseInt(pageSizeAttr, 10) : 0;
-        const items = Array.from(list.querySelectorAll('li')).filter(li => li.style.display !== 'none');
+        const rawItems = Array.from(list.querySelectorAll(LIST_ITEM_SELECTOR));
+        const items = (rawItems.length ? rawItems : Array.from(list.children)).filter(el => el.style.display !== 'none');
         const wrapper = list.parentElement;
         let pager = wrapper.querySelector('.pager');
         if(!pageSize || items.length <= pageSize){
@@ -133,8 +137,8 @@
         }
     }
 
-    // 初始应用分页
-    document.querySelectorAll('ul[list], ul.list').forEach(ul => applyPagination(ul));
+    // 初始应用分页（支持常见列表容器，包括项目网格 .project-list）
+    document.querySelectorAll('ul[list], ul.list, .list, .project-list').forEach(el => applyPagination(el));
 
     // 列表排序：通过 data-sort-target 指定列表，select 使用 value: name-asc/name-desc
     document.querySelectorAll('[data-sort-target]').forEach(select => {
@@ -146,9 +150,10 @@
     });
 
     function sortList(list, mode){
-        const items = Array.from(list.querySelectorAll('li'));
-        const visible = items.filter(li => li.style.display !== 'none');
-        const hidden = items.filter(li => li.style.display === 'none');
+        const raw = Array.from(list.querySelectorAll(LIST_ITEM_SELECTOR));
+        const items = raw.length ? raw : Array.from(list.children);
+        const visible = items.filter(el => el.style.display !== 'none');
+        const hidden = items.filter(el => el.style.display === 'none');
         const [key, dir] = (mode || 'name-asc').split('-');
         const getText = (li) => (li.textContent || '').trim().toLowerCase();
         visible.sort((a, b) => {

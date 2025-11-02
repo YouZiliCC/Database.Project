@@ -30,13 +30,13 @@
     };
 
     // 全局函数：接受申请
-    window.acceptApplication = async function(gid, aid){
+    window.acceptApplication = async function(gid, gaid){
         if(!confirm('确认接受该用户的加入申请？')) return;
         try{
-            const result = await post(`/group/${gid}/applications/${aid}/accept`);
+            const result = await post(`/group/${gid}/applications/${gaid}/accept`);
             showFlash(result.message || '已接受申请', 'success');
             // 移除该行
-            const row = document.getElementById(`application-${aid}`);
+            const row = document.getElementById(`application-${gaid}`);
             if(row) row.remove();
             setTimeout(() => location.reload(), 1000);
         }catch(e){ 
@@ -45,13 +45,13 @@
     };
 
     // 全局函数：拒绝申请
-    window.rejectApplication = async function(gid, aid){
+    window.rejectApplication = async function(gid, gaid){
         if(!confirm('确认拒绝该用户的加入申请？')) return;
         try{
-            const result = await post(`/group/${gid}/applications/${aid}/reject`);
+            const result = await post(`/group/${gid}/applications/${gaid}/reject`);
             showFlash(result.message || '已拒绝申请', 'success');
             // 移除该行
-            const row = document.getElementById(`application-${aid}`);
+            const row = document.getElementById(`application-${gaid}`);
             if(row) row.remove();
         }catch(e){ 
             showFlash(e.message, 'danger');

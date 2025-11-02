@@ -1,7 +1,6 @@
 from .base import db
-from .models import User, Project, Group, GroupApplication
+from .models import User, Project, Group, GroupApplication, ProjectStar, ProjectComment
 from sqlalchemy import select
-from datetime import datetime
 import logging
 
 
@@ -67,7 +66,7 @@ def safe_delete(instance):
 
 
 # -------------------------------------------------------------------------------------------
-# 用户 (User) CRUD 操作
+# User CRUD 操作
 # -------------------------------------------------------------------------------------------
 def create_user(uname, email, sid, password, uinfo=None, role=0):
     """
@@ -250,7 +249,7 @@ def get_user_by_sid(sid):
 
 
 # -------------------------------------------------------------------------------------------
-# Group
+# Group CRUD 操作
 # -------------------------------------------------------------------------------------------
 def create_group(gname, leader_id, ginfo=None):
     """
@@ -466,7 +465,7 @@ def get_project_by_pid(pid):
 
 def get_projects_by_user(user):
     """
-    根据用户ID获取项目列表。
+    根据用户获取项目列表。
 
     参数:
         user (User): 用户对象。
@@ -509,7 +508,7 @@ def create_group_application(uid, gid, message=None):
 
         application = GroupApplication(uid=uid, gid=gid, message=message, status=0)
         if safe_add(application):
-            logger.info(f"工作组申请创建成功, ID: {application.aid}")
+            logger.info(f"工作组申请创建成功, ID: {application.gaid}")
             return application
         return None
     except Exception as e:
@@ -535,11 +534,11 @@ def update_group_application(application, **kwargs):
     try:
         for key, value in kwargs.items():
             if hasattr(application, key):
-                if key != "aid":  # 不允许修改ID
+                if key != "gaid":  # 不允许修改ID
                     setattr(application, key, value)
         return safe_commit()
     except Exception as e:
-        logger.error(f"更新申请 {application.aid} 失败: {e}", exc_info=True)
+        logger.error(f"更新申请 {application.gaid} 失败: {e}", exc_info=True)
         db.session.rollback()
         return False
 
@@ -560,27 +559,27 @@ def delete_group_application(application):
     try:
         return safe_delete(application)
     except Exception as e:
-        logger.error(f"删除申请 {application.aid} 失败: {e}", exc_info=True)
+        logger.error(f"删除申请 {application.gaid} 失败: {e}", exc_info=True)
         db.session.rollback()
         return False
 
 
-def get_application_by_aid(aid):
+def get_application_by_gaid(gaid):
     """
     根据申请ID获取申请。
 
     参数:
-        aid (str): 申请ID。
+        gaid (str): 申请ID。
 
     返回:
         GroupApplication: 匹配的申请对象，未找到则返回None。
     """
     try:
         return db.session.execute(
-            select(GroupApplication).where(GroupApplication.aid == aid)
+            select(GroupApplication).where(GroupApplication.gaid == gaid)
         ).scalar_one_or_none()
     except Exception as e:
-        logger.error(f"get_application_by_aid Failed: {e}", exc_info=True)
+        logger.error(f"get_application_by_gaid Failed: {e}", exc_info=True)
         return None
 
 
@@ -653,4 +652,222 @@ def get_user_applications(uid):
         )
     except Exception as e:
         logger.error(f"get_user_applications Failed: {e}", exc_info=True)
+        return []
+
+
+# -------------------------------------------------------------------------------------------
+# ProjectStar CRUD 操作
+# -------------------------------------------------------------------------------------------
+def create_project_star(uid, pid):
+    """
+    创建项目点赞记录。
+
+    参数:
+        uid (str): 用户ID。
+        pid (str): 项目ID。
+    返回:
+        ProjectStar: 创建成功的点赞对象，失败则返回None。
+    """
+    try:
+        project_star = ProjectStar(uid=uid, pid=pid)
+        if safe_add(project_star):
+            logger.info(f"项目点赞记录创建成功, 用户ID: {uid}, 项目ID: {pid}")
+            return project_star
+        return None
+    except Exception as e:
+        logger.error(f"创建项目点赞记录失败: {e}", exc_info=True)
+        db.session.rollback()
+        return None
+    
+def delete_project_star(project_star):
+    """
+    删除项目点赞记录。
+
+    参数:
+        project_star (ProjectStar): 要删除的点赞对象。
+
+    返回:
+        bool: 删除是否成功。
+    """
+    if not project_star:
+        logger.warning("delete_project_star Failed: 点赞对象为 None")
+        return False
+    try:
+        db.session.delete(project_star)
+        db.session.commit()
+        return True
+    except Exception as e:
+        logger.error(f"删除项目点赞记录失败: {e}", exc_info=True)
+        db.session.rollback()
+        return False
+    
+
+def get_project_star_count_by_pid(pid):
+    """
+    获取项目的点赞数。
+
+    参数:
+        pid (str): 项目ID。
+
+    返回:
+        int: 点赞数量。
+    """
+    try:
+        from .models import ProjectStar
+        from sqlalchemy import func
+        count = db.session.execute(
+            select(func.count(ProjectStar.psid))
+            .where(ProjectStar.pid == pid)
+        ).scalar()
+        return count or 0
+    except Exception as e:
+        logger.error(f"get_project_star_count_by_pid Failed: {e}", exc_info=True)
+        return 0
+    
+
+def check_user_starred(uid, pid):
+    """
+    检查用户是否已对项目点赞。
+
+    参数:
+        uid (str): 用户ID。
+        pid (str): 项目ID。
+
+    返回:
+        bool: 是否已点赞。
+    """
+    try:
+        from .models import ProjectStar
+        star = db.session.execute(
+            select(ProjectStar)
+            .where(ProjectStar.uid == uid, ProjectStar.pid == pid)
+        ).scalar_one_or_none()
+        return star is not None
+    except Exception as e:
+        logger.error(f"check_user_starred Failed: {e}", exc_info=True)
+        return False
+    
+
+# -------------------------------------------------------------------------------------------
+# ProjectComment CRUD 操作
+# -------------------------------------------------------------------------------------------
+def create_project_comment(uid, pid, content):
+    """
+    创建项目评论。
+
+    参数:
+        uid (str): 用户ID。
+        pid (str): 项目ID。
+        content (str): 评论内容。
+
+    返回:
+        ProjectComment: 创建成功的评论对象，失败则返回None。
+    """
+    try:
+        project_comment = ProjectComment(uid=uid, pid=pid, content=content)
+        if safe_add(project_comment):
+            logger.info(f"项目评论创建成功, 用户ID: {uid}, 项目ID: {pid}")
+            return project_comment
+        return None
+    except Exception as e:
+        logger.error(f"创建项目评论失败: {e}", exc_info=True)
+        db.session.rollback()
+        return None
+
+
+def update_comment(comment, **kwargs):
+    """
+    更新评论内容。
+
+    参数:
+        comment (ProjectComment): 要更新的评论对象。
+        **kwargs: 要更新的字段及其值。
+
+    返回:
+        bool: 更新是否成功。
+    """
+    if not comment:
+        logger.warning("update_comment Failed: 评论对象为 None")
+        return False
+    try:
+        for key, value in kwargs.items():
+            if hasattr(comment, key):
+                if key != "pcid":  # 不允许修改ID
+                    setattr(comment, key, value)
+        return safe_commit()
+    except Exception as e:
+        logger.error(f"更新评论 {comment.pcid} 失败: {e}", exc_info=True)
+        db.session.rollback()
+        return False
+
+
+def delete_project_comment(project_comment):
+    """
+    删除项目评论。
+
+    参数:
+        project_comment (ProjectComment): 要删除的评论对象。
+
+    返回:
+        bool: 删除是否成功。
+    """
+    if not project_comment:
+        logger.warning("delete_project_comment Failed: 评论对象为 None")
+        return False
+    try:
+        return safe_delete(project_comment)
+    except Exception as e:
+        logger.error(f"删除项目评论失败: {e}", exc_info=True)
+        db.session.rollback()
+        return False
+
+
+def get_comment_by_pcid(pcid):
+    """
+    根据评论ID获取评论。
+
+    参数:
+        pcid (str): 评论ID。
+
+    返回:
+        ProjectComment: 匹配的评论对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(
+            select(ProjectComment).where(ProjectComment.pcid == pcid)
+        ).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_comment_by_pcid Failed: {e}", exc_info=True)
+        return None
+
+
+def get_ordered_project_comments_by_pid(pid):
+    """
+    获取项目的所有评论，教师评论排在最前面。
+
+    参数:
+        pid (str): 项目ID。
+
+    返回:
+        list: 评论对象列表，教师评论在前，然后按创建时间倒序排列。
+    """
+    try:
+        # 先获取所有评论并 join user 表来判断是否是教师
+        from .models import User
+        comments = (
+            db.session.execute(
+                select(ProjectComment)
+                .join(User, ProjectComment.uid == User.uid)
+                .where(ProjectComment.pid == pid)
+                .order_by(
+                    User.role.desc(),  # role=1 (教师) 排在前面
+                    ProjectComment.created_at.desc()  # 然后按时间倒序
+                )
+            )
+            .scalars()
+            .all()
+        )
+        return comments
+    except Exception as e:
+        logger.error(f"get_ordered_project_comments_by_pid Failed: {e}", exc_info=True)
         return []

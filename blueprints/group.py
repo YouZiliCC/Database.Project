@@ -173,16 +173,16 @@ def apply_to_group(gid):
     return jsonify({"message": "申请已提交，请等待组长审核"}), 200
 
 
-@group_bp.route("/<uuid:gid>/applications/<uuid:aid>/accept", methods=["POST"])
+@group_bp.route("/<uuid:gid>/applications/<uuid:gaid>/accept", methods=["POST"])
 @login_required
 @leader_required
-def accept_application(gid, aid):
+def accept_application(gid, gaid):
     """接受工作组申请"""
     gid = str(gid)
-    aid = str(aid)
+    gaid = str(gaid)
 
     # 获取申请
-    application = get_application_by_aid(aid)
+    application = get_application_by_gaid(gaid)
     if not application or str(application.gid) != gid:
         return jsonify({"error": "申请不存在"}), 404
 
@@ -208,22 +208,22 @@ def accept_application(gid, aid):
 
     # 更新申请状态
     if not update_group_application(application, status=1):
-        logger.warning(f"更新申请状态失败: aid={aid}")
+        logger.warning(f"更新申请状态失败: gaid={gaid}")
 
     logger.info(f"申请已接受: user {user.uname} joined group {application.group.gname}")
     return jsonify({"message": "已接受申请，用户已加入工作组"}), 200
 
 
-@group_bp.route("/<uuid:gid>/applications/<uuid:aid>/reject", methods=["POST"])
+@group_bp.route("/<uuid:gid>/applications/<uuid:gaid>/reject", methods=["POST"])
 @login_required
 @leader_required
-def reject_application(gid, aid):
+def reject_application(gid, gaid):
     """拒绝工作组申请"""
     gid = str(gid)
-    aid = str(aid)
+    gaid = str(gaid)
 
     # 获取申请
-    application = get_application_by_aid(aid)
+    application = get_application_by_gaid(gaid)
     if not application or str(application.gid) != gid:
         return jsonify({"error": "申请不存在"}), 404
 
@@ -233,7 +233,7 @@ def reject_application(gid, aid):
 
     # 更新申请状态
     if not update_group_application(application, status=2):
-        logger.warning(f"拒绝申请失败: aid={aid}")
+        logger.warning(f"拒绝申请失败: gaid={gaid}")
         return jsonify({"error": "拒绝申请失败"}), 500
 
     logger.info(

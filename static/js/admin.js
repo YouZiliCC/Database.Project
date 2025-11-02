@@ -64,6 +64,7 @@
                 <td>${u.email ?? ''}</td>
                 <td>${u.sid ?? ''}</td>
                 <td>${u.is_admin ? '<span class="badge badge-admin">是</span>' : '否'}</td>
+                <td>${u.is_teacher ? '<span class="badge badge-teacher">是</span>' : '否'}</td>
                 <td>
                     <button class="btn btn-sm btn-danger" data-action="del_user" data-id="${u.uid}">删除</button>
                     <button class="btn btn-sm" data-action="reset_password" data-id="${u.uid}">重置密码</button>
@@ -75,7 +76,7 @@
             <div class="table-wrap">
                 <table class="table">
                     <thead>
-                        <tr><th>用户名</th><th>邮箱</th><th>学号</th><th>管理员</th><th>操作</th></tr>
+                        <tr><th>用户名</th><th>邮箱</th><th>学号</th><th>Admin</th><th>Teacher</th><th>操作</th></tr>
                     </thead>
                     <tbody>${rows}</tbody>
                 </table>
@@ -105,7 +106,7 @@
             <div class="table-wrap">
                 <table class="table">
                     <thead>
-                        <tr><th>项目名</th><th>描述</th><th>组名</th><th>端口</th><th>容器端口</th><th>操作</th></tr>
+                        <tr><th>项目名</th><th>简介</th><th>组名</th><th>端口</th><th>容器端口</th><th>操作</th></tr>
                     </thead>
                     <tbody>${rows}</tbody>
                 </table>

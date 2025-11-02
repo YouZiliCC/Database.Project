@@ -88,20 +88,20 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for app in pending_applications %}
-                                <tr id="application-{{ app.aid }}">
+                            {% for appli in pending_applications %}
+                                <tr id="application-{{ appli.gaid }}">
                                     <td>
-                                        <a href="{{ url_for('user.user_detail', uid=app.user.uid) }}">{{ app.user.uname }}</a>
+                                        <a href="{{ url_for('user.user_detail', uid=appli.user.uid) }}">{{ appli.user.uname }}</a>
                                     </td>
-                                    <td>{{ app.user.email }}</td>
-                                    <td>{{ app.created_at.strftime("%Y-%m-%d %H:%M") if app.created_at else '未知' }}</td>
+                                    <td>{{ appli.user.email }}</td>
+                                    <td>{{ appli.created_at.strftime("%Y-%m-%d %H:%M") if appli.created_at else '未知' }}</td>
                                     <td>
                                         <button class="btn btn-sm btn-success"
-                                                onclick="acceptApplication('{{ group.gid }}', '{{ app.aid }}')">
+                                                onclick="acceptApplication('{{ group.gid }}', '{{ appli.gaid }}')">
                                             接受
                                         </button>
                                         <button class="btn btn-sm btn-danger"
-                                                onclick="rejectApplication('{{ group.gid }}', '{{ app.aid }}')">
+                                                onclick="rejectApplication('{{ group.gid }}', '{{ appli.gaid }}')">
                                             拒绝
                                         </button>
                                     </td>

@@ -9,7 +9,7 @@
 
 需要创建新的 `group_applications` 表，包含以下字段：
 
-- `aid` (String, Primary Key): 申请ID
+- `gaid` (String, Primary Key): 申请ID
 - `uid` (String, Foreign Key -> users.uid): 申请用户ID
 - `gid` (String, Foreign Key -> groups.gid): 目标工作组ID
 - `status` (Integer): 申请状态 (0=待审核, 1=已接受, 2=已拒绝)
@@ -47,7 +47,7 @@ with app.app_context():
 
 ```sql
 CREATE TABLE group_applications (
-    aid VARCHAR(512) PRIMARY KEY,
+    gaid VARCHAR(512) PRIMARY KEY,
     uid VARCHAR(512) NOT NULL,
     gid VARCHAR(512) NOT NULL,
     status INTEGER NOT NULL DEFAULT 0,
@@ -98,7 +98,7 @@ CREATE INDEX idx_group_applications_status ON group_applications(status);
 - 400: 用户已加入工作组或已有待审核申请
 - 404: 工作组不存在
 
-### POST /group/<gid>/applications/<aid>/accept
+### POST /group/<gid>/applications/<gaid>/accept
 组长接受申请
 
 **权限**: 需要是该工作组的组长
@@ -108,7 +108,7 @@ CREATE INDEX idx_group_applications_status ON group_applications(status);
 - 400: 申请已被处理或用户已加入其他工作组
 - 404: 申请不存在
 
-### POST /group/<gid>/applications/<aid>/reject
+### POST /group/<gid>/applications/<gaid>/reject
 组长拒绝申请
 
 **权限**: 需要是该工作组的组长

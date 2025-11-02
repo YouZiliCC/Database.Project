@@ -24,7 +24,7 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 { font-size: 2rem; }
 h2 { font-size: 1.5rem; }
-h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+h3 { font-size: 1.25rem; margin-top: 1rem;}
 
 a { color: #0d6efd; text-decoration: none; }
 a:hover { color: #0b5ed7; text-decoration: underline; }
@@ -354,8 +354,8 @@ input[type="checkbox"]:focus {
 }
 .card-footer {
     padding: 12px 16px;
-    border-top: 1px solid #e5e7eb;
-    background: #f9fafb;
+    border-top: 1px solid #748de1a9;
+    background: #748de1a9;
     display: flex;
     gap: 8px;
     align-items: center;
@@ -491,6 +491,7 @@ input[type="checkbox"]:focus {
     background: #fff;
     border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(229, 231, 235, 0.6);
 }
 .table th, 
 .table td { 
@@ -723,7 +724,14 @@ input[type="checkbox"]:focus {
 .theme-dark .card,
 .theme-dark .info-section,
 .theme-dark .admin-result,
-.theme-dark .project-detail { background: #1e293b; color: #e5e7eb; border-color: #334155; }
+.theme-dark .project-detail { 
+    background: #1e293b; 
+    color: #e5e7eb; 
+    border: 2px solid #334155;
+}
+.theme-dark .card:hover {
+    border-color: #475569;
+}
 .theme-dark .card-title { color: #f1f5f9; }
 .theme-dark .card-text { color: #cbd5e1; }
 .theme-dark .card-body { color: #cbd5e1; }
@@ -737,8 +745,12 @@ input[type="checkbox"]:focus {
 .theme-dark .admin-result .description { color: #94a3b8; }
 
 /* 个人信息页面 */
-.theme-dark .info-header { border-color: #374151; }
-.theme-dark .info-row { border-color: #334155; }
+.theme-dark .info-header { 
+    border-bottom: 2px solid #475569;
+}
+.theme-dark .info-row { 
+    border-bottom: 1px solid #334155;
+}
 .theme-dark .info-row label { color: #cbd5e1; }
 .theme-dark .info-row span { color: #e5e7eb; }
 .theme-dark .user-avatar-placeholder,
@@ -747,7 +759,9 @@ input[type="checkbox"]:focus {
 .theme-dark .text-danger { color: #fca5a5 !important; }
 
 /* 详情页面 */
-.theme-dark .detail-header { border-color: #374151; }
+.theme-dark .detail-header { 
+    border-bottom: 2px solid #475569;
+}
 .theme-dark .detail-content { color: #e5e7eb; }
 .theme-dark .detail-content h3 { color: #f1f5f9; }
 .theme-dark .detail-content p { color: #cbd5e1; }
@@ -758,9 +772,20 @@ input[type="checkbox"]:focus {
 .theme-dark .page-header h3 { color: #f1f5f9; }
 
 /* 表格 */
+.theme-dark .table { 
+    box-shadow: 0 0 0 1px rgba(51, 65, 85, 0.5);
+}
 .theme-dark .table th, 
-.theme-dark .table td { background: #1e293b; color: #e5e7eb; border-color: #374151; }
-.theme-dark .table thead th { background: #374151; color: #f1f5f9; }
+.theme-dark .table td { 
+    background: #1e293b; 
+    color: #e5e7eb; 
+    border: 1px solid #334155;
+}
+.theme-dark .table thead th { 
+    background: #334155; 
+    color: #f1f5f9;
+    border-bottom: 2px solid #475569;
+}
 .theme-dark .table tbody tr:hover { background: #334155; }
 
 /* 模态框 */
@@ -840,66 +865,6 @@ input[type="checkbox"]:focus {
 .theme-dark .badge-admin { background: #92400e; color: #fef3c7; }
 .theme-dark .badge-teacher { background: #7c3aed; color: #ede9fe; }
 .theme-dark .badge-leader { background: #1e40af; color: #dbeafe; }
-
-/* ==================== 终端 ==================== */
-.terminal-section {
-    margin-top: 24px;
-}
-.terminal-info {
-    margin-bottom: 16px;
-}
-.terminal-container {
-    background: #1e1e1e;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-.terminal-header {
-    background: #2d2d2d;
-    padding: 8px 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.terminal-title {
-    color: #e5e7eb;
-    font-weight: 600;
-    font-size: 14px;
-}
-.terminal-output {
-    background: #1e1e1e;
-    color: #e5e7eb;
-    padding: 16px;
-    min-height: 300px;
-    max-height: 500px;
-    overflow-y: auto;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-}
-.terminal-line {
-    margin-bottom: 4px;
-}
-.terminal-input-container {
-    background: #1e1e1e;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.terminal-prompt {
-    color: #22c55e;
-    font-weight: bold;
-    font-family: 'Courier New', monospace;
-}
-.terminal-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: #e5e7eb;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    outline: none;
-}
 
 /* ==================== 响应式 ==================== */
 @media (max-width: 768px) {
@@ -1119,3 +1084,495 @@ footer svg {
 .theme-dark .markdown-content hr {
     border-top-color: #374151;
 }
+
+/* Floating comment button */
+.floating-comment-btn {
+    position: fixed;
+    right: 32px;
+    bottom: 190px;
+    z-index: 1200;
+}
+
+.comment-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 50%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.comment-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+    border-color: #60a5fa;
+    background: #eff6ff;
+}
+
+.comment-btn .comment-icon {
+    font-size: 28px;
+    line-height: 1;
+}
+
+/* Comment panel (slide in from right) */
+.comment-panel {
+    position: fixed;
+    right: 120px;
+    bottom: 100px;
+    width: 360px;
+    max-height: 400px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    z-index: 1190;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.comment-panel.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.comment-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.comment-panel-header h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #111827;
+}
+
+.comment-panel-header .close-btn {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.comment-panel-header .close-btn:hover {
+    color: #374151;
+}
+
+.comment-panel-body {
+    padding: 20px;
+}
+
+.comment-panel-body textarea {
+    width: 100%;
+    resize: vertical;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 12px;
+    min-height: 100px;
+}
+
+.comment-panel-body textarea:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.comment-panel-body .btn {
+    width: 100%;
+}
+
+/* Floating star button */
+.floating-star-btn {
+    position: fixed;
+    right: 32px;
+    bottom: 100px;
+    z-index: 1200;
+}
+
+.star-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 50%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.star-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+    border-color: #fbbf24;
+}
+
+.star-btn .star-icon {
+    font-size: 28px;
+    color: #d1d5db;
+    transition: color 0.3s ease;
+    line-height: 1;
+}
+
+.star-btn:hover .star-icon {
+    color: #fbbf24;
+}
+
+.star-btn.starred .star-icon {
+    color: #f59e0b;
+}
+
+.star-btn .star-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.star-btn.starred {
+    border-color: #fbbf24;
+    background: #fffbeb;
+}
+
+/* Comment form and items */
+.comment-form {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 12px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    resize: vertical;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.comment-form textarea:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.comment-item { 
+    padding: 16px 0; 
+    border-bottom: 1px solid #f3f4f6; 
+}
+
+.comment-item:last-child {
+    border-bottom: none;
+}
+
+/* Teacher comment special style */
+.comment-item.teacher-comment {
+    background: linear-gradient(to right, #fef3c7 0%, #ffffff 100%);
+    padding: 16px;
+    border-radius: 8px;
+    border: 2px solid #fbbf24;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
+}
+
+.teacher-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.comment-head { 
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comment-author {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.comment-item:hover .comment-actions {
+    opacity: 1;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+    font-size: 16px;
+}
+
+.btn-icon:hover {
+    background: #f3f4f6;
+}
+
+.comment-head strong {
+    color: #111827;
+    font-size: 14px;
+}
+
+.comment-body { 
+    color: #374151;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Comment edit form */
+.comment-edit-form {
+    margin-top: 8px;
+}
+
+.comment-edit-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.comment-edit-textarea:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.comment-edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.btn-sm {
+    padding: 4px 12px;
+    font-size: 13px;
+}
+
+/* Project stars in list cards */
+.project-stars {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.project-stars .star-icon {
+    color: #f59e0b;
+    font-size: 18px;
+}
+
+.project-stars .star-count {
+    font-weight: 600;
+    color: #111827;
+    font-size: 16px;
+}
+
+.project-stars .star-label {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Dark theme variants */
+.theme-dark .comment-btn {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.theme-dark .comment-btn:hover {
+    border-color: #60a5fa;
+    background: #1e3a8a;
+}
+
+.theme-dark .comment-panel {
+    background: #1e293b;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.theme-dark .comment-panel-header {
+    border-bottom-color: #334155;
+}
+
+.theme-dark .comment-panel-header h4 {
+    color: #f1f5f9;
+}
+
+.theme-dark .comment-panel-header .close-btn {
+    color: #94a3b8;
+}
+
+.theme-dark .comment-panel-header .close-btn:hover {
+    color: #cbd5e1;
+}
+
+.theme-dark .comment-panel-body textarea {
+    background: #0f172a;
+    color: #e5e7eb;
+    border-color: #334155;
+}
+
+.theme-dark .comment-panel-body textarea:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+.theme-dark .star-btn {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.theme-dark .star-btn:hover {
+    border-color: #fbbf24;
+}
+
+.theme-dark .star-btn.starred {
+    background: #422006;
+    border-color: #fbbf24;
+}
+
+.theme-dark .star-btn .star-count {
+    color: #94a3b8;
+}
+
+.theme-dark .comment-form {
+    background: #1e293b;
+}
+
+.theme-dark .comment-form textarea {
+    background: #0f172a;
+    color: #e5e7eb;
+    border-color: #334155;
+}
+
+.theme-dark .comment-form textarea:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+.theme-dark .comment-item {
+    border-bottom-color: #334155;
+}
+
+.theme-dark .comment-item.teacher-comment {
+    background: linear-gradient(to right, #422006 0%, #1e293b 100%);
+    border-color: #d97706;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+}
+
+.theme-dark .teacher-badge {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.theme-dark .btn-icon:hover {
+    background: #334155;
+}
+
+.theme-dark .comment-edit-textarea {
+    background: #0f172a;
+    color: #e5e7eb;
+    border-color: #334155;
+}
+
+.theme-dark .comment-edit-textarea:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+.theme-dark .comment-head strong {
+    color: #f1f5f9;
+}
+
+.theme-dark .comment-body { 
+    color: #cbd5e1; 
+}
+
+.theme-dark .project-stars {
+    border-top-color: #334155;
+}
+
+.theme-dark .project-stars .star-count {
+    color: #f1f5f9;
+}
+
+.theme-dark .project-stars .star-label {
+    color: #94a3b8;
+}
+
+@media (max-width: 900px){
+    .floating-comment-btn {
+        right: 16px;
+        bottom: 160px;
+    }
+    .comment-btn {
+        width: 56px;
+        height: 56px;
+    }
+    .comment-btn .comment-icon {
+        font-size: 24px;
+    }
+    .comment-panel {
+        right: 16px;
+        left: 16px;
+        bottom: 60px;
+        width: auto;
+        max-height: 60vh;
+    }
+    .floating-star-btn { 
+        right: 16px; 
+        bottom: 80px; 
+    }
+    .star-btn {
+        width: 60px;
+        height: 60px;
+    }
+    .star-btn .star-icon {
+        font-size: 24px;
+    }
+}
+

@@ -109,7 +109,7 @@ class GroupApplication(db.Model, TimestampMixin):
     # 工作组申请表
     __tablename__ = "group_applications"
     # 字段
-    aid = db.Column(db.String(512), primary_key=True, default=generate_uuid)
+    gaid = db.Column(db.String(512), primary_key=True, default=generate_uuid)
     uid = db.Column(
         db.String(512), db.ForeignKey("users.uid", ondelete="CASCADE"), nullable=False
     )
@@ -135,6 +135,65 @@ class GroupApplication(db.Model, TimestampMixin):
 
     def __repr__(self):
         return f"<GroupApplication {self.user.uname} -> {self.group.gname} (status={self.status})>"
+
+
+class ProjectStar(db.Model, TimestampMixin):
+    # 项目点赞表
+    __tablename__ = "project_stars"
+    # 字段
+    psid = db.Column(db.String(512), primary_key=True, default=generate_uuid)
+    uid = db.Column(
+        db.String(512), db.ForeignKey("users.uid", ondelete="CASCADE"), nullable=False
+    )
+    pid = db.Column(
+        db.String(512), db.ForeignKey("projects.pid", ondelete="CASCADE"), nullable=False
+    )
+
+    user = db.relationship(
+        "User",
+        backref=db.backref("stars", passive_deletes=True),
+        foreign_keys=[uid],
+    )
+    project = db.relationship(
+        "Project",
+        backref=db.backref("stars", passive_deletes=True),
+        foreign_keys=[pid],
+    )
+
+    def __repr__(self):
+        return f"<ProjectStar {self.user.uname} -> {self.project.pname}>"
+
+
+class ProjectComment(db.Model, TimestampMixin):
+    # 项目评论表
+    __tablename__ = "project_comments"
+    # 字段
+    pcid = db.Column(db.String(512), primary_key=True, default=generate_uuid)
+    uid = db.Column(
+        db.String(512), db.ForeignKey("users.uid", ondelete="CASCADE"), nullable=False
+    )
+    pid = db.Column(
+        db.String(512), db.ForeignKey("projects.pid", ondelete="CASCADE"), nullable=False
+    )
+    content = db.Column(db.Text, nullable=False)
+
+    user = db.relationship(
+        "User",
+        backref=db.backref("comments", passive_deletes=True),
+        foreign_keys=[uid],
+    )
+    project = db.relationship(
+        "Project",
+        backref=db.backref("comments", passive_deletes=True),
+        foreign_keys=[pid],
+    )
+    
+    @property
+    def is_teacher_comment(self):
+        return self.user.is_teacher
+
+    def __repr__(self):
+        return f"<ProjectComment {self.user.uname} on {self.project.pname}>"
 
 
 # 用户加载回调函数(flask_login)

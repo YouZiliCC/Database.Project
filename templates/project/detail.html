@@ -97,8 +97,85 @@
                            href="{{ url_for("project.project_list") }}">返回列表</a>
                     </div>
                 </div>
+                </div>
+
+                <!-- Comments section (只显示评论列表，不显示输入框) -->
+                <div class="info-section" id="comments-root">
+                    <h3>💬 评论区</h3>
+                    <div id="project-comments-list">
+                        {% if comments and comments|length > 0 %}
+                            {% for c in comments %}
+                                <div class="comment-item {% if c.is_teacher_comment %}teacher-comment{% endif %}" data-comment-id="{{ c.pcid }}">
+                                    <div class="comment-head">
+                                        <div class="comment-author">
+                                            <strong>
+                                                {{ c.user.uname if c.user else '匿名' }}
+                                                {% if c.is_teacher_comment %}
+                                                    <span class="teacher-badge">教师</span>
+                                                {% endif %}
+                                            </strong>
+                                            <span class="text-muted">{{ c.created_at.strftime("%Y-%m-%d %H:%M") }}</span>
+                                        </div>
+                                        {% if current_user.is_authenticated and current_user.uid == c.uid %}
+                                            <div class="comment-actions">
+                                                <button class="btn-icon" onclick="editComment('{{ c.pcid }}', '{{ project.pid }}')" title="编辑">
+                                                    <span>✏️</span>
+                                                </button>
+                                                <button class="btn-icon" onclick="deleteComment('{{ c.pcid }}', '{{ project.pid }}')" title="删除">
+                                                    <span>🗑️</span>
+                                                </button>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="comment-body" data-original-content="{{ c.content | e }}">{{ c.content | e }}</div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty">暂无评论，快来抢沙发吧~</div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </section>
     </div>
+
+    <!-- Floating comment button -->
+    <div class="floating-comment-btn" id="project-floating-comment">
+        <button class="comment-btn" 
+                onclick="toggleCommentPanel()"
+                title="评论">
+            <span class="comment-icon">💬</span>
+        </button>
+    </div>
+
+    <!-- Floating star button -->
+    <div class="floating-star-btn" id="project-floating-star">
+        <button id="project-star-btn" 
+                class="star-btn {% if user_starred %}starred{% endif %}" 
+                onclick="toggleProjectStar('{{ project.pid }}')"
+                title="点赞">
+            <span class="star-icon">{% if user_starred %}★{% else %}☆{% endif %}</span>
+            <span class="star-count" id="project-star-count">{{ star_count }}</span>
+        </button>
+    </div>
+
+    <!-- Comment panel (hidden by default) -->
+    <div class="comment-panel" id="comment-panel" style="display: none;">
+        <div class="comment-panel-header">
+            <h4>💬 发表评论</h4>
+            <button class="close-btn" onclick="toggleCommentPanel()">×</button>
+        </div>
+        <div class="comment-panel-body">
+            {% if current_user.is_authenticated %}
+                <textarea id="comment-input" placeholder="写下你的评论..." rows="4"></textarea>
+                <button class="btn btn-primary" onclick="postProjectComment('{{ project.pid }}')">发表评论</button>
+            {% else %}
+                <div class="empty">请先 <a href="{{ url_for('auth.login') }}">登录</a> 后评论</div>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/group.js') }}"></script>{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/group.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/project.js') }}"></script>
+{% endblock %}
