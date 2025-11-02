@@ -41,18 +41,11 @@
                         <span class="info-value">{{ project.created_at.strftime("%Y-%m-%d %H:%M") if project.created_at else '未知' }}</span>
                     </div>
                     <div class="sidebar-info-item">
-                        <span class="info-label">运行状态</span>
+                        <span class="info-label">容器状态</span>
                         <span class="info-value">
                             <span id="project-status" class="status-badge">加载中...</span>
                         </span>
                     </div>
-                    {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
-                    <div class="sidebar-info-item">
-                        <button id="project-start-btn" class="btn btn-sm btn-primary" onclick="startProject('{{ project.pid }}')">
-                            🚀 启动/重启
-                        </button>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </aside>
@@ -66,6 +59,29 @@
         <section class="project-detail">
             <div class="detail-header">
                 <h2>{{ project.pname }}</h2>
+            </div>
+            <div class="info-section">
+                <h3>🚀 访问与管理</h3>
+                <div class="button-group">
+                    {% if project.port %}
+                    <a class="btn btn-primary" href="http://localhost:{{ project.port }}" target="_blank">🌐 访问应用</a>
+                    {% endif %}
+                    {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
+                    <button id="project-start-btn" class="btn btn-success" onclick="startProject('{{ project.pid }}')">
+                        🚀 启动容器
+                    </button>
+                    <button id="project-stop-btn" class="btn btn-warning" onclick="stopProject('{{ project.pid }}')">
+                        ⏸️ 停止容器
+                    </button>
+                    <button id="project-remove-btn" class="btn btn-danger" onclick="removeProject('{{ project.pid }}')">
+                        🗑️ 删除容器
+                    </button>
+                    <a class="btn" href="{{ url_for('project.project_edit', pid=project.pid) }}">编辑项目</a>
+                    <button class="btn btn-danger" onclick="deleteProject('{{ project.gid }}', '{{ project.pid }}')">删除项目</button>
+                    {% endif %}
+                    <a class="btn btn-secondary" href="{{ url_for('group.group_detail', gid=project.gid) }}">返回工作组</a>
+                    <a class="btn btn-secondary" href="{{ url_for('project.project_list') }}">返回列表</a>
+                </div>
             </div>
             <div class="detail-content">
                 {% if project.pinfo %}
@@ -94,26 +110,6 @@
                             </td>
                         </tr>
                     </table>
-                </div>
-                <div class="info-section">
-                    <h3>🚀 访问与管理</h3>
-                    <div class="button-group">
-                        {% if project.port %}
-                            <a class="btn btn-primary"
-                               href="http://localhost:{{ project.port }}"
-                               target="_blank">🌐 访问应用</a>
-                        {% endif %}
-                        {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
-                            <a class="btn"
-                               href="{{ url_for('project.project_edit', pid=project.pid) }}">编辑项目</a>
-                            <button class="btn btn-danger"
-                                    onclick="deleteProject('{{ project.gid }}', '{{ project.pid }}')">删除项目</button>
-                        {% endif %}
-                        <a class="btn btn-secondary"
-                           href="{{ url_for('group.group_detail', gid=project.gid) }}">返回工作组</a>
-                        <a class="btn btn-secondary"
-                           href="{{ url_for('project.project_list') }}">返回列表</a>
-                    </div>
                 </div>
             </div>
             <!-- Comments section (只显示评论列表，不显示输入框) -->

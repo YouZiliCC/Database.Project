@@ -239,21 +239,39 @@
 
     // ==================== Docker 状态管理 ====================
     
-    // 更新状态徽章显示
+    // 更新状态徽章显示和按钮状态
     function updateStatusBadge(status) {
         const el = document.getElementById('project-status');
         if(!el) return;
         
         el.className = 'status-badge';
+        
+        // 获取三个按钮
+        const startBtn = document.getElementById('project-start-btn');
+        const stopBtn = document.getElementById('project-stop-btn');
+        const removeBtn = document.getElementById('project-remove-btn');
+        
         if(status === 'running'){
             el.textContent = '运行中';
             el.classList.add('badge-success');
+            // 运行中：禁用启动，启用停止和删除
+            if(startBtn) startBtn.disabled = true;
+            if(stopBtn) stopBtn.disabled = false;
+            if(removeBtn) removeBtn.disabled = false;
         }else if(status === 'starting'){
             el.textContent = '启动中';
             el.classList.add('badge-warning');
+            // 启动中：禁用所有按钮
+            if(startBtn) startBtn.disabled = true;
+            if(stopBtn) stopBtn.disabled = true;
+            if(removeBtn) removeBtn.disabled = true;
         }else{
             el.textContent = '已停止';
             el.classList.add('badge-secondary');
+            // 已停止：启用启动，禁用停止，启用删除
+            if(startBtn) startBtn.disabled = false;
+            if(stopBtn) stopBtn.disabled = true;
+            if(removeBtn) removeBtn.disabled = false;
         }
     }
 
@@ -282,8 +300,14 @@
 
     // 启动/重启项目
     window.startProject = async function(pid){
-        const btn = document.getElementById('project-start-btn');
-        if(btn) btn.disabled = true;
+        const startBtn = document.getElementById('project-start-btn');
+        const stopBtn = document.getElementById('project-stop-btn');
+        const removeBtn = document.getElementById('project-remove-btn');
+        
+        // 禁用所有按钮
+        if(startBtn) startBtn.disabled = true;
+        if(stopBtn) stopBtn.disabled = true;
+        if(removeBtn) removeBtn.disabled = true;
         
         try{
             updateStatusBadge('starting');
@@ -314,8 +338,63 @@
             if(e.message !== '需要登录'){
                 showFlash(e.message, 'danger');
             }
-        }finally{
-            if(btn) btn.disabled = false;
+            // 出错时恢复按钮状态
+            if(startBtn) startBtn.disabled = false;
+            if(removeBtn) removeBtn.disabled = false;
+        }
+    }
+
+    // 停止项目容器
+    window.stopProject = async function(pid){
+        const startBtn = document.getElementById('project-start-btn');
+        const stopBtn = document.getElementById('project-stop-btn');
+        const removeBtn = document.getElementById('project-remove-btn');
+        
+        // 临时禁用按钮
+        if(stopBtn) stopBtn.disabled = true;
+        
+        try{
+            const res = await post(`/project/${pid}/docker/stop`);
+            
+            if(res.status) updateStatusBadge(res.status);
+            showFlash(res.message || '容器已停止', 'success');
+        }catch(e){
+            if(e.message !== '需要登录'){
+                showFlash(e.message, 'danger');
+            }
+            // 出错时恢复按钮（假设仍在运行）
+            if(stopBtn) stopBtn.disabled = false;
+        }
+    }
+
+    // 删除项目容器
+    window.removeProject = async function(pid){
+        if(!confirm('⚠️ 确定要删除容器吗？\n\n此操作将永久删除容器及其数据，无法恢复！')){
+            return;
+        }
+
+        const startBtn = document.getElementById('project-start-btn');
+        const stopBtn = document.getElementById('project-stop-btn');
+        const removeBtn = document.getElementById('project-remove-btn');
+        
+        // 临时禁用所有按钮
+        if(startBtn) startBtn.disabled = true;
+        if(stopBtn) stopBtn.disabled = true;
+        if(removeBtn) removeBtn.disabled = true;
+        
+        try{
+            const res = await post(`/project/${pid}/docker/remove`);
+            
+            if(res.status) updateStatusBadge(res.status);
+            showFlash(res.message || '容器已删除', 'success');
+        }catch(e){
+            if(e.message !== '需要登录'){
+                showFlash(e.message, 'danger');
+            }
+            // 出错时根据可能的状态恢复按钮
+            // 假设删除失败，容器可能还在，恢复按钮状态
+            if(startBtn) startBtn.disabled = false;
+            if(removeBtn) removeBtn.disabled = false;
         }
     }
 

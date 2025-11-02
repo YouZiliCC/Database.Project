@@ -19,6 +19,8 @@ def create_app():
         load_dotenv(env_path)
     except Exception as e:
         app.logger.error(f"加载环境变量失败: {e}", exc_info=True)
+    
+    app.config["WORKING_DIR"] = os.getcwd()
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
@@ -48,6 +50,8 @@ def create_app():
     app.config["PORT"] = int(os.getenv("PORT", 5000))
     app.config["HOST"] = os.getenv("HOST", "0.0.0.0")
     app.config["DEBUG"] = os.getenv("DEBUG", "False") == "True"
+    # Docker配置
+    app.config["IMAGE_NAME"] = os.getenv("IMAGE_NAME", "imds:latest")
 
     # CSRF保护
     csrf = CSRFProtect()
