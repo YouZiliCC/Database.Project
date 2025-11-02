@@ -40,6 +40,7 @@ dependencies = [
     { name = "dotenv" },
     { name = "email-validator" },
     { name = "flask" },
+    { name = "flask-email" },
     { name = "flask-login" },
     { name = "flask-sqlalchemy" },
     { name = "flask-wtf" },
@@ -53,6 +54,7 @@ requires-dist = [
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "email-validator", specifier = ">=2.3.0" },
     { name = "flask", specifier = ">=3.1.2" },
+    { name = "flask-email", specifier = ">=1.4.4" },
     { name = "flask-login", specifier = ">=0.6.3" },
     { name = "flask-sqlalchemy", specifier = ">=3.1.1" },
     { name = "flask-wtf", specifier = ">=1.2.2" },
@@ -110,6 +112,16 @@ sdist = { url = "https://files.pythonhosted.org/packages/dc/6d/cfe3c0fcc5e477df2
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/f9/7f9263c5695f4bd0023734af91bedb2ff8209e8de6ead162f35d8dc762fd/flask-3.1.2-py3-none-any.whl", hash = "sha256:ca1d8112ec8a6158cc29ea4858963350011b5c846a414cdb7a954aa9e967d03c", size = 103308, upload-time = "2025-08-19T21:03:19.499Z" },
 ]
+
+[[package]]
+name = "flask-email"
+version = "1.4.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "blinker" },
+    { name = "flask" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9a/9d/0786c1921b8f9874b2befd574d78703f50b0c566e703b4b199ca73b857f8/Flask-Email-1.4.4.tar.gz", hash = "sha256:773f0fb4e13191da43c111a00399cb070a0b978b4047786d5479d5dde0469f6b", size = 33055, upload-time = "2013-06-19T13:11:49.19Z" }
 
 [[package]]
 name = "flask-login"

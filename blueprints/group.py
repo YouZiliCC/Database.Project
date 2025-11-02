@@ -297,7 +297,6 @@ def leader_change(gid):
 # -------------------------------------------------------------------------------------------
 # Group Project Actions
 # -------------------------------------------------------------------------------------------
-# TODO: project management
 @group_bp.route("/<uuid:gid>/projects", methods=["GET", "POST"])
 @login_required
 @leader_required
@@ -453,16 +452,3 @@ def group_delete(gid):
         return jsonify({"error": "删除工作组失败"}), 500
     logger.info(f"删除工作组成功: {group.gname} by user {current_user.uname}")
     return jsonify({"message": "工作组已成功删除"}), 200  # 自动清空用户的gid字段
-
-
-# TODO: IMAGE upload (WAITING)
-@group_bp.route("/<uuid:gid>/upload_image", methods=["POST"])
-@login_required
-@group_required
-def group_upload_image(gid):
-    """上传工作组图片"""
-    gid = str(gid)
-    group = get_group_by_gid(gid)
-    if not group:
-        return jsonify({"error": "工作组不存在"}), 404
-    pass
