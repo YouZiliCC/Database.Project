@@ -1446,6 +1446,8 @@ footer svg {
 .markdown-content {
     line-height: 1.8;
     color: #1f2937;
+    word-break: break-all;
+    white-space: pre-line;
 }
 .markdown-content h1, 
 .markdown-content h2, 
