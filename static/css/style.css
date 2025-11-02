@@ -37,7 +37,7 @@ code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: '
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000; /* 确保导航栏始终在最顶层 */
 }
 .navbar { 
     max-width: 1200px; 
@@ -59,7 +59,8 @@ code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: '
     border: none;
     cursor: pointer;
     padding: 8px;
-    z-index: 101;
+    z-index: 102; /* 提高层级，确保在展开菜单之上 */
+    position: relative; /* 确保 z-index 生效 */
 }
 
 .navbar-toggle-icon {
@@ -1296,9 +1297,20 @@ input[type="checkbox"]:focus {
         justify-content: space-between; /* 移动端时品牌和按钮两端对齐 */
     }
     
+    /* 移动端品牌名称限制宽度，避免挤出汉堡按钮 */
+    .brand {
+        flex: 1;
+        min-width: 0; /* 允许缩小 */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: calc(100% - 60px); /* 减去汉堡按钮的宽度 */
+    }
+    
     /* 显示汉堡菜单按钮 */
     .navbar-toggle {
         display: flex;
+        flex-shrink: 0; /* 汉堡按钮不缩小 */
     }
     
     /* 导航菜单默认隐藏 */
@@ -1316,6 +1328,7 @@ input[type="checkbox"]:focus {
         border-top: 1px solid rgba(255,255,255,0.1);
         max-height: calc(100vh - 60px);
         overflow-y: auto;
+        z-index: 100; /* 确保菜单在汉堡按钮下方，不被遮挡 */
     }
     
     /* 展开状态 */
