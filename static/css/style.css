@@ -1446,8 +1446,9 @@ footer svg {
 .markdown-content {
     line-height: 1.8;
     color: #1f2937;
-    word-break: break-all;
-    white-space: pre-line;
+    word-wrap: break-word; /* 长单词自动换行 */
+    overflow-wrap: break-word; /* 现代浏览器支持 */
+    word-break: normal; /* 不强制在任意字符处断开 */
 }
 .markdown-content h1, 
 .markdown-content h2, 
