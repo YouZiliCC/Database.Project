@@ -36,3 +36,4 @@ nginx+gunicorn+flask+mysql+letsencrypt
 美观设计：
 黑白
 动态效果
+响应式设计，小屏幕折叠边栏
