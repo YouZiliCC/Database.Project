@@ -335,12 +335,14 @@ input[type="checkbox"]:focus {
 .card {
     background: #ffffff;
     border-radius: 10px;
+    border: 2px solid #e5e7eb;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
 }
 .card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
     transform: translateY(-2px);
 }
 .card-header {
@@ -458,6 +460,10 @@ input[type="checkbox"]:focus {
 .badge-admin {
     background: #fef3c7;
     color: #92400e;
+}
+.badge-teacher {
+    background: #e6ec8c;
+    color: #9050c4;
 }
 .badge-leader {
     background: #dbeafe;
@@ -832,6 +838,7 @@ input[type="checkbox"]:focus {
 .theme-dark .badge.badge-success { background: #166534; color: #bbf7d0; }
 .theme-dark .badge.badge-danger { background: #991b1b; color: #fecaca; }
 .theme-dark .badge-admin { background: #92400e; color: #fef3c7; }
+.theme-dark .badge-teacher { background: #7c3aed; color: #ede9fe; }
 .theme-dark .badge-leader { background: #1e40af; color: #dbeafe; }
 
 /* ==================== 终端 ==================== */

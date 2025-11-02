@@ -75,6 +75,44 @@
             {% else %}
                 <div class="empty">暂无成员</div>
             {% endif %}
+            <h3>📋 待审核申请</h3>
+            {% if current_user.is_authenticated and current_user.uid == group.leader_id and pending_applications %}
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>用户名</th>
+                                <th>邮箱</th>
+                                <th>申请时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in pending_applications %}
+                                <tr id="application-{{ app.aid }}">
+                                    <td>
+                                        <a href="{{ url_for('user.user_detail', uid=app.user.uid) }}">{{ app.user.uname }}</a>
+                                    </td>
+                                    <td>{{ app.user.email }}</td>
+                                    <td>{{ app.created_at.strftime("%Y-%m-%d %H:%M") if app.created_at else '未知' }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success"
+                                                onclick="acceptApplication('{{ group.gid }}', '{{ app.aid }}')">
+                                            接受
+                                        </button>
+                                        <button class="btn btn-sm btn-danger"
+                                                onclick="rejectApplication('{{ group.gid }}', '{{ app.aid }}')">
+                                            拒绝
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty">暂无待审核申请</div>
+            {% endif %}
             <h3>📦 项目列表</h3>
             {% if group.projects %}
                 <div class="grid-container">
@@ -109,7 +147,11 @@
             <div class="button-group mt-16">
                 {% if current_user.is_authenticated %}
                     {% if not current_user.gid %}
-                        <button class="btn btn-primary" onclick="joinGroup('{{ group.gid }}')">加入该组</button>
+                        {% if user_application %}
+                            <button class="btn btn-secondary" disabled>已申请，等待审核</button>
+                        {% else %}
+                            <button class="btn btn-primary" onclick="applyToGroup('{{ group.gid }}')">申请加入</button>
+                        {% endif %}
                     {% elif current_user.gid == group.gid %}
                         {% if current_user.uid == group.leader_id %}
                             <a href="{{ url_for('group.group_edit', gid=group.gid) }}" class="btn">编辑工作组</a>
@@ -123,7 +165,7 @@
                         {% endif %}
                     {% endif %}
                 {% endif %}
-                <a href="{{ url_for('group.group_list') }}" class="btn btn-secondary">返回列表</a>
+                <a href="{{ url_for("group.group_list") }}" class="btn btn-secondary">返回列表</a>
             </div>
         </div>
     </div>

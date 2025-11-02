@@ -38,11 +38,15 @@ class User(db.Model, TimestampMixin, UserMixin):
     gid = db.Column(
         db.String(512), db.ForeignKey("groups.gid", ondelete="SET NULL"), nullable=True
     )
-    role = db.Column(db.Integer, default=0)  # 0: 普通用户, 1: 管理员
+    role = db.Column(db.Integer, default=0)  # 0: 普通用户, 1: 管理员, 2: Teacher
 
     @property
     def is_admin(self):
         return self.role == 1
+
+    @property
+    def is_teacher(self):
+        return self.role == 2
 
     @property
     def is_leader(self):
@@ -99,6 +103,38 @@ class Project(db.Model, TimestampMixin):
 
     def __repr__(self):
         return f"<Project {self.pname} ({self.port}:{self.docker_port})>"
+
+
+class GroupApplication(db.Model, TimestampMixin):
+    # 工作组申请表
+    __tablename__ = "group_applications"
+    # 字段
+    aid = db.Column(db.String(512), primary_key=True, default=generate_uuid)
+    uid = db.Column(
+        db.String(512), db.ForeignKey("users.uid", ondelete="CASCADE"), nullable=False
+    )
+    gid = db.Column(
+        db.String(512), db.ForeignKey("groups.gid", ondelete="CASCADE"), nullable=False
+    )
+    status = db.Column(
+        db.Integer, default=0, nullable=False
+    )  # 0: 待审核, 1: 已接受, 2: 已拒绝
+    message = db.Column(db.Text, nullable=True)  # 申请留言
+
+    # 建立关系 - 使用 passive_deletes 让数据库处理级联删除
+    user = db.relationship(
+        "User",
+        backref=db.backref("applications", passive_deletes=True),
+        foreign_keys=[uid],
+    )
+    group = db.relationship(
+        "Group",
+        backref=db.backref("applications", passive_deletes=True),
+        foreign_keys=[gid],
+    )
+
+    def __repr__(self):
+        return f"<GroupApplication {self.user.uname} -> {self.group.gname} (status={self.status})>"
 
 
 # 用户加载回调函数(flask_login)

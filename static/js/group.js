@@ -17,13 +17,42 @@
         return json;
     }
 
-    // 全局函数：加入工作组
-    window.joinGroup = async function(gid){
-        if(!confirm('确认加入该工作组？')) return;
+    // 全局函数：申请加入工作组
+    window.applyToGroup = async function(gid){
+        if(!confirm('确认申请加入该工作组？')) return;
         try{
-            await post(`/user/me/join/${gid}`);
-            // 直接跳转，让服务器端 flash 显示
-            location.reload();
+            const result = await post(`/group/${gid}/apply`);
+            showFlash(result.message || '申请已提交', 'success');
+            setTimeout(() => location.reload(), 1000);
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
+    };
+
+    // 全局函数：接受申请
+    window.acceptApplication = async function(gid, aid){
+        if(!confirm('确认接受该用户的加入申请？')) return;
+        try{
+            const result = await post(`/group/${gid}/applications/${aid}/accept`);
+            showFlash(result.message || '已接受申请', 'success');
+            // 移除该行
+            const row = document.getElementById(`application-${aid}`);
+            if(row) row.remove();
+            setTimeout(() => location.reload(), 1000);
+        }catch(e){ 
+            showFlash(e.message, 'danger');
+        }
+    };
+
+    // 全局函数：拒绝申请
+    window.rejectApplication = async function(gid, aid){
+        if(!confirm('确认拒绝该用户的加入申请？')) return;
+        try{
+            const result = await post(`/group/${gid}/applications/${aid}/reject`);
+            showFlash(result.message || '已拒绝申请', 'success');
+            // 移除该行
+            const row = document.getElementById(`application-${aid}`);
+            if(row) row.remove();
         }catch(e){ 
             showFlash(e.message, 'danger');
         }

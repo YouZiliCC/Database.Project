@@ -18,3 +18,21 @@ wsgi gunicorn 日志
 nginx+gunicorn+flask+mysql+letsencrypt
  Nginx 80 → Certbot 一键签发 443 → 自动续期
 ; +redis
+
+
+### 安全性
+- ✅ 使用 `@login_required` 装饰器保护路由
+- ✅ 使用 `@leader_required` 装饰器确保只有组长能审批
+- ✅ CSRF 保护（通过 Flask-WTF）
+- ✅ 数据验证（检查用户状态、工作组存在性等）
+
+### 数据一致性
+- ✅ 使用事务保证数据一致性
+- ✅ 外键级联删除（CASCADE）
+- ✅ 防止重复申请（同一用户对同一工作组只能有一个待审核申请）
+- 回滚的设计，封装好的改动
+
+
+美观设计：
+黑白
+动态效果

@@ -26,22 +26,25 @@ def create_app():
         "SQLALCHEMY_TRACK_MODIFICATIONS"
     )
 
-    # MySQL 连接池配置（提升性能）
+    # 数据库连接池配置（提升性能）
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-        "pool_size": os.getenv("SQLALCHEMY_ENGINE_OPTIONS_POOL_SIZE"),  # 连接池大小
-        "pool_recycle": os.getenv(
-            "SQLALCHEMY_ENGINE_OPTIONS_POOL_RECYCLE"
-        ),  # 连接回收时间
-        "pool_pre_ping": os.getenv(
-            "SQLALCHEMY_ENGINE_OPTIONS_POOL_PRE_PING"
-        ),  # 连接前检查是否有效，防止 MySQL has gone away
-        "max_overflow": os.getenv(
-            "SQLALCHEMY_ENGINE_OPTIONS_MAX_OVERFLOW"
+        "pool_size": int(
+            os.getenv("SQLALCHEMY_ENGINE_OPTIONS_POOL_SIZE", 10)
+        ),  # 连接池大小
+        "pool_recycle": int(
+            os.getenv("SQLALCHEMY_ENGINE_OPTIONS_POOL_RECYCLE", 3600)
+        ),  # 连接回收时间（秒）
+        "pool_pre_ping": os.getenv("SQLALCHEMY_ENGINE_OPTIONS_POOL_PRE_PING", "True")
+        == "True",  # 连接前检查是否有效
+        "max_overflow": int(
+            os.getenv("SQLALCHEMY_ENGINE_OPTIONS_MAX_OVERFLOW", 20)
         ),  # 超过 pool_size 后最多再创建的连接数
     }
 
     app.config["LOG_LEVEL"] = os.getenv("LOG_LEVEL")
     app.config["ADMIN_ONLY_LOGIN"] = os.getenv("ADMIN_ONLY_LOGIN", "False") == "True"
+    app.config["TEACHER_REGISTRATION_CODE"] = os.getenv("TEACHER_REGISTRATION_CODE")
+    # 测试服务器配置
     app.config["PORT"] = int(os.getenv("PORT", 5000))
     app.config["HOST"] = os.getenv("HOST", "0.0.0.0")
     app.config["DEBUG"] = os.getenv("DEBUG", "False") == "True"
@@ -52,6 +55,17 @@ def create_app():
 
     # 初始化数据库
     db.init_app(app)
+
+    # 启用 SQLite 外键约束（测试环境）
+    if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
+        from sqlalchemy import event
+        from sqlalchemy.engine import Engine
+
+        @event.listens_for(Engine, "connect")
+        def set_sqlite_pragma(dbapi_conn, connection_record):
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
 
     # 初始化登录管理器
     login_manager.init_app(app)
@@ -68,6 +82,7 @@ def create_app():
     from blueprints.project import project_bp
     from blueprints.admin import admin_bp
     from blueprints.api import api_bp
+    from blueprints.comment import comment_bp
 
     # 将蓝图注册到应用
     app.register_blueprint(index_bp)
@@ -78,6 +93,7 @@ def create_app():
     app.register_blueprint(project_bp, url_prefix="/project")
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(api_bp, url_prefix="/api")
+    app.register_blueprint(comment_bp, url_prefix="/comment")
 
     # 注册 Markdown 过滤器
     @app.template_filter("markdown")

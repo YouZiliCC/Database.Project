@@ -105,24 +105,6 @@ pass
 # -------------------------------------------------------------------------------------------
 # User Group Actions
 # -------------------------------------------------------------------------------------------
-@user_bp.route("/me/join/<uuid:gid>", methods=["POST"])
-@login_required
-def user_join_group(gid):
-    """当前用户加入工作组"""
-    gid = str(gid)
-    user = current_user
-    if not user:
-        return jsonify({"error": "用户不存在"}), 404
-    group = get_group_by_gid(gid)
-    if not group:
-        return jsonify({"error": "工作组不存在"}), 404
-    if not update_user(user, gid=gid):
-        logger.warning(f"加入工作组失败: {user.uname} to group {group.gname}")
-        return jsonify({"error": "加入工作组失败"}), 500
-    logger.info(f"加入工作组成功: {user.uname} to group {group.gname}")
-    return jsonify({"message": f"您已成功加入工作组 {group.gname}"}), 200
-
-
 @user_bp.route("/me/leave", methods=["POST"])
 @login_required
 def user_leave_group():

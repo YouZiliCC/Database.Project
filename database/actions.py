@@ -1,5 +1,5 @@
 from .base import db
-from .models import User, Project, Group
+from .models import User, Project, Group, GroupApplication
 from sqlalchemy import select
 from datetime import datetime
 import logging
@@ -482,4 +482,175 @@ def get_projects_by_user(user):
         )
     except Exception as e:
         logger.error(f"get_projects_by_user Failed: {e}", exc_info=True)
+        return []
+
+
+# -------------------------------------------------------------------------------------------
+# GroupApplication CRUD 操作
+# -------------------------------------------------------------------------------------------
+def create_group_application(uid, gid, message=None):
+    """
+    创建工作组申请。
+
+    参数:
+        uid (str): 用户ID。
+        gid (str): 工作组ID。
+        message (str): 申请留言。
+
+    返回:
+        GroupApplication: 创建成功的申请对象，失败则返回None。
+    """
+    try:
+        # 检查是否已存在待审核的申请
+        existing = get_pending_application(uid, gid)
+        if existing:
+            logger.warning(f"用户 {uid} 已有待审核的申请到工作组 {gid}")
+            return None
+
+        application = GroupApplication(uid=uid, gid=gid, message=message, status=0)
+        if safe_add(application):
+            logger.info(f"工作组申请创建成功, ID: {application.aid}")
+            return application
+        return None
+    except Exception as e:
+        logger.error(f"创建工作组申请失败: {e}", exc_info=True)
+        db.session.rollback()
+        return None
+
+
+def update_group_application(application, **kwargs):
+    """
+    更新工作组申请记录。
+
+    参数:
+        application (GroupApplication): 要更新的申请对象。
+        **kwargs: 要更新的字段及其值。
+
+    返回:
+        bool: 更新是否成功。
+    """
+    if not application:
+        logger.warning("update_group_application Failed: 申请对象为 None")
+        return False
+    try:
+        for key, value in kwargs.items():
+            if hasattr(application, key):
+                if key != "aid":  # 不允许修改ID
+                    setattr(application, key, value)
+        return safe_commit()
+    except Exception as e:
+        logger.error(f"更新申请 {application.aid} 失败: {e}", exc_info=True)
+        db.session.rollback()
+        return False
+
+
+def delete_group_application(application):
+    """
+    删除工作组申请记录。
+
+    参数:
+        application (GroupApplication): 要删除的申请对象。
+
+    返回:
+        bool: 删除是否成功。
+    """
+    if not application:
+        logger.warning("delete_group_application Failed: 申请对象为 None")
+        return False
+    try:
+        return safe_delete(application)
+    except Exception as e:
+        logger.error(f"删除申请 {application.aid} 失败: {e}", exc_info=True)
+        db.session.rollback()
+        return False
+
+
+def get_application_by_aid(aid):
+    """
+    根据申请ID获取申请。
+
+    参数:
+        aid (str): 申请ID。
+
+    返回:
+        GroupApplication: 匹配的申请对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(
+            select(GroupApplication).where(GroupApplication.aid == aid)
+        ).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_application_by_aid Failed: {e}", exc_info=True)
+        return None
+
+
+def get_pending_application(uid, gid):
+    """
+    获取用户对某工作组的待审核申请。
+
+    参数:
+        uid (str): 用户ID。
+        gid (str): 工作组ID。
+
+    返回:
+        GroupApplication: 待审核的申请对象，未找到则返回None。
+    """
+    try:
+        return db.session.execute(
+            select(GroupApplication).where(
+                GroupApplication.uid == uid,
+                GroupApplication.gid == gid,
+                GroupApplication.status == 0,
+            )
+        ).scalar_one_or_none()
+    except Exception as e:
+        logger.error(f"get_pending_application Failed: {e}", exc_info=True)
+        return None
+
+
+def get_group_pending_applications(gid):
+    """
+    获取某工作组的所有待审核申请。
+
+    参数:
+        gid (str): 工作组ID。
+
+    返回:
+        list: 待审核的申请对象列表。
+    """
+    try:
+        return (
+            db.session.execute(
+                select(GroupApplication).where(
+                    GroupApplication.gid == gid, GroupApplication.status == 0
+                )
+            )
+            .scalars()
+            .all()
+        )
+    except Exception as e:
+        logger.error(f"get_group_pending_applications Failed: {e}", exc_info=True)
+        return []
+
+
+def get_user_applications(uid):
+    """
+    获取用户的所有申请。
+
+    参数:
+        uid (str): 用户ID。
+
+    返回:
+        list: 申请对象列表。
+    """
+    try:
+        return (
+            db.session.execute(
+                select(GroupApplication).where(GroupApplication.uid == uid)
+            )
+            .scalars()
+            .all()
+        )
+    except Exception as e:
+        logger.error(f"get_user_applications Failed: {e}", exc_info=True)
         return []

@@ -39,6 +39,7 @@ class RegisterForm(FlaskForm):
             EqualTo("password", message="密码不一致"),
         ],
     )
+    teacher_code = StringField("注册码(选填)", validators=[Length(max=20)])
     submit = SubmitField("注册")
 
     # 自定义验证器
@@ -103,12 +104,18 @@ def register():
     form = RegisterForm()
     # 处理表单提交
     if form.validate_on_submit():
+        role = 0  # 普通用户
+        if form.teacher_code.data == current_app.config.get(
+            "TEACHER_REGISTRATION_CODE"
+        ):
+            role = 2  # 如果填写了正确的教师注册码，则设置为教师角色
         # 创建新用户
         create_user(
             uname=form.uname.data,
             email=form.email.data,
             sid=form.sid.data,
             password=form.password.data,
+            role=role,
         )
         if not create_user:
             flash("注册失败，请重试", "danger")

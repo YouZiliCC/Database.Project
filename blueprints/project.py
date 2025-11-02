@@ -85,6 +85,7 @@ def project_list():
 @project_bp.route("/<uuid:pid>", methods=["GET"])
 def project_detail(pid):
     """项目详情页面"""
+    pid = str(pid)
     project = get_project_by_pid(pid)
     if not project:
         abort(404, description="项目不存在")

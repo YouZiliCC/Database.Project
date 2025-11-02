@@ -5,7 +5,7 @@
         <div class="page-header">
             <h2>工作组列表</h2>
             {% if current_user.is_authenticated and not current_user.gid %}
-                <a href="{{ url_for('group.group_create') }}" class="btn">创建工作组</a>
+                <a href="{{ url_for("group.group_create") }}" class="btn">创建工作组</a>
             {% endif %}
         </div>
         <div class="mb-16">
@@ -56,7 +56,12 @@
                             <a href="{{ url_for('group.group_detail', gid=group.gid) }}"
                                class="btn btn-sm">查看详情</a>
                             {% if current_user.is_authenticated and not current_user.gid %}
-                                <button class="btn btn-sm btn-primary" onclick="joinGroup('{{ group.gid }}')">加入</button>
+                                {% if group.gid in user_applications %}
+                                    <button class="btn btn-sm btn-secondary" disabled>已申请</button>
+                                {% else %}
+                                    <button class="btn btn-sm btn-primary"
+                                            onclick="applyToGroup('{{ group.gid }}')">申请加入</button>
+                                {% endif %}
                             {% endif %}
                         </div>
                     </div>

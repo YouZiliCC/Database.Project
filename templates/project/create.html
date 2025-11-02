@@ -23,13 +23,13 @@
                 <label>{{ form.port.label }}</label>
                 {{ form.port(size=10, **{"data-validate":"required|min:1|max:65535", "placeholder":"如: 8080"}) }}
                 {% if form.port.errors %}<span class="error">{{ form.port.errors[0] }}</span>{% endif %}
-                <small class="form-help">应用对外访问端口 (1-65535)</small>
+                <small class="form-help">宿主机端口 (10000-65535)，对应外部访问端口</small>
             </div>
             <div class="form-row">
                 <label>{{ form.docker_port.label }}</label>
                 {{ form.docker_port(size=10, **{"data-validate":"required|min:1|max:65535", "placeholder":"如: 3000"}) }}
                 {% if form.docker_port.errors %}<span class="error">{{ form.docker_port.errors[0] }}</span>{% endif %}
-                <small class="form-help">Docker容器内部端口 (1-65535)</small>
+                <small class="form-help">Docker容器内部端口 (1024-65535)，对应项目部署的端口</small>
             </div>
             <div class="form-row">
                 {{ form.submit(class="btn", value="创建项目") }}

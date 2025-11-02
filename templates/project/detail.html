@@ -3,8 +3,8 @@
 {% block content %}
     <div class="container">
         <div class="breadcrumb">
-            <a href="{{ url_for('index.index') }}">首页</a> &gt;
-            <a href="{{ url_for('project.project_list') }}">项目展台</a> &gt;
+            <a href="{{ url_for("index.index") }}">首页</a> &gt;
+            <a href="{{ url_for("project.project_list") }}">项目展台</a> &gt;
             <span>{{ project.pname }}</span>
         </div>
         <section class="project-detail">
@@ -92,7 +92,9 @@
                                     onclick="deleteProject('{{ project.gid }}', '{{ project.pid }}')">删除项目</button>
                         {% endif %}
                         <a class="btn btn-secondary"
-                           href="{{ url_for('project.project_list') }}">返回列表</a>
+                           href="{{ url_for('group.group_detail', gid=project.gid) }}">返回工作组</a>
+                        <a class="btn btn-secondary"
+                           href="{{ url_for("project.project_list") }}">返回列表</a>
                     </div>
                 </div>
             </div>
