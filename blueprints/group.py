@@ -166,12 +166,14 @@ def apply_to_group(gid):
     # 创建申请
     application = create_group_application(current_user.uid, gid)
     if not application:
-        logger.warning(
-            f"创建申请失败: user {current_user.uname} to group {group.gname}"
+        logger.error(
+            f"创建申请失败: user={current_user.uname}, group={group.gname}, gid={gid}"
         )
         return jsonify({"error": "提交申请失败，请重试"}), 500
 
-    logger.info(f"申请提交成功: user {current_user.uname} to group {group.gname}")
+    logger.info(
+        f"申请提交成功: user={current_user.uname}, group={group.gname}, gid={gid}"
+    )
     return jsonify({"message": "申请已提交，请等待组长审核"}), 200
 
 
@@ -203,16 +205,18 @@ def accept_application(gid, gaid):
 
     # 将用户加入工作组
     if not update_user(user, gid=gid):
-        logger.warning(
-            f"接受申请失败: user {user.uname} to group {application.group.gname}"
+        logger.error(
+            f"接受申请失败: user={user.uname}, group={application.group.gname}, gid={gid}"
         )
         return jsonify({"error": "接受申请失败"}), 500
 
     # 更新申请状态
     if not update_group_application(application, status=1):
-        logger.warning(f"更新申请状态失败: gaid={gaid}")
+        logger.warning(f"更新申请状态失败: gaid={gaid}, user={user.uname}")
 
-    logger.info(f"申请已接受: user {user.uname} joined group {application.group.gname}")
+    logger.info(
+        f"申请已接受: user={user.uname}, group={application.group.gname}, gid={gid}"
+    )
     return jsonify({"message": "已接受申请，用户已加入工作组"}), 200
 
 
@@ -235,11 +239,11 @@ def reject_application(gid, gaid):
 
     # 更新申请状态
     if not update_group_application(application, status=2):
-        logger.warning(f"拒绝申请失败: gaid={gaid}")
+        logger.error(f"拒绝申请失败: gaid={gaid}, user={application.user.uname}")
         return jsonify({"error": "拒绝申请失败"}), 500
 
     logger.info(
-        f"申请已拒绝: user {application.user.uname} to group {application.group.gname}"
+        f"申请已拒绝: user={application.user.uname}, group={application.group.gname}, gid={gid}"
     )
     return jsonify({"message": "已拒绝申请"}), 200
 
@@ -257,12 +261,12 @@ def remove_member(gid, uid):
     if not user:
         return jsonify({"error": "用户不存在"}), 404
     if not update_user(user, gid=None):
-        logger.warning(
-            f"移除用户失败: {user.uname} from group {group.gname} by user {current_user.uname}"
+        logger.error(
+            f"移除用户失败: user={user.uname}, group={group.gname}, operator={current_user.uname}"
         )
         return jsonify({"error": "移除用户失败"}), 500
     logger.info(
-        f"用户已成功移除工作组: {user.uname} from group {group.gname} by user {current_user.uname}"
+        f"用户已成功移除工作组: user={user.uname}, group={group.gname}, operator={current_user.uname}"
     )
     return jsonify({"message": "用户已成功移除工作组"}), 200
 
@@ -285,10 +289,14 @@ def leader_change(gid):
             flash("新组长不存在", "error")
             return render_template("group/change_leader.html", form=form, group=group)
         if not update_group(group, leader_id=new_leader.uid):
-            logger.warning(f"更换组长失败: {group.gname} by user {current_user.uname}")
+            logger.error(
+                f"更换组长失败: group={group.gname}, new_leader={new_leader.uname}, operator={current_user.uname}"
+            )
             flash("更换组长失败", "error")
             return render_template("group/change_leader.html", form=form, group=group)
-        logger.info(f"组长更换成功: {group.gname} by user {current_user.uname}")
+        logger.info(
+            f"组长更换成功: group={group.gname}, new_leader={new_leader.uname}, operator={current_user.uname}"
+        )
         flash("组长更换成功", "success")
         return redirect(url_for("group.group_detail", gid=gid))
     return render_template("group/change_leader.html", form=form, group=group)
@@ -330,12 +338,14 @@ def project_create(gid):
         )
         if not project:
             flash("创建项目失败，请重试", "danger")
-            logger.warning(
-                f"创建项目失败: {form.pname.data} by user {current_user.uname}"
+            logger.error(
+                f"创建项目失败: project={form.pname.data}, group={group.gname}, operator={current_user.uname}"
             )
             return render_template("project/create.html", form=form, group=group)
         flash("项目创建成功！", "success")
-        logger.info(f"创建项目成功: {form.pname.data} by user {current_user.uname}")
+        logger.info(
+            f"创建项目成功: project={form.pname.data}, pid={project.pid}, group={group.gname}, operator={current_user.uname}"
+        )
         return redirect(url_for("group.group_detail", gid=group.gid))
     return render_template("project/create.html", form=form, group=group)
 
@@ -352,10 +362,16 @@ def project_delete(gid, pid):
     project = get_project_by_pid(pid)
     if not project or str(project.gid) != str(gid):
         return jsonify({"error": "项目不存在"}), 404
+
+    pname = project.pname  # 保存项目名，删除后无法访问
     if not delete_project(project):
-        logger.warning(f"删除项目失败: {project.pname} by user {current_user.uname}")
+        logger.error(
+            f"删除项目失败: project={pname}, pid={pid}, operator={current_user.uname}"
+        )
         return jsonify({"error": "删除项目失败"}), 500
-    logger.info(f"删除项目成功: {project.pname} by user {current_user.uname}")
+    logger.info(
+        f"删除项目成功: project={pname}, pid={pid}, operator={current_user.uname}"
+    )
     return jsonify({"message": "项目已成功删除"}), 200
 
 

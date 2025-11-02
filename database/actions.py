@@ -23,7 +23,7 @@ def safe_commit():
         return True
     except Exception as e:
         db.session.rollback()
-        logger.error(f"safe_commit Failed: {e}", exc_info=True)  # 记录详细异常信息
+        logger.error(f"数据库提交失败: {e}", exc_info=True)
         return False
 
 
@@ -41,7 +41,9 @@ def safe_add(instance):
         db.session.add(instance)
         return safe_commit()
     except Exception as e:
-        logger.error(f"safe_add Failed: {e}", exc_info=True)
+        logger.error(
+            f"数据库添加记录失败 [{type(instance).__name__}]: {e}", exc_info=True
+        )
         db.session.rollback()
         return False
 
@@ -60,7 +62,9 @@ def safe_delete(instance):
         db.session.delete(instance)
         return safe_commit()
     except Exception as e:
-        logger.error(f"safe_delete Failed: {e}", exc_info=True)
+        logger.error(
+            f"数据库删除记录失败 [{type(instance).__name__}]: {e}", exc_info=True
+        )
         db.session.rollback()
         return False
 
@@ -91,8 +95,8 @@ def create_user(uname, email, sid, password, uinfo=None, role=0):
                 get_user_by_sid(sid),
             ]
         ):
-            logger.warning(
-                f"创建用户失败: 用户名/邮箱/学号已存在 ({uname}, {email}, {sid})"
+            logger.debug(
+                f"创建用户失败: 用户名/邮箱/学号已存在 (uname={uname}, email={email}, sid={sid})"
             )
             return None
 
@@ -100,11 +104,11 @@ def create_user(uname, email, sid, password, uinfo=None, role=0):
         user.set_password(password)  # 使用模型方法设置密码哈希
 
         if safe_add(user):
-            logger.info(f"用户 {uname} 创建成功, ID: {user.uid}")
+            logger.info(f"用户创建成功: uname={uname}, uid={user.uid}")
             return user
         return None
     except Exception as e:
-        logger.error(f"创建用户失败: {e}", exc_info=True)
+        logger.error(f"创建用户异常: uname={uname}", exc_info=True)
         db.session.rollback()
         return None
 
@@ -132,7 +136,10 @@ def update_user(user, **kwargs):
                     setattr(user, key, value)
         return safe_commit()
     except Exception as e:
-        logger.error(f"更新用户 {user.uid} 失败: {e}", exc_info=True)
+        logger.error(
+            f"更新用户失败: uid={user.uid}, uname={getattr(user, 'uname', 'unknown')}",
+            exc_info=True,
+        )
         db.session.rollback()
         return False
 
@@ -153,7 +160,10 @@ def delete_user(user):
     try:
         return safe_delete(user)
     except Exception as e:
-        logger.error(f"删除用户 {user.uid} 失败: {e}", exc_info=True)
+        logger.error(
+            f"删除用户失败: uid={user.uid}, uname={getattr(user, 'uname', 'unknown')}",
+            exc_info=True,
+        )
         db.session.rollback()
         return False
 
@@ -295,7 +305,10 @@ def update_group(group, **kwargs):
                     setattr(group, key, value)
         return safe_commit()
     except Exception as e:
-        logger.error(f"更新工作组 {group.gid} 失败: {e}", exc_info=True)
+        logger.error(
+            f"更新工作组失败: gid={group.gid}, gname={getattr(group, 'gname', 'unknown')}",
+            exc_info=True,
+        )
         db.session.rollback()
         return False
 
@@ -316,7 +329,10 @@ def delete_group(group):
     try:
         return safe_delete(group)
     except Exception as e:
-        logger.error(f"删除工作组 {group.gid} 失败: {e}", exc_info=True)
+        logger.error(
+            f"删除工作组失败: gid={group.gid}, gname={getattr(group, 'gname', 'unknown')}",
+            exc_info=True,
+        )
         db.session.rollback()
         return False
 

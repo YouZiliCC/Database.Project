@@ -237,5 +237,101 @@
         }
     });
 
+    // ==================== Docker 状态管理 ====================
+    
+    // 更新状态徽章显示
+    function updateStatusBadge(status) {
+        const el = document.getElementById('project-status');
+        if(!el) return;
+        
+        el.className = 'status-badge';
+        if(status === 'running'){
+            el.textContent = '运行中';
+            el.classList.add('badge-success');
+        }else if(status === 'starting'){
+            el.textContent = '启动中';
+            el.classList.add('badge-warning');
+        }else{
+            el.textContent = '已停止';
+            el.classList.add('badge-secondary');
+        }
+    }
+
+    // 获取项目 Docker 状态
+    async function fetchProjectStatus(pid){
+        try{
+            const res = await fetch(`/project/${pid}/docker/status`, {
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            if(res.status === 401){
+                checkAuthAndRedirect(401);
+                return null;
+            }
+            
+            const data = await res.json().catch(()=>({}));
+            if(res.ok && data.status){
+                updateStatusBadge(data.status);
+                return data.status;
+            }
+        }catch(e){
+            console.error('获取状态失败:', e);
+        }
+        return null;
+    }
+
+    // 启动/重启项目
+    window.startProject = async function(pid){
+        const btn = document.getElementById('project-start-btn');
+        if(btn) btn.disabled = true;
+        
+        try{
+            updateStatusBadge('starting');
+            const res = await post(`/project/${pid}/start`);
+            
+            if(res.status) updateStatusBadge(res.status);
+            showFlash(res.message || '启动已开始', 'info');
+
+            // 轮询状态直到完成（最多2分钟）
+            const startTime = Date.now();
+            const timeout = 120000; // 2分钟
+            
+            while(Date.now() - startTime < timeout){
+                await new Promise(r => setTimeout(r, 3000)); // 每3秒检查一次
+                const status = await fetchProjectStatus(pid);
+                
+                if(status && status !== 'starting'){
+                    // 启动完成
+                    if(status === 'running'){
+                        showFlash('容器启动成功！', 'success');
+                    }else{
+                        showFlash('容器未能启动，请查看日志', 'warning');
+                    }
+                    break;
+                }
+            }
+        }catch(e){
+            if(e.message !== '需要登录'){
+                showFlash(e.message, 'danger');
+            }
+        }finally{
+            if(btn) btn.disabled = false;
+        }
+    }
+
+    // 页面加载时获取初始状态
+    document.addEventListener('DOMContentLoaded', function(){
+        const statusEl = document.getElementById('project-status');
+        if(!statusEl) return;
+        
+        // 从 URL 中提取 pid
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        const pid = pathParts[pathParts.indexOf('project') + 1];
+        
+        if(pid && pid.length > 20){ // 简单验证是 UUID
+            fetchProjectStatus(pid);
+        }
+    });
+
 })();
 

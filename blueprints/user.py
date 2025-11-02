@@ -108,9 +108,9 @@ def user_leave_group():
             403,
         )
     if not update_user(user, gid=None):
-        logger.warning(f"退出工作组失败: {user.uname}")
+        logger.error(f"退出工作组失败: user={user.uname}, uid={user.uid}")
         return jsonify({"error": "退出工作组失败"}), 500
-    logger.info(f"退出工作组成功: {user.uname}")
+    logger.info(f"退出工作组成功: user={user.uname}, uid={user.uid}")
     return jsonify({"message": "您已成功退出工作组"}), 200
 
 
@@ -155,10 +155,14 @@ def user_edit():
         )
         if not updated_user:
             flash("更新用户信息失败，请重试", "danger")
-            logger.warning(f"更新用户信息失败: {form.uname.data}")
+            logger.error(
+                f"更新用户信息失败: user={form.uname.data}, operator={current_user.uname}"
+            )
             return render_template("user/edit.html", form=form, user=user)
         flash("用户信息更新成功", "success")
-        logger.info(f"更新用户信息成功: {form.uname.data} by user {current_user.uname}")
+        logger.info(
+            f"更新用户信息成功: user={form.uname.data}, operator={current_user.uname}"
+        )
         return redirect(url_for("user.user_me"))
     return render_template("user/edit.html", form=form, user=user)
 
@@ -175,9 +179,10 @@ def user_delete():
     user = current_user
     if not user:
         return jsonify({"error": "用户不存在"}), 404
+    uname = user.uname  # 保存用户名，logout后无法访问
     if not delete_user(user):
-        logger.warning(f"删除用户账号失败: {user.uname}")
+        logger.error(f"删除用户账号失败: user={uname}")
         return jsonify({"error": "删除用户账号失败"}), 500
     logout_user()
-    logger.info(f"删除用户账号成功: {user.uname}")
+    logger.info(f"删除用户账号成功: user={uname}")
     return jsonify({"message": "账号已成功删除"}), 200

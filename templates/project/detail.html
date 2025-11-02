@@ -42,8 +42,17 @@
                     </div>
                     <div class="sidebar-info-item">
                         <span class="info-label">运行状态</span>
-                        <span class="info-value"><span class="status-badge badge-success">运行中</span></span>
+                        <span class="info-value">
+                            <span id="project-status" class="status-badge">加载中...</span>
+                        </span>
                     </div>
+                    {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
+                    <div class="sidebar-info-item">
+                        <button id="project-start-btn" class="btn btn-sm btn-primary" onclick="startProject('{{ project.pid }}')">
+                            🚀 启动/重启
+                        </button>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </aside>

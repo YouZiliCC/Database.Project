@@ -585,6 +585,14 @@ input[type="checkbox"]:focus {
     background: #d1fae5;
     color: #065f46;
 }
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+.badge-secondary {
+    background: #e5e7eb;
+    color: #374151;
+}
 .status-badge {
     padding: 4px 12px;
     border-radius: 999px;
