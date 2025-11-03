@@ -21,19 +21,19 @@ workers = int(os.getenv("GUNICORN_WORKERS", multiprocessing.cpu_count() * 2))
 threads = 1
 
 # Worker 超时时间（秒）
-timeout = 120
+timeout = int(os.getenv("TIMEOUT", 120))
 
 # 保持连接活动时间（秒）- 对 WebSocket 很重要
-keepalive = os.getenv("GUNICORN_KEEPALIVE", 5)
+keepalive = int(os.getenv("KEEPALIVE", 5))
 
 # 日志级别
 loglevel = os.getenv("LOG_LEVEL", "info").lower()
 
 # 访问日志文件（- 表示 stdout）
-accesslog = "-"
+accesslog = os.getenv("ACCESSLOG", "-")
 
 # 错误日志文件（- 表示 stderr）
-errorlog = "-"
+errorlog = os.getenv("ERRORLOG", "-")
 
 # 访问日志格式
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
