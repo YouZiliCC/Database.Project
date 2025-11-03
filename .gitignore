@@ -13,7 +13,9 @@ wheels/
 .env
 
 instance/
+log/
 static/img/users/
 static/img/groups/
 static/img/projects/
 *.tar
+*.log

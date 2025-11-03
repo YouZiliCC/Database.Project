@@ -1,3 +1,5 @@
+import eventlet
+eventlet.monkey_patch() 
 # Gunicorn 配置文件
 # 用于生产环境部署 Flask-SocketIO + WebSocket
 import dotenv
@@ -48,7 +50,7 @@ pidfile = None
 reload = os.getenv("DEBUG", "False") == "True"
 
 # 预加载应用（可提高性能，但热重载会失效）
-preload_app = False
+preload_app = os.getenv("PRELOAD", "False") == "True"
 
 # 最大请求数（处理后重启 worker，防止内存泄漏）
 max_requests = 1000
