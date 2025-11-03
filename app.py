@@ -62,11 +62,12 @@ def create_app():
     csrf.init_app(app)
 
     # 初始化 SocketIO (用于 WebShell)
+    # 使用 eventlet 模式以支持 Gunicorn + WebSocket
     global socketio
     socketio = SocketIO(
         app,
         cors_allowed_origins="*",
-        async_mode="threading",
+        async_mode=os.getenv("WORKER_CLASS", "eventlet"),
         logger=False,
         engineio_logger=False,
     )
