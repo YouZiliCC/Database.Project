@@ -5,14 +5,13 @@ from flask import (
     url_for,
     flash,
     request,
-    current_app,
     abort,
     jsonify,
 )
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import logout_user, login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
+from wtforms import StringField, SubmitField, TextAreaField
+from wtforms.validators import DataRequired, Email, Length, ValidationError
 from database.actions import *
 from blueprints.auth import login_required
 import logging

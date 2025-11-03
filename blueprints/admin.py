@@ -1,11 +1,17 @@
-import logging
-from flask import Blueprint, jsonify, render_template, flash, abort
+from flask import (
+    Blueprint,
+    jsonify,
+    render_template,
+    flash,
+    abort,
+)
 from flask_login import login_required, current_user
 from functools import wraps
 from database.actions import *
 from blueprints.user import UserForm
 from blueprints.group import GroupForm, ChangeLeaderForm
 from blueprints.project import ProjectForm
+import logging
 
 # 管理员蓝图
 admin_bp = Blueprint("admin", __name__)
