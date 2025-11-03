@@ -1,3 +1,8 @@
+# ⚠️ 关键：使用 eventlet 时必须在所有 import 之前调用 monkey_patch()
+# 这会将标准库的阻塞操作（线程、锁、socket等）替换为非阻塞的绿色版本
+import eventlet
+eventlet.monkey_patch()
+
 from app import create_app
 from flask import render_template
 
