@@ -65,7 +65,7 @@
                 <div class="button-group">
                     {% if project.port %}
                         <a class="btn btn-primary"
-                           href="http://localhost:{{ project.port }}"
+                           href="http://pkume.com:{{ project.port }}"
                            target="_blank">🌐 访问应用</a>
                     {% endif %}
                     {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
