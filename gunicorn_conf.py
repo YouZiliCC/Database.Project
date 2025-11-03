@@ -1,5 +1,6 @@
 import eventlet
-eventlet.monkey_patch() 
+
+eventlet.monkey_patch()
 # Gunicorn 配置文件
 # 用于生产环境部署 Flask-SocketIO + WebSocket
 import dotenv
@@ -47,7 +48,7 @@ daemon = os.getenv("DAEMON", "False") == "True"
 pidfile = None
 
 # 热重载
-reload = os.getenv("DEBUG", "False") == "True"
+reload = os.getenv("RELOAD", "False") == "True"
 
 # 预加载应用（可提高性能，但热重载会失效）
 preload_app = os.getenv("PRELOAD", "False") == "True"
@@ -67,6 +68,7 @@ limit_request_field_size = 8190
 
 # Worker 临时目录
 worker_tmp_dir = "/dev/shm" if os.path.exists("/dev/shm") else None
+
 
 # 启动时回调
 def on_starting(server):
