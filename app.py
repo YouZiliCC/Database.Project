@@ -1,21 +1,24 @@
-from datetime import timedelta
-from flask import Flask
-from flask_wtf import CSRFProtect
-from flask_socketio import SocketIO
-from database.base import db, login_manager
-from database.actions import create_user, get_user_by_uname
-from dotenv import load_dotenv
-from markupsafe import Markup
-import logging
-import os
-import markdown
-
-# 全局 SocketIO 实例
-socketio = None
+import eventlet
+eventlet.monkey_patch()
 
 
 def create_app():
     """创建Flask应用实例"""
+    from datetime import timedelta
+    from flask import Flask
+    from flask_wtf import CSRFProtect
+    from flask_socketio import SocketIO
+    from database.base import db, login_manager
+    from database.actions import create_user, get_user_by_uname
+    from dotenv import load_dotenv
+    from markupsafe import Markup
+    import logging
+    import os
+    import markdown
+
+    # 全局 SocketIO 实例
+    socketio = None
+
     app = Flask(__name__)
     # 加载环境变量
     env_path = os.path.join(os.path.dirname(__file__), ".env")
