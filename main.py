@@ -2,7 +2,7 @@ from app import create_app
 from flask import render_template
 
 # 创建应用实例
-app = create_app()
+app, socketio = create_app()
 
 
 # 全局错误处理
@@ -22,4 +22,11 @@ def health_check():
 
 
 if __name__ == "__main__":
-    app.run(debug=app.config["DEBUG"], host=app.config["HOST"], port=app.config["PORT"])
+    # 支持websocket
+    socketio.run(
+        app,
+        debug=app.config["DEBUG"],
+        host=app.config["HOST"],
+        port=app.config["PORT"],
+        allow_unsafe_werkzeug=True,
+    )

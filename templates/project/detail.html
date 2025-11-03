@@ -67,6 +67,9 @@
                     <a class="btn btn-primary" href="http://localhost:{{ project.port }}" target="_blank">🌐 访问应用</a>
                     {% endif %}
                     {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
+                    <a id="terminal-btn" class="btn btn-info" href="{{ url_for('terminal.terminal', pid=project.pid) }}" target="_blank" style="display: none;">
+                        🖥️ WebShell 终端
+                    </a>
                     <button id="project-start-btn" class="btn btn-success" onclick="startProject('{{ project.pid }}')">
                         🚀 启动容器
                     </button>

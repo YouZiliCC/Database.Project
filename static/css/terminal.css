@@ -1,0 +1,397 @@
+/* ==================== WebShell Terminal 样式 ==================== */
+
+.terminal-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 警告提示 */
+.terminal-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%);
+    border: 2px solid #ffc107;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15);
+}
+
+.terminal-warning strong {
+    color: #f57c00;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.terminal-warning ul {
+    margin-left: 20px;
+    color: #795548;
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+
+.terminal-warning li {
+    margin-bottom: 6px;
+}
+
+/* 终端头部 */
+.terminal-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    color: white;
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.terminal-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.project-info {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: 'Consolas', 'Monaco', monospace;
+    backdrop-filter: blur(10px);
+}
+
+/* 连接状态指示器 */
+.connection-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.connection-status::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: blink 1.5s ease-in-out infinite;
+}
+
+.status-connecting {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+.status-connecting::before {
+    background: #ffc107;
+    box-shadow: 0 0 8px #ffc107;
+}
+
+.status-connected {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    animation: none;
+}
+
+.status-connected::before {
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: none;
+}
+
+.status-disconnected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    animation: none;
+}
+
+.status-disconnected::before {
+    background: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+    animation: none;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* 终端容器 */
+.terminal-wrapper {
+    background: #1e1e1e;
+    border-left: 2px solid #1e40af;
+    border-right: 2px solid #1e40af;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+#terminal-container {
+    width: 100%;
+    height: 600px;
+    padding: 12px;
+    overflow: hidden;
+}
+
+/* Xterm.js 样式微调 */
+#terminal-container .xterm {
+    height: 100%;
+    padding: 4px;
+}
+
+#terminal-container .xterm-viewport {
+    overflow-y: auto;
+}
+
+#terminal-container .xterm-screen {
+    cursor: text;
+}
+
+/* 自定义滚动条 */
+#terminal-container .xterm-viewport::-webkit-scrollbar {
+    width: 10px;
+}
+
+#terminal-container .xterm-viewport::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 5px;
+}
+
+#terminal-container .xterm-viewport::-webkit-scrollbar-thumb {
+    background: #3f3f3f;
+    border-radius: 5px;
+    border: 2px solid #1a1a1a;
+}
+
+#terminal-container .xterm-viewport::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* 控制按钮区域 */
+.terminal-controls {
+    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 16px 24px;
+    border-radius: 0 0 12px 12px;
+    border-left: 2px solid #1e40af;
+    border-right: 2px solid #1e40af;
+    border-bottom: 2px solid #1e40af;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 按钮样式 */
+.terminal-controls .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-back {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white;
+}
+
+.btn-back:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+}
+
+.btn-clear {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.btn-clear:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+}
+
+.btn-reconnect {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.btn-reconnect:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .terminal-page {
+        padding: 12px;
+    }
+
+    .terminal-warning {
+        padding: 16px;
+    }
+
+    .terminal-warning strong {
+        font-size: 1rem;
+    }
+
+    .terminal-warning ul {
+        margin-left: 16px;
+        font-size: 0.9rem;
+    }
+
+    .terminal-header {
+        padding: 16px;
+    }
+
+    .terminal-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .project-info {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+        width: 100%;
+    }
+
+    #terminal-container {
+        height: 450px;
+    }
+
+    .terminal-controls {
+        padding: 12px;
+        justify-content: center;
+    }
+
+    .terminal-controls .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        flex: 1;
+        justify-content: center;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .terminal-header h2 {
+        font-size: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .connection-status {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+    }
+
+    #terminal-container {
+        height: 400px;
+    }
+
+    .terminal-controls .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* 加载动画 */
+.terminal-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #9ca3af;
+    font-size: 1.1rem;
+}
+
+.terminal-loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+    border: 3px solid rgba(156, 163, 175, 0.3);
+    border-top-color: #9ca3af;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 暗色主题优化 */
+@media (prefers-color-scheme: dark) {
+    .terminal-warning {
+        background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+        border-color: #f59e0b;
+    }
+
+    .terminal-warning strong {
+        color: #fbbf24;
+    }
+
+    .terminal-warning ul {
+        color: #fde68a;
+    }
+
+    .terminal-controls {
+        background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+    }
+}
+
+/* 打印样式 */
+@media print {
+    .terminal-controls,
+    .terminal-warning,
+    .connection-status {
+        display: none;
+    }
+
+    .terminal-wrapper {
+        border: 1px solid #000;
+    }
+
+    #terminal-container {
+        height: auto;
+        min-height: 400px;
+    }
+}

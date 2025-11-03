@@ -1,6 +1,7 @@
 from datetime import timedelta
 from flask import Flask
 from flask_wtf import CSRFProtect
+from flask_socketio import SocketIO
 from database.base import db, login_manager
 from database.actions import create_user, get_user_by_uname
 from dotenv import load_dotenv
@@ -8,6 +9,9 @@ from markupsafe import Markup
 import logging
 import os
 import markdown
+
+# 全局 SocketIO 实例
+socketio = None
 
 
 def create_app():
@@ -56,6 +60,16 @@ def create_app():
     # CSRF保护
     csrf = CSRFProtect()
     csrf.init_app(app)
+
+    # 初始化 SocketIO (用于 WebShell)
+    global socketio
+    socketio = SocketIO(
+        app,
+        cors_allowed_origins="*",
+        async_mode="threading",
+        logger=False,
+        engineio_logger=False,
+    )
 
     # 初始化数据库
     db.init_app(app)
@@ -109,6 +123,7 @@ def create_app():
     from blueprints.project import project_bp
     from blueprints.admin import admin_bp
     from blueprints.api import api_bp
+    from blueprints.terminal import terminal_bp, init_terminal_socketio
 
     # 将蓝图注册到应用
     app.register_blueprint(index_bp)
@@ -119,6 +134,10 @@ def create_app():
     app.register_blueprint(project_bp, url_prefix="/project")
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(api_bp, url_prefix="/api")
+    app.register_blueprint(terminal_bp, url_prefix="/terminal")
+    
+    # 初始化 Terminal WebSocket 事件处理器
+    init_terminal_socketio(socketio)
 
     # 注册 Markdown 过滤器
     @app.template_filter("markdown")
@@ -166,4 +185,4 @@ def create_app():
     app.logger.setLevel(app.config["LOG_LEVEL"])
 
     app.logger.info("Flask应用初始化完成")
-    return app
+    return app, socketio

@@ -246,32 +246,36 @@
         
         el.className = 'status-badge';
         
-        // 获取三个按钮
+        // 获取所有按钮
         const startBtn = document.getElementById('project-start-btn');
         const stopBtn = document.getElementById('project-stop-btn');
         const removeBtn = document.getElementById('project-remove-btn');
+        const terminalBtn = document.getElementById('terminal-btn');
         
         if(status === 'running'){
             el.textContent = '运行中';
             el.classList.add('badge-success');
-            // 运行中：禁用启动，启用停止和删除
+            // 运行中：禁用启动，启用停止和删除，显示 WebShell
             if(startBtn) startBtn.disabled = true;
             if(stopBtn) stopBtn.disabled = false;
             if(removeBtn) removeBtn.disabled = false;
+            if(terminalBtn) terminalBtn.style.display = 'inline-block';
         }else if(status === 'starting'){
             el.textContent = '启动中';
             el.classList.add('badge-warning');
-            // 启动中：禁用所有按钮
+            // 启动中：禁用所有按钮，隐藏 WebShell
             if(startBtn) startBtn.disabled = true;
             if(stopBtn) stopBtn.disabled = true;
             if(removeBtn) removeBtn.disabled = true;
+            if(terminalBtn) terminalBtn.style.display = 'none';
         }else{
             el.textContent = '已停止';
             el.classList.add('badge-secondary');
-            // 已停止：启用启动，禁用停止，启用删除
+            // 已停止：启用启动，禁用停止，启用删除，隐藏 WebShell
             if(startBtn) startBtn.disabled = false;
             if(stopBtn) stopBtn.disabled = true;
             if(removeBtn) removeBtn.disabled = false;
+            if(terminalBtn) terminalBtn.style.display = 'none';
         }
     }
 
