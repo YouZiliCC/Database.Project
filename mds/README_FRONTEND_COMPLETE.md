@@ -163,7 +163,7 @@ static/js/
 - `pname`: 项目名称
 - `pinfo`: 项目描述
 - `gid`: 所属工作组ID
-- `docker_id`: Docker容器ID
+- `docker_name`: Docker容器ID
 - `port`: 对外访问端口
 - `docker_port`: Docker内部端口
 

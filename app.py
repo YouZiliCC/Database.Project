@@ -23,7 +23,7 @@ def create_app():
         load_dotenv(env_path)
     except Exception as e:
         app.logger.error(f"加载环境变量失败: {e}", exc_info=True)
-    
+
     app.config["WORKING_DIR"] = os.getcwd()
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
@@ -135,7 +135,7 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(api_bp, url_prefix="/api")
     app.register_blueprint(terminal_bp, url_prefix="/terminal")
-    
+
     # 初始化 Terminal WebSocket 事件处理器
     init_terminal_socketio(socketio)
 

@@ -2,11 +2,11 @@
 
 Users
 
--uid- uname upasswd uinfo docker_id admin
+-uid- uname upasswd uinfo docker_name admin
 
 Projects
 
--pid pname pinfo docker_id port docker_port
+-pid pname pinfo docker_name port docker_port
 
 
 djlint . --reformat --profile=jinja

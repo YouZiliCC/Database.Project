@@ -65,7 +65,7 @@ def list_projects():
             "pname": project.pname,
             "gid": project.gid,
             "gname": project.group.gname,
-            "docker_id": project.docker_id,
+            "docker_name": project.docker_name,
             "port": project.port,
             "docker_port": project.docker_port,
             "star_count": len(project.stars),

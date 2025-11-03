@@ -64,26 +64,34 @@
                 <h3>🚀 访问与管理</h3>
                 <div class="button-group">
                     {% if project.port %}
-                    <a class="btn btn-primary" href="http://localhost:{{ project.port }}" target="_blank">🌐 访问应用</a>
+                        <a class="btn btn-primary"
+                           href="http://localhost:{{ project.port }}"
+                           target="_blank">🌐 访问应用</a>
                     {% endif %}
                     {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
-                    <a id="terminal-btn" class="btn btn-info" href="{{ url_for('terminal.terminal', pid=project.pid) }}" target="_blank" style="display: none;">
-                        🖥️ WebShell 终端
-                    </a>
-                    <button id="project-start-btn" class="btn btn-success" onclick="startProject('{{ project.pid }}')">
-                        🚀 启动容器
-                    </button>
-                    <button id="project-stop-btn" class="btn btn-warning" onclick="stopProject('{{ project.pid }}')">
-                        ⏸️ 停止容器
-                    </button>
-                    <button id="project-remove-btn" class="btn btn-danger" onclick="removeProject('{{ project.pid }}')">
-                        🗑️ 删除容器
-                    </button>
-                    <a class="btn" href="{{ url_for('project.project_edit', pid=project.pid) }}">编辑项目</a>
-                    <button class="btn btn-danger" onclick="deleteProject('{{ project.gid }}', '{{ project.pid }}')">删除项目</button>
+                        <a id="terminal-btn"
+                           class="btn btn-info"
+                           href="{{ url_for('terminal.terminal', pid=project.pid) }}"
+                           target="_blank"
+                           style="display: none">🖥️ WebShell 终端</a>
+                        <button id="project-start-btn"
+                                class="btn btn-success"
+                                onclick="startProject('{{ project.pid }}')">🚀 启动容器</button>
+                        <button id="project-stop-btn"
+                                class="btn btn-warning"
+                                onclick="stopProject('{{ project.pid }}')">⏸️ 停止容器</button>
+                        <button id="project-remove-btn"
+                                class="btn btn-danger"
+                                onclick="removeProject('{{ project.pid }}')">🗑️ 删除容器</button>
+                        <a class="btn"
+                           href="{{ url_for('project.project_edit', pid=project.pid) }}">编辑项目</a>
+                        <button class="btn btn-danger"
+                                onclick="deleteProject('{{ project.gid }}', '{{ project.pid }}')">删除项目</button>
                     {% endif %}
-                    <a class="btn btn-secondary" href="{{ url_for('group.group_detail', gid=project.gid) }}">返回工作组</a>
-                    <a class="btn btn-secondary" href="{{ url_for('project.project_list') }}">返回列表</a>
+                    <a class="btn btn-secondary"
+                       href="{{ url_for('group.group_detail', gid=project.gid) }}">返回工作组</a>
+                    <a class="btn btn-secondary"
+                       href="{{ url_for('project.project_list') }}">返回列表</a>
                 </div>
             </div>
             <div class="detail-content">
@@ -101,7 +109,7 @@
                                 <strong>容器ID：</strong>
                             </td>
                             <td>
-                                <code>{{ project.docker_id }}</code>
+                                <code>{{ project.docker_name }}</code>
                             </td>
                         </tr>
                         <tr>

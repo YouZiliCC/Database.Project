@@ -97,7 +97,7 @@ class Project(db.Model, TimestampMixin):
     gid = db.Column(
         db.String(512), db.ForeignKey("groups.gid", ondelete="CASCADE"), nullable=False
     )
-    docker_id = db.Column(db.String(512), unique=True, default=generate_uuid)
+    docker_name = db.Column(db.String(512), unique=True, default=generate_uuid)
     port = db.Column(db.Integer, unique=True, nullable=True)
     docker_port = db.Column(db.Integer, unique=False, nullable=True)
 

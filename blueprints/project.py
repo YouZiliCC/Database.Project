@@ -131,8 +131,8 @@ def _docker_run_container(
             ports={f"{container_port}/tcp": host_port},
             detach=True,
             stdin_open=True,  # 等价于 docker run -i
-            tty=True,         # 等价于 docker run -t
-            remove=False,     # 不自动删除
+            tty=True,  # 等价于 docker run -t
+            remove=False,  # 不自动删除
             cpu_count=1,
             mem_limit="1g",
         )
@@ -167,7 +167,7 @@ def _docker_start_container(container_name: str) -> bool:
     except Exception as e:
         logger.error(f"容器启动异常: {container_name}", exc_info=True)
         return False
-    
+
 
 def _docker_stop_container(container_name: str) -> bool:
     """停止容器"""
@@ -541,9 +541,9 @@ def start_docker(pid):
     working_dir = current_app.config.get("WORKING_DIR")
     if not project:
         return jsonify({"success": False, "message": "项目不存在"}), 404
-    
+
     image_name = current_app.config.get("IMAGE_NAME")
-    container_name = project.docker_id
+    container_name = project.docker_name
 
     # 需要提前配置好端口映射
     try:
@@ -581,9 +581,7 @@ def start_docker(pid):
     def _build_and_start():
         try:
             DOCKER_STATUS[pid] = "starting"
-            logger.info(
-                f"开始启动项目容器: project={project.pname}, pid={pid}"
-            )
+            logger.info(f"开始启动项目容器: project={project.pname}, pid={pid}")
 
             # 如果镜像不存在，先 build
             if not image_exists:
@@ -665,13 +663,17 @@ def stop_docker(pid):
     if not project:
         return jsonify({"success": False, "message": "项目不存在"}), 404
 
-    container_name = project.docker_id
+    container_name = project.docker_name
     if not _docker_container_exists(container_name):
-        logger.warning(f"停止容器失败，容器不存在: container={container_name}, project={project.pname}")
+        logger.warning(
+            f"停止容器失败，容器不存在: container={container_name}, project={project.pname}"
+        )
         return jsonify({"success": False, "message": "容器不存在"}), 404
     stopped = _docker_stop_container(container_name)
     if not stopped:
-        logger.error(f"停止容器失败: container={container_name}, project={project.pname}")
+        logger.error(
+            f"停止容器失败: container={container_name}, project={project.pname}"
+        )
         return jsonify({"success": False, "message": "停止容器失败"}), 500
     DOCKER_STATUS[pid] = "stopped"
     logger.info(f"容器已停止: project={project.pname}, pid={pid}")
@@ -688,19 +690,25 @@ def remove_docker(pid):
     if not project:
         return jsonify({"success": False, "message": "项目不存在"}), 404
 
-    container_name = project.docker_id
+    container_name = project.docker_name
     if not _docker_container_exists(container_name):
-        logger.warning(f"删除容器失败，容器不存在: container={container_name}, project={project.pname}")
+        logger.warning(
+            f"删除容器失败，容器不存在: container={container_name}, project={project.pname}"
+        )
         return jsonify({"success": False, "message": "容器不存在"}), 404
-    
+
     removed = _docker_remove_container(container_name)
     if not removed:
-        logger.error(f"删除容器失败: container={container_name}, project={project.pname}")
+        logger.error(
+            f"删除容器失败: container={container_name}, project={project.pname}"
+        )
         return jsonify({"success": False, "message": "删除容器失败"}), 500
-    
+
     # 清除内存状态
     DOCKER_STATUS.pop(pid, None)
-    logger.info(f"容器已删除: project={project.pname}, pid={pid}, container={container_name}")
+    logger.info(
+        f"容器已删除: project={project.pname}, pid={pid}, container={container_name}"
+    )
     return jsonify({"success": True, "message": "容器已删除", "status": "stopped"}), 200
 
 
@@ -718,7 +726,7 @@ def project_docker_status(pid):
         return jsonify({"success": True, "status": status}), 200
 
     # 如果没有内存标记，检测容器实际状态
-    container_name = project.docker_id
+    container_name = project.docker_name
     if _docker_container_exists(container_name):
         st = _docker_container_status(container_name)
         mapped = "running" if st == "running" else "stopped"
@@ -726,6 +734,7 @@ def project_docker_status(pid):
 
     # 默认视为已停止
     return jsonify({"success": True, "status": "stopped"}), 200
+
 
 # TODO: iframe 或者别的实现方法
 

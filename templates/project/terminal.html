@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% block title %}WebShell - {{ project.pname }} - 数据库系统课程{% endblock %}
-
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/terminal.css') }}">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
-<style>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/terminal.css') }}">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
+    <style>
     /* 确保终端页面全宽 */
     .container {
         max-width: 100% !important;
@@ -16,71 +17,57 @@
         width: 100%;
         min-height: calc(100vh - 60px);
     }
-</style>
+    </style>
 {% endblock %}
-
 {% block content %}
-<div class="terminal-page">
-    <div class="terminal-warning">
-        <strong>⚠️ WebShell 终端使用须知</strong>
-        <ul>
-            <li>这是一个完整的交互式 Bash Shell，可以执行任意 Linux 命令</li>
-            <li>所有操作在 Docker 容器沙箱中进行，与宿主机完全隔离</li>
-            <li>支持 vim、nano 等编辑器，支持 ANSI 彩色输出</li>
-            <li>支持标准输入输出重定向、管道、后台任务等特性</li>
-            <li>请谨慎操作，避免误删文件或破坏容器环境</li>
-            <li>退出命令（exit）会关闭会话，可通过"重新连接"按钮恢复</li>
-        </ul>
-    </div>
-    
-    <div class="terminal-header">
-        <h2>
-            🖥️ WebShell 终端 - {{ project.pname }}
-            <span id="connection-status" class="connection-status status-connecting">连接中...</span>
-        </h2>
-        <div class="project-info">
-            容器 ID: {{ project.docker_id[:12] }} | 端口映射: {{ project.port }}:{{ project.docker_port }}
+    <div class="terminal-page">
+        <div class="terminal-warning">
+            <strong>⚠️ WebShell 终端使用须知</strong>
+            <ul>
+                <li>这是一个完整的交互式 Bash Shell，可以执行任意 Linux 命令</li>
+                <li>所有操作在 Docker 容器沙箱中进行，与宿主机完全隔离</li>
+                <li>支持 vim、nano 等编辑器，支持 ANSI 彩色输出</li>
+                <li>支持标准输入输出重定向、管道、后台任务等特性</li>
+                <li>请谨慎操作，避免误删文件或破坏容器环境</li>
+                <li>退出命令（exit）会关闭会话，可通过"重新连接"按钮恢复</li>
+            </ul>
+        </div>
+        <div class="terminal-header">
+            <h2>
+                🖥️ WebShell 终端 - {{ project.pname }}
+                <span id="connection-status" class="connection-status status-connecting">连接中...</span>
+            </h2>
+            <div class="project-info">
+                容器 ID: {{ project.docker_name[:12] }} | 端口映射: {{ project.port }}:{{ project.docker_port }}
+            </div>
+        </div>
+        <div class="terminal-wrapper">
+            <div id="terminal-container"></div>
+        </div>
+        <div class="terminal-controls">
+            <a href="{{ url_for('project.project_detail', pid=project.pid) }}"
+               class="btn btn-back">← 返回项目详情</a>
+            <button id="btn-clear" class="btn btn-clear">🗑️ 清空屏幕</button>
+            <button id="btn-reconnect" class="btn btn-reconnect" style="display: none;">🔄 重新连接</button>
         </div>
     </div>
-    
-    <div class="terminal-wrapper">
-        <div id="terminal-container"></div>
-    </div>
-    
-    <div class="terminal-controls">
-        <a href="{{ url_for('project.project_detail', pid=project.pid) }}" class="btn btn-back">
-            ← 返回项目详情
-        </a>
-        <button id="btn-clear" class="btn btn-clear">
-            🗑️ 清空屏幕
-        </button>
-        <button id="btn-reconnect" class="btn btn-reconnect" style="display: none;">
-            🔄 重新连接
-        </button>
-    </div>
-</div>
 {% endblock %}
-
 {% block scripts %}
-<!-- Socket.IO 客户端库 - 主 CDN -->
-<script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.2/dist/socket.io.min.js" 
-        crossorigin="anonymous"
-        onerror="this.onerror=null; this.src='https://unpkg.com/socket.io-client@4.7.2/dist/socket.io.min.js'"></script>
-
-<!-- Xterm.js 核心库 - 主 CDN -->
-<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js" 
-        crossorigin="anonymous"
-        onerror="this.onerror=null; this.src='https://unpkg.com/xterm@5.3.0/lib/xterm.min.js'"></script>
-
-<!-- Xterm.js 自适应插件 - 主 CDN -->
-<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js" 
-        crossorigin="anonymous"
-        onerror="this.onerror=null; this.src='https://unpkg.com/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js'"></script>
-
-<!-- 终端 JavaScript 逻辑 -->
-<script src="{{ url_for('static', filename='js/terminal.js') }}"></script>
-
-<script>
+    <!-- Socket.IO 客户端库 - 主 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.2/dist/socket.io.min.js"
+            crossorigin="anonymous"
+            onerror="this.onerror=null; this.src='https://unpkg.com/socket.io-client@4.7.2/dist/socket.io.min.js'"></script>
+    <!-- Xterm.js 核心库 - 主 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"
+            crossorigin="anonymous"
+            onerror="this.onerror=null; this.src='https://unpkg.com/xterm@5.3.0/lib/xterm.min.js'"></script>
+    <!-- Xterm.js 自适应插件 - 主 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"
+            crossorigin="anonymous"
+            onerror="this.onerror=null; this.src='https://unpkg.com/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js'"></script>
+    <!-- 终端 JavaScript 逻辑 -->
+    <script src="{{ url_for('static', filename='js/terminal.js') }}"></script>
+    <script>
     // 等待所有脚本加载完成后初始化终端
     function checkLibrariesLoaded() {
         // 检查所有必需的库是否已加载
@@ -149,5 +136,5 @@
             return confirmationMessage;
         }
     });
-</script>
+    </script>
 {% endblock %}
