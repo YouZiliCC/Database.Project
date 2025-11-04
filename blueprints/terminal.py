@@ -4,6 +4,7 @@ from flask import (
     request,
     abort,
     jsonify,
+    current_app,
 )
 from flask_login import login_required, current_user
 from flask_socketio import emit, disconnect
@@ -84,17 +85,7 @@ def init_terminal_socketio(socketio_instance):
                 # 发送 exit 命令让 bash 优雅退出
                 if local_objs and local_objs.get("socket"):
                     sock = local_objs["socket"]
-                    try:
-                        exit_cmd = b"exit\n"
-                        if hasattr(sock, "_sock"):
-                            sock._sock.sendall(exit_cmd)
-                        else:
-                            sock.sendall(exit_cmd)
-                        logger.info(f"已发送 exit 命令: sid={request.sid}")
-                    except Exception as send_error:
-                        logger.warning(f"发送 exit 命令失败: {send_error}")
 
-                    # 关闭 socket
                     try:
                         if hasattr(sock, "_sock"):
                             sock._sock.close()
@@ -108,6 +99,25 @@ def init_terminal_socketio(socketio_instance):
                     logger.info(
                         f"清理会话: sid={request.sid}, pid={session_info.get('pid')}"
                     )
+
+                    # 从容器内部强制杀死本次会话的 bash 进程
+                    # 使用环境变量标记来精确定位容器内的进程
+                    session_marker = session_info.get("session_marker")
+                    container_name = session_info.get("container_name")
+                    if session_marker and container_name:
+                        try:
+                            container = docker_client.containers.get(container_name)
+                            # 在容器内查找带有特定环境变量的 bash 进程并杀死
+                            # 使用 grep 环境变量来精确匹配
+                            kill_cmd = f"for pid in $(ps -eo pid,cmd | grep bash | grep -v grep | awk '{{print $1}}'); do cat /proc/$pid/environ 2>/dev/null | tr '\\0' '\\n' | grep -q '^{session_marker}=' && kill -9 $pid && echo killed $pid; done"
+                            kill_result = container.exec_run(
+                                f'sh -c "{kill_cmd}"', user="root"
+                            )
+                            logger.info(
+                                f"杀死容器内 bash (marker={session_marker}): exit_code={kill_result.exit_code}, output={kill_result.output.decode('utf-8', errors='ignore').strip()}"
+                            )
+                        except Exception as e:
+                            logger.warning(f"容器内杀死 bash 失败: {e}")
             except Exception as e:
                 logger.error(f"清理会话失败: {e}", exc_info=True)
             finally:
@@ -151,35 +161,27 @@ def init_terminal_socketio(socketio_instance):
                 emit("error", {"message": "容器未运行"})
                 return
 
-            # 启动新会话前，清理容器内的睡眠和僵尸进程
-            try:
-                # 清理所有睡眠状态（S）和僵尸状态（Z）的进程
-                # 排除 PID=1 的主进程和必要的系统进程
-                cleanup_cmd = container.exec_run(
-                    '/bin/sh -c \'ps -eo pid,stat,comm | grep -E "^[[:space:]]*[0-9]+ [SZ]" | grep -v "^ *1 " | awk "{print \\$1}" | xargs -r kill -9 2>/dev/null || true\'',
-                    detach=False,
-                )
-                logger.debug(
-                    f"清理睡眠和僵尸进程完成: exit_code={cleanup_cmd.exit_code}"
-                )
-            except Exception as cleanup_error:
-                logger.warning(f"清理进程时出错（可忽略）: {cleanup_error}")
-
             # 保存当前会话ID（在请求上下文中）
             current_sid = request.sid
             logger.info(f"为会话 {current_sid} 创建 exec 实例")
 
+            # 生成唯一的会话标记，用于在容器内识别此进程
+            session_marker = f"TERMINAL_SESSION_{current_sid.replace('-', '_')}"
+
             # 创建 exec 实例（不立即运行）
+            timeout = current_app.config["TIMEOUT_COMMAND_EXECUTION"]
             exec_cmd = container.client.api.exec_create(
                 container.id,
-                "/bin/bash",
+                f"/bin/bash -c 'export TMOUT={timeout}; export {session_marker}=1; exec bash'",
                 stdin=True,
                 tty=True,
                 environment={"TERM": "xterm-256color", "LANG": "en_US.UTF-8"},
                 user="root",
             )
             exec_id = exec_cmd["Id"]
-            logger.info(f"Exec ID: {exec_id}")
+            logger.info(
+                f"Exec ID: {exec_id} TIMEOUT: {timeout} SESSION_MARKER: {session_marker}"
+            )
 
             # 启动 exec 并获取 socket
             exec_socket = container.client.api.exec_start(
@@ -193,6 +195,7 @@ def init_terminal_socketio(socketio_instance):
                 {
                     "exec_id": exec_id,
                     "pid": pid,
+                    "session_marker": session_marker,
                     "container_id": container.id,
                     "container_name": container.name,
                 },
