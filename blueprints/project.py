@@ -105,7 +105,14 @@ def group_required_pid(func):
 def project_list():
     """项目列表页面"""
     projects = list_all_projects()
-    return render_template("project/list.html", projects=projects)
+    external_url = (
+        current_app.config.get("SERVER_PROTOCOL", "http")
+        + "://"
+        + current_app.config.get("SERVER_DOMAIN", "localhost")
+    )
+    return render_template(
+        "project/list.html", projects=projects, external_url=external_url
+    )
 
 
 @project_bp.route("/<uuid:pid>", methods=["GET"])
@@ -125,12 +132,19 @@ def project_detail(pid):
     if current_user.is_authenticated:
         user_starred = check_user_starred(current_user.uid, pid)
 
+    external_url = (
+        current_app.config.get("SERVER_PROTOCOL", "http")
+        + "://"
+        + current_app.config.get("SERVER_DOMAIN", "localhost")
+    )
+
     return render_template(
         "project/detail.html",
         project=project,
         comments=comments,
         star_count=star_count,
         user_starred=user_starred,
+        external_url=external_url,
     )
 
 

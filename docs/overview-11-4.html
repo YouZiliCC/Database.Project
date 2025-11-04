@@ -682,47 +682,7 @@
                 <h2>数据模型</h2>
 
                 <h3>核心实体关系</h3>
-                <div class="architecture-diagram">
-                        ┌─────────────────┐
-                        │     User        │
-                        ├─────────────────┤
-                        │ uid (PK)        │
-                        │ uname           │
-                        │ email           │
-                        │ passwd_hash     │
-                        │ role            │
-                        │ gid (FK)        │◄─────┐
-                        │ created_at      │      │
-                        │ updated_at      │      │
-                        └─────────────────┘      │
-                                                 │
-                                            ┌────┴──────────┐
-                                            │               │
-                                    ┌───────▼────────┐      │
-                                    │     Group      │      │
-                                    ├────────────────┤      │
-                                    │ gid (PK)       │      │
-                                    │ gname          │      │
-                                    │ leader_id (FK) ├──────┘
-                                    │ created_at     │
-                                    │ updated_at     │
-                                    └────────────────┘
-                                            │
-                                            │ 1:N
-                                            │
-                                    ┌───────▼────────┐
-                                    │    Project     │
-                                    ├────────────────┤
-                                    │ pid (PK)       │
-                                    │ pname          │
-                                    │ gid (FK)       │
-                                    │ docker_name    │
-                                    │ port           │
-                                    │ docker_port    │
-                                    │ created_at     │
-                                    │ updated_at     │
-                                    └────────────────┘
-                </div>
+                <img src="database_models.svg">
 
                 <h3>数据表详解</h3>
                 

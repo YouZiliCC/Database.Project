@@ -37,6 +37,8 @@ def create_app():
     app.config["WORKING_DIR"] = os.getcwd()
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+    app.config["SERVER_PROTOCOL"] = os.getenv("SERVER_PROTOCOL")
+    app.config["SERVER_DOMAIN"] = os.getenv("SERVER_DOMAIN")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.getenv(
         "SQLALCHEMY_TRACK_MODIFICATIONS"
