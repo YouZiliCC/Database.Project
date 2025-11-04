@@ -136,6 +136,20 @@ def init_terminal_socketio(socketio_instance):
                 emit("error", {"message": "容器未运行"})
                 return
 
+            # 启动新会话前，清理容器内的睡眠和僵尸进程
+            try:
+                # 清理所有睡眠状态（S）和僵尸状态（Z）的进程
+                # 排除 PID=1 的主进程和必要的系统进程
+                cleanup_cmd = container.exec_run(
+                    '/bin/sh -c \'ps -eo pid,stat,comm | grep -E "^[[:space:]]*[0-9]+ [SZ]" | grep -v "^ *1 " | awk "{print \\$1}" | xargs -r kill -9 2>/dev/null || true\'',
+                    detach=False,
+                )
+                logger.debug(
+                    f"清理睡眠和僵尸进程完成: exit_code={cleanup_cmd.exit_code}"
+                )
+            except Exception as cleanup_error:
+                logger.warning(f"清理进程时出错（可忽略）: {cleanup_error}")
+
             # 保存当前会话ID（在请求上下文中）
             current_sid = request.sid
             logger.info(f"为会话 {current_sid} 创建 exec 实例")
@@ -304,7 +318,7 @@ def init_terminal_socketio(socketio_instance):
             session = TERMINAL_SESSIONS[request.sid]
             exec_id = session.get("exec_id")
             container = session.get("container")
-            
+
             # 调用 Docker API 调整终端大小
             if container and exec_id:
                 container.client.api.exec_resize(exec_id, height=rows, width=cols)

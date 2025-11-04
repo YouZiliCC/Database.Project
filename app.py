@@ -182,7 +182,8 @@ def create_app():
 
     # 配置日志
     logging.basicConfig(
-        level=app.config["LOG_LEVEL"], format="[%(levelname)s] %(name)s : %(message)s"
+        level=app.config["LOG_LEVEL"],
+        format="[%(asctime)s] [%(levelname)s] %(name)s : %(message)s",
     )
     app.logger.setLevel(app.config["LOG_LEVEL"])
 

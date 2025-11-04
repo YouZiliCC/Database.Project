@@ -1,24 +1,25 @@
 {% extends "base.html" %}
 {% block title %}终端 - {{ project.pname }}{% endblock %}
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/terminal.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='vendor/xterm/xterm.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/terminal.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='vendor/xterm/xterm.css') }}">
 {% endblock %}
 {% block content %}
-<div class="terminal-container">
-    <div class="terminal-header">
-        <span class="terminal-title">{{ project.pname }} - 终端</span>
-        <a href="{{ url_for('project.project_detail', pid=project.pid) }}" class="btn btn-secondary">返回项目</a>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <span class="terminal-title">{{ project.pname }} - 终端</span>
+            <a href="{{ url_for('project.project_detail', pid=project.pid) }}"
+               class="btn btn-secondary">返回项目</a>
+        </div>
+        <div id="terminal"></div>
     </div>
-    <div id="terminal"></div>
-</div>
 {% endblock %}
 {% block scripts %}
-<script src="{{ url_for('static', filename='vendor/xterm/xterm.min.js') }}"></script>
-<script src="{{ url_for('static', filename='vendor/xterm/xterm-addon-fit.min.js') }}"></script>
-<script src="{{ url_for('static', filename='vendor/socket.io/socket.io.min.js') }}"></script>
-<script>
-    const PROJECT_ID = "{{ project.pid }}";
-</script>
-<script src="{{ url_for('static', filename='js/terminal.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/xterm/xterm.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/xterm/xterm-addon-fit.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/socket.io/socket.io.min.js') }}"></script>
+    <script>const PROJECT_ID = "{{ project.pid }}";</script>
+    <script src="{{ url_for('static', filename='js/terminal.js') }}"></script>
 {% endblock %}
