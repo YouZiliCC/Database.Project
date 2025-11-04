@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>uni-web 技术架构文档</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .nav {
+            background: #f5f5f5;
+            padding: 20px 40px;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: #764ba2;
+        }
+
+        main {
+            padding: 40px;
+        }
+
+        section {
+            margin-bottom: 50px;
+            scroll-margin-top: 80px;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.4em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        h4 {
+            color: #555;
+            font-size: 1.1em;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .tech-item {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tech-item h4 {
+            margin-top: 0;
+            color: #667eea;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        tr:hover {
+            background: #f0f4ff;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .architecture-diagram {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            line-height: 1.4;
+            white-space: pre;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            display: block;
+        }
+
+        .workflow-step {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .workflow-step .number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .endpoint {
+            background: #f0f4ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 3px solid #764ba2;
+            font-family: monospace;
+        }
+
+        .endpoint .method {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .module-card {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .module-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .module-card h4 {
+            color: #667eea;
+            margin-top: 0;
+        }
+
+        .file-tree {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin: 20px 0;
+            white-space: pre;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            display: block;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 5px 5px 5px 0;
+        }
+
+        footer {
+            background: #f5f5f5;
+            border-top: 2px solid #eee;
+            padding: 30px 40px;
+            text-align: center;
+            color: #666;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #667eea;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 999;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            main {
+                padding: 20px;
+            }
+
+            .tech-stack {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 uni-web</h1>
+            <p>web项目管理与容器化部署平台</p>
+        </header>
+
+        <nav class="nav">
+            <a href="#overview">概述</a>
+            <a href="#architecture">架构设计</a>
+            <a href="#tech-stack">技术栈</a>
+            <a href="#modules">核心模块</a>
+            <a href="#database">数据模型</a>
+            <a href="#api">API 接口</a>
+            <a href="#features">功能特性</a>
+            <a href="#deployment">部署运维</a>
+            <a href="#development">开发指南</a>
+        </nav>
+
+        <main>
+            <!-- 概述部分 -->
+            <section id="overview">
+                <h2>📖 项目概述</h2>
+                <p><strong>uni-web</strong> 是一个面向web项目管理和容器化部署平台。系统为师生提供了一个集成的工作环境，支持项目创建、管理、版本控制和容器化部署。</p>
+                
+                <h3>核心目标</h3>
+                <ul class="feature-list">
+                    <li>为师生提供统一的项目管理平台</li>
+                    <li>支持Docker容器化的项目部署和运行</li>
+                    <li>实现实时的Web终端交互功能</li>
+                    <li>管理项目间的协作和权限控制</li>
+                    <li>提供灵活的工作组管理机制</li>
+                </ul>
+
+                <h3>主要特点</h3>
+                <ul class="feature-list">
+                    <li>基于Flask框架的轻量级Web应用</li>
+                    <li>集成Redis实现分布式会话管理</li>
+                    <li>支持实时双向通信的WebSocket服务</li>
+                    <li>完整的身份认证和权限管理系统</li>
+                    <li>Docker API集成实现容器全生命周期管理</li>
+                </ul>
+            </section>
+
+            <!-- 架构设计 -->
+            <section id="architecture">
+                <h2>🏗️ 架构设计</h2>
+                
+                <h3>整体架构</h3>
+                <div class="architecture-diagram">
+                ┌─────────────────────────────────────────────────────────┐
+                │                    Client Layer (Web UI)                │
+                │        HTML/CSS/JavaScript + Socket.io + Xterm          │
+                └────────────────────┬────────────────────────────────────┘
+                                     │ HTTP(S) & WebSocket
+                ┌────────────────────▼────────────────────────────────────┐
+                │              应用层 (Flask Application)                  │
+                │     ┌──────────────┬──────────────┬──────────────┐      │
+                │     │   API        │  ROUTE       │  AUTH        │      │
+                │     └──────────────┴──────────────┴──────────────┘      │
+                └───────────────────────────┬─────────────────────────────┘
+                                            │
+                            ┌───────────────┼─────────────────┐
+                            │               │                 │
+                    ┌───────▼────┐ ┌────────▼─────────┐ ┌─────▼──────┐
+                    │  Database  │ │  Session&Memory  │ │  Container │
+                    │  (MySQL)   │ │      (Redis)     │ │   (Docker) │
+                    └────────────┘ └──────────────────┘ └────────────┘
+                </div>
+
+                <h3>分层架构</h3>
+                <div class="workflow-step">
+                    <div class="number">1</div>
+                    <h4>表现层 (Presentation Layer)</h4>
+                    <p>提供Web用户界面和WebSocket实时通信支持。使用Jinja2模板渲染HTML，通过Socket.io实现实时互动。</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="number">2</div>
+                    <h4>业务逻辑层 (Business Logic Layer)</h4>
+                    <p>处理核心业务逻辑，包括用户认证、权限控制、项目管理、工作组管理等。由Blueprint模块组织不同的功能域。</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="number">3</div>
+                    <h4>数据访问层 (Data Access Layer)</h4>
+                    <p>负责与数据库的交互。使用SQLAlchemy ORM提供对象关系映射，支持数据操作和查询。</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="number">4</div>
+                    <h4>基础设施层 (Infrastructure Layer)</h4>
+                    <p>包括数据库连接、Redis缓存、Docker API调用等基础服务。负责与外部系统集成。</p>
+                </div>
+            </section>
+
+            <!-- 技术栈 -->
+            <section id="tech-stack">
+                <h2>🛠️ 技术栈</h2>
+                
+                <h3>后端技术</h3>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <h4>Web框架</h4>
+                        <p><strong>Flask 3.1.2</strong> - 轻量级Python Web框架</p>
+                        <p>提供路由、视图、请求处理等核心功能</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>实时通信</h4>
+                        <p><strong>Flask-SocketIO 5.5.1</strong> - WebSocket支持</p>
+                        <p>实现实时双向通信，支持终端交互</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>数据库</h4>
+                        <p><strong>SQLAlchemy 3.1.1</strong> + <strong>MySQL</strong></p>
+                        <p>ORM框架和关系数据库存储</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>缓存层</h4>
+                        <p><strong>Redis 7.0.1</strong></p>
+                        <p>会话存储、缓存管理、实时数据共享</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>容器管理</h4>
+                        <p><strong>Docker SDK 7.1.0</strong></p>
+                        <p>容器生命周期管理、镜像构建部署</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>认证授权</h4>
+                        <p><strong>Flask-Login 0.6.3</strong></p>
+                        <p>用户会话管理和身份认证</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>表单验证</h4>
+                        <p><strong>Flask-WTF 1.2.2</strong></p>
+                        <p>表单处理和CSRF保护</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>邮件服务</h4>
+                        <p><strong>Flask-Email 1.4.4</strong></p>
+                        <p>用户通知和邮件发送</p>
+                    </div>
+                </div>
+
+                <h3>前端技术</h3>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <h4>模板引擎</h4>
+                        <p><strong>Jinja2</strong></p>
+                        <p>服务器端模板渲染</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>实时通信</h4>
+                        <p><strong>Socket.io</strong></p>
+                        <p>客户端WebSocket库</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>终端模拟器</h4>
+                        <p><strong>Xterm.js</strong></p>
+                        <p>Web终端UI和交互</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>样式框架</h4>
+                        <p><strong>CSS3</strong></p>
+                        <p>响应式设计和UI美化</p>
+                    </div>
+                </div>
+
+                <h3>部署运维</h3>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <h4>应用服务器</h4>
+                        <p><strong>Gunicorn 23.0.0</strong></p>
+                        <p>WSGI应用服务器，支持多进程部署</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>异步处理</h4>
+                        <p><strong>Eventlet 0.40.3</strong></p>
+                        <p>高性能并发处理库</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>Python版本</h4>
+                        <p><strong>Python 3.13+</strong></p>
+                        <p>最新稳定版本</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 核心模块 -->
+            <section id="modules">
+                <h2>📦 核心模块</h2>
+
+                <div class="module-grid">
+                    <div class="module-card">
+                        <h4>📱 auth.py (认证模块)</h4>
+                        <p><strong>职责:</strong> 用户身份认证和授权管理</p>
+                        <p><strong>关键功能:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>用户登录/注册</li>
+                            <li>密码哈希和验证</li>
+                            <li>会话管理</li>
+                            <li>权限校验装饰器</li>
+                        </ul>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>👥 user.py (用户管理)</h4>
+                        <p><strong>职责:</strong> 用户信息管理和个人设置</p>
+                        <p><strong>关键功能:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>用户信息查看/编辑</li>
+                            <li>个人资料管理</li>
+                            <li>密码重置</li>
+                            <li>用户列表展示</li>
+                        </ul>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>👨‍💼 group.py (工作组管理)</h4>
+                        <p><strong>职责:</strong> 工作组的创建、管理和成员协作</p>
+                        <p><strong>关键功能:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>工作组创建/编辑</li>
+                            <li>成员管理</li>
+                            <li>组长角色管理</li>
+                            <li>权限隔离</li>
+                        </ul>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>📋 project.py (项目管理)</h4>
+                        <p><strong>职责:</strong> 项目的全生命周期管理</p>
+                        <p><strong>关键功能:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>项目CRUD操作</li>
+                            <li>Docker容器管理</li>
+                            <li>端口配置</li>
+                            <li>项目状态监控</li>
+                        </ul>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>🖥️ terminal.py (Web终端)</h4>
+                        <p><strong>职责:</strong> 实时Web终端交互</p>
+                        <p><strong>关键功能:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>WebSocket连接管理</li>
+                            <li>终端输入输出处理</li>
+                            <li>会话管理</li>
+                            <li>命令执行</li>
+                        </ul>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>⚙️ api.py (API接口)</h4>
+                        <p><strong>职责:</strong> RESTful API提供</p>
+                        <p><strong>关键功能:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>JSON数据交互</li>
+                            <li>AJAX请求处理</li>
+                            <li>异步操作支持</li>
+                            <li>错误响应标准化</li>
+                        </ul>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>👑 admin.py (管理后台)</h4>
+                        <p><strong>职责:</strong> 系统管理和监控</p>
+                        <p><strong>关键功能:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>系统统计信息</li>
+                            <li>用户管理</li>
+                            <li>项目监控</li>
+                            <li>系统日志查看</li>
+                        </ul>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>🏠 index.py (首页导航)</h4>
+                        <p><strong>职责:</strong> 应用首页和主导航</p>
+                        <p><strong>关键功能:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>首页展示</li>
+                            <li>快速导航</li>
+                            <li>个人信息展示</li>
+                            <li>快捷操作入口</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>数据库模块 (database/)</h3>
+                <div class="highlight">
+                    <h4>models.py - 数据模型定义</h4>
+                    <p>定义所有数据库表结构，包括User、Group、Project等核心实体</p>
+                    
+                    <h4>actions.py - 数据操作函数</h4>
+                    <p>提供数据库操作的高级接口，简化CRUD操作</p>
+                    
+                    <h4>base.py - 数据库初始化</h4>
+                    <p>SQLAlchemy配置、数据库连接、Flask-Login集成</p>
+                </div>
+
+                <h3>工具模块 (utils/)</h3>
+                <div class="highlight">
+                    <h4>docker_client.py - Docker集成</h4>
+                    <p>Docker SDK封装，提供容器和镜像管理的便捷接口</p>
+                    
+                    <h4>redis_client.py - Redis集成</h4>
+                    <p>Redis连接管理和缓存操作接口</p>
+                </div>
+            </section>
+
+            <!-- 数据模型 -->
+            <section id="database">
+                <h2>🗄️ 数据模型</h2>
+
+                <h3>核心实体关系</h3>
+                <div class="architecture-diagram">
+                        ┌─────────────────┐
+                        │     User        │
+                        ├─────────────────┤
+                        │ uid (PK)        │
+                        │ uname           │
+                        │ email           │
+                        │ passwd_hash     │
+                        │ role            │
+                        │ gid (FK)        │◄─────┐
+                        │ created_at      │      │
+                        │ updated_at      │      │
+                        └─────────────────┘      │
+                                                 │
+                                            ┌────┴──────────┐
+                                            │               │
+                                    ┌───────▼────────┐      │
+                                    │     Group      │      │
+                                    ├────────────────┤      │
+                                    │ gid (PK)       │      │
+                                    │ gname          │      │
+                                    │ leader_id (FK) ├──────┘
+                                    │ created_at     │
+                                    │ updated_at     │
+                                    └────────────────┘
+                                            │
+                                            │ 1:N
+                                            │
+                                    ┌───────▼────────┐
+                                    │    Project     │
+                                    ├────────────────┤
+                                    │ pid (PK)       │
+                                    │ pname          │
+                                    │ gid (FK)       │
+                                    │ docker_name    │
+                                    │ port           │
+                                    │ docker_port    │
+                                    │ created_at     │
+                                    │ updated_at     │
+                                    └────────────────┘
+                </div>
+
+                <h3>数据表详解</h3>
+                
+                <h4>Users 表 (用户表)</h4>
+                <table>
+                    <tr>
+                        <th>字段名</th>
+                        <th>类型</th>
+                        <th>说明</th>
+                        <th>特殊属性</th>
+                    </tr>
+                    <tr>
+                        <td>uid</td>
+                        <td>VARCHAR(512)</td>
+                        <td>用户唯一标识</td>
+                        <td>主键, UUID</td>
+                    </tr>
+                    <tr>
+                        <td>uname</td>
+                        <td>VARCHAR(512)</td>
+                        <td>用户名</td>
+                        <td>唯一, 非空</td>
+                    </tr>
+                    <tr>
+                        <td>email</td>
+                        <td>VARCHAR(512)</td>
+                        <td>邮箱地址</td>
+                        <td>唯一, 非空</td>
+                    </tr>
+                    <tr>
+                        <td>passwd_hash</td>
+                        <td>VARCHAR(512)</td>
+                        <td>密码哈希值</td>
+                        <td>非空</td>
+                    </tr>
+                    <tr>
+                        <td>gid</td>
+                        <td>VARCHAR(512)</td>
+                        <td>所属工作组ID</td>
+                        <td>外键, 可为空</td>
+                    </tr>
+                    <tr>
+                        <td>role</td>
+                        <td>INT</td>
+                        <td>用户角色</td>
+                        <td>0:普通用户, 1:管理员, 2:教师</td>
+                    </tr>
+                    <tr>
+                        <td>sid</td>
+                        <td>VARCHAR(512)</td>
+                        <td>学号/工号</td>
+                        <td>唯一, 非空</td>
+                    </tr>
+                    <tr>
+                        <td>uinfo</td>
+                        <td>TEXT</td>
+                        <td>用户个人介绍</td>
+                        <td>可为空</td>
+                    </tr>
+                    <tr>
+                        <td>created_at</td>
+                        <td>DATETIME</td>
+                        <td>创建时间</td>
+                        <td>自动生成</td>
+                    </tr>
+                    <tr>
+                        <td>updated_at</td>
+                        <td>DATETIME</td>
+                        <td>更新时间</td>
+                        <td>自动更新</td>
+                    </tr>
+                </table>
+
+                <h4>Groups 表 (工作组表)</h4>
+                <table>
+                    <tr>
+                        <th>字段名</th>
+                        <th>类型</th>
+                        <th>说明</th>
+                        <th>特殊属性</th>
+                    </tr>
+                    <tr>
+                        <td>gid</td>
+                        <td>VARCHAR(512)</td>
+                        <td>工作组唯一标识</td>
+                        <td>主键, UUID</td>
+                    </tr>
+                    <tr>
+                        <td>gname</td>
+                        <td>VARCHAR(512)</td>
+                        <td>工作组名称</td>
+                        <td>非空</td>
+                    </tr>
+                    <tr>
+                        <td>ginfo</td>
+                        <td>TEXT</td>
+                        <td>工作组描述</td>
+                        <td>可为空</td>
+                    </tr>
+                    <tr>
+                        <td>leader_id</td>
+                        <td>VARCHAR(512)</td>
+                        <td>组长用户ID</td>
+                        <td>外键, 非空</td>
+                    </tr>
+                    <tr>
+                        <td>created_at</td>
+                        <td>DATETIME</td>
+                        <td>创建时间</td>
+                        <td>自动生成</td>
+                    </tr>
+                    <tr>
+                        <td>updated_at</td>
+                        <td>DATETIME</td>
+                        <td>更新时间</td>
+                        <td>自动更新</td>
+                    </tr>
+                </table>
+
+                <h4>Projects 表 (项目表)</h4>
+                <table>
+                    <tr>
+                        <th>字段名</th>
+                        <th>类型</th>
+                        <th>说明</th>
+                        <th>特殊属性</th>
+                    </tr>
+                    <tr>
+                        <td>pid</td>
+                        <td>VARCHAR(512)</td>
+                        <td>项目唯一标识</td>
+                        <td>主键, UUID</td>
+                    </tr>
+                    <tr>
+                        <td>pname</td>
+                        <td>VARCHAR(512)</td>
+                        <td>项目名称</td>
+                        <td>非空</td>
+                    </tr>
+                    <tr>
+                        <td>pinfo</td>
+                        <td>TEXT</td>
+                        <td>项目描述</td>
+                        <td>可为空</td>
+                    </tr>
+                    <tr>
+                        <td>gid</td>
+                        <td>VARCHAR(512)</td>
+                        <td>所属工作组ID</td>
+                        <td>外键, 非空</td>
+                    </tr>
+                    <tr>
+                        <td>docker_name</td>
+                        <td>VARCHAR(512)</td>
+                        <td>Docker容器名</td>
+                        <td>非空</td>
+                    </tr>
+                    <tr>
+                        <td>port</td>
+                        <td>INT</td>
+                        <td>项目外部访问端口</td>
+                        <td>非空, 唯一</td>
+                    </tr>
+                    <tr>
+                        <td>docker_port</td>
+                        <td>INT</td>
+                        <td>Docker容器内端口</td>
+                        <td>非空</td>
+                    </tr>
+                    <tr>
+                        <td>created_at</td>
+                        <td>DATETIME</td>
+                        <td>创建时间</td>
+                        <td>自动生成</td>
+                    </tr>
+                    <tr>
+                        <td>updated_at</td>
+                        <td>DATETIME</td>
+                        <td>更新时间</td>
+                        <td>自动更新</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- API接口 -->
+            <section id="api">
+                <h2>🔌 API 接口</h2>
+
+                <h3>认证相关 API</h3>
+                
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/auth/login</strong>
+                    <p>用户登录。需要提供用户名/邮箱和密码。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/auth/register</strong>
+                    <p>新用户注册。验证邮箱和密码要求。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/auth/logout</strong>
+                    <p>用户登出。清除会话信息。</p>
+                </div>
+
+                <h3>用户管理 API</h3>
+                
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/user/</strong>
+                    <p>获取当前登录用户信息。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/user/&lt;uid&gt;</strong>
+                    <p>获取指定用户的详细信息。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/user/&lt;uid&gt;/edit</strong>
+                    <p>编辑用户信息。支持修改邮箱、个人介绍等。</p>
+                </div>
+
+                <h3>工作组管理 API</h3>
+                
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/group/</strong>
+                    <p>获取用户所属工作组列表。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/group/create</strong>
+                    <p>创建新工作组。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/group/&lt;gid&gt;</strong>
+                    <p>获取工作组详情及成员列表。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/group/&lt;gid&gt;/edit</strong>
+                    <p>编辑工作组信息。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/group/&lt;gid&gt;/change_leader</strong>
+                    <p>更换工作组组长。</p>
+                </div>
+
+                <h3>项目管理 API</h3>
+                
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/project/</strong>
+                    <p>获取用户工作组内的项目列表。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/project/create</strong>
+                    <p>创建新项目。需要指定项目名、描述、端口等。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/project/&lt;pid&gt;</strong>
+                    <p>获取项目详情及Docker容器状态。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/project/&lt;pid&gt;/edit</strong>
+                    <p>编辑项目信息。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/project/&lt;pid&gt;/start</strong>
+                    <p>启动项目容器。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/project/&lt;pid&gt;/stop</strong>
+                    <p>停止项目容器。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">POST</div>
+                    <strong>/project/&lt;pid&gt;/restart</strong>
+                    <p>重启项目容器。</p>
+                </div>
+
+                <h3>Web终端 API</h3>
+                
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/terminal/&lt;pid&gt;</strong>
+                    <p>获取项目的Web终端界面。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">WebSocket</div>
+                    <strong>/socket.io/?EIO=4&transport=websocket</strong>
+                    <p>WebSocket连接用于实时终端交互。命名空间: /terminal</p>
+                </div>
+
+                <h3>管理员 API</h3>
+                
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/admin/dashboard</strong>
+                    <p>获取系统管理员仪表板信息。需要管理员权限。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/admin/users</strong>
+                    <p>获取全系统用户列表。</p>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method">GET</div>
+                    <strong>/admin/projects</strong>
+                    <p>获取全系统项目列表。</p>
+                </div>
+            </section>
+
+            <!-- 功能特性 -->
+            <section id="features">
+                <h2>✨ 功能特性</h2>
+
+                <h3>用户管理</h3>
+                <ul class="feature-list">
+                    <li>支持邮箱注册和登录</li>
+                    <li>密码安全加密存储（werkzeug.security）</li>
+                    <li>用户信息详情页和编辑页</li>
+                    <li>三种用户角色：普通用户、教师、管理员</li>
+                    <li>基于角色的访问控制（RBAC）</li>
+                </ul>
+
+                <h3>工作组协作</h3>
+                <ul class="feature-list">
+                    <li>创建和管理工作组</li>
+                    <li>工作组成员管理</li>
+                    <li>灵活的组长更换机制</li>
+                    <li>工作组权限隔离</li>
+                    <li>工作组内项目共享</li>
+                </ul>
+
+                <h3>项目管理</h3>
+                <ul class="feature-list">
+                    <li>项目CRUD完整操作</li>
+                    <li>项目详细信息管理</li>
+                    <li>灵活的端口配置</li>
+                    <li>项目版本历史追踪</li>
+                    <li>项目状态实时监控</li>
+                </ul>
+
+                <h3>Docker容器化</h3>
+                <ul class="feature-list">
+                    <li>容器自动构建和部署</li>
+                    <li>容器生命周期管理（启动、停止、重启、删除）</li>
+                    <li>镜像构建和管理</li>
+                    <li>容器状态实时查询</li>
+                    <li>Docker日志查看</li>
+                    <li>容器资源监控</li>
+                </ul>
+
+                <h3>Web终端</h3>
+                <ul class="feature-list">
+                    <li>实时交互式Web终端</li>
+                    <li>WebSocket双向通信</li>
+                    <li>完整的bash命令支持</li>
+                    <li>终端会话管理和恢复</li>
+                    <li>Xterm.js强大的终端UI</li>
+                    <li>多用户并发终端会话</li>
+                </ul>
+
+                <h3>会话管理</h3>
+                <ul class="feature-list">
+                    <li>Redis分布式会话存储</li>
+                    <li>会话签名验证</li>
+                    <li>7天会话过期时间</li>
+                    <li>自动会话清理</li>
+                    <li>支持多设备登录</li>
+                </ul>
+
+                <h3>安全机制</h3>
+                <ul class="feature-list">
+                    <li>CSRF保护（Flask-WTF）</li>
+                    <li>密码安全加密</li>
+                    <li>会话签名验证</li>
+                    <li>权限装饰器验证</li>
+                    <li>输入数据验证和清理</li>
+                    <li>SQL注入防护（SQLAlchemy ORM）</li>
+                </ul>
+            </section>
+
+            <!-- 部署运维 -->
+            <section id="deployment">
+                <h2>🚀 部署运维</h2>
+
+                <h3>环境要求</h3>
+                <ul class="feature-list">
+                    <li>Python 3.13+</li>
+                    <li>MySQL 5.7+</li>
+                    <li>Redis 7.0+</li>
+                    <li>Docker 20.10+（用于容器管理）</li>
+                    <li>Linux/macOS/Windows</li>
+                </ul>
+
+                <h3>安装步骤</h3>
+                <div class="code-block">
+                    git clone &lt;repository_url&gt;
+                </div>
+                <div class="code-block">
+                    cd uni-web
+                </div>
+                <h3>环境配置</h3>
+                <p>创建 <code>.env</code> 文件</p>
+                <div class="code-block">
+                    cp .env.example .env
+                </div>
+                <h3>启动服务</h3>
+                <div class="code-block">
+                    uv run gunicorn -c gunicorn_conf.py main:app /
+                    uv run main.py
+                </div>
+
+                <h3>常见问题排查</h3>
+                
+                <h4>数据库连接失败</h4>
+                <p>检查MySQL服务是否运行，验证连接字符串正确性，确保用户有访问权限。</p>
+
+                <h4>Redis连接失败</h4>
+                <p>确保Redis服务运行，检查端口号和密码配置，验证网络连接。</p>
+
+                <h4>Docker API调用失败</h4>
+                <p>确认Docker daemon运行，检查socket权限，验证Docker SDK安装。</p>
+
+                <h4>WebSocket连接问题</h4>
+                <p>检查Gunicorn是否启用了eventlet worker，验证firewall规则，确认Socket.io版本兼容性。</p>
+
+                <h3>性能优化建议</h3>
+                <ul class="feature-list">
+                    <li>使用Gunicorn多进程模式提高并发性能</li>
+                    <li>配置Redis缓存减少数据库查询</li>
+                    <li>使用CDN加速静态资源传输</li>
+                    <li>启用数据库连接池管理</li>
+                    <li>定期清理过期会话数据</li>
+                    <li>监控系统资源使用情况</li>
+                </ul>
+            </section>
+
+            <!-- 开发指南 -->
+            <section id="development">
+                <h2>👨‍💻 开发指南</h2>
+
+                <h3>项目结构</h3>
+                <div class="file-tree">
+uni-web/
+├── app.py                    # Flask应用工厂
+├── main.py                   # 应用入口
+├── gunicorn_conf.py          # Gunicorn配置
+├── pyproject.toml            # 项目配置和依赖
+├── .env                      # 环境变量
+├── blueprints/               # 蓝图模块（MVC中的控制器）
+│   ├── auth.py              # 认证模块
+│   ├── user.py              # 用户管理
+│   ├── group.py             # 工作组管理
+│   ├── project.py           # 项目管理
+│   ├── terminal.py          # Web终端
+│   ├── api.py               # API接口
+│   ├── admin.py             # 管理后台
+│   └── index.py             # 首页
+├── database/                 # 数据库层
+│   ├── base.py              # 数据库初始化
+│   ├── models.py            # 数据模型定义
+│   └── actions.py           # 数据操作接口
+├── utils/                    # 工具模块
+│   ├── docker_client.py      # Docker集成
+│   └── redis_client.py       # Redis集成
+├── templates/                # Jinja2模板
+│   ├── base.html            # 基础模板
+│   ├── index.html           # 首页
+│   ├── auth/                # 认证相关模板
+│   ├── user/                # 用户相关模板
+│   ├── group/               # 工作组模板
+│   ├── project/             # 项目相关模板
+│   ├── admin/               # 管理后台模板
+│   └── errors/              # 错误页面
+├── static/                   # 静态资源
+│   ├── css/                 # 样式文件
+│   ├── js/                  # JavaScript脚本
+│   ├── img/                 # 图片资源
+│   └── vendor/              # 第三方库
+│       ├── socket.io/       # Socket.io客户端
+│       └── xterm/           # Xterm.js库
+└── instance/                # 实例数据（本地）
+                </div>
+
+                <h3>开发工作流程</h3>
+
+                <div class="workflow-step">
+                    <div class="number">1</div>
+                    <h4>功能需求分析</h4>
+                    <p>理解新功能需求，确定涉及的数据模型和业务逻辑</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="number">2</div>
+                    <h4>数据模型设计</h4>
+                    <p>如需要，在 <code>database/models.py</code> 中扩展数据模型</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="number">3</div>
+                    <h4>后端业务逻辑</h4>
+                    <p>在相应的blueprint中实现业务逻辑和API接口</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="number">4</div>
+                    <h4>数据访问层</h4>
+                    <p>在 <code>database/actions.py</code> 中实现数据操作函数</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="number">5</div>
+                    <h4>前端模板</h4>
+                    <p>创建或修改 <code>templates/</code> 中的Jinja2模板</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="number">6</div>
+                    <h4>前端交互</h4>
+                    <p>在 <code>static/js/</code> 中实现JavaScript交互逻辑</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="number">7</div>
+                    <h4>测试验证</h4>
+                    <p>进行功能测试、边界测试和安全测试</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="number">8</div>
+                    <h4>代码提交</h4>
+                    <p>提交代码到版本控制系统</p>
+                </div>
+
+                <h3>编码规范</h3>
+                
+                <h4>Python代码规范</h4>
+                <ul class="feature-list">
+                    <li>遵循PEP 8风格指南</li>
+                    <li>使用有意义的变量和函数名称</li>
+                    <li>为复杂逻辑添加注释说明</li>
+                    <li>使用类型提示（Type Hints）</li>
+                    <li>避免过长的函数和文件</li>
+                    <li>使用装饰器模式实现横切关注点</li>
+                </ul>
+
+                <h4>数据库规范</h4>
+                <ul class="feature-list">
+                    <li>使用UUID作为主键</li>
+                    <li>总是包含created_at和updated_at时间戳</li>
+                    <li>使用TimestampMixin混合类</li>
+                    <li>明确定义外键关系</li>
+                    <li>验证数据约束（非空、唯一等）</li>
+                </ul>
+
+                <h4>API规范</h4>
+                <ul class="feature-list">
+                    <li>使用RESTful风格命名</li>
+                    <li>返回标准化JSON响应格式</li>
+                    <li>提供清晰的错误消息</li>
+                    <li>使用适当的HTTP状态码</li>
+                    <li>实现权限验证装饰器</li>
+                </ul>
+
+            </section>
+
+        </main>
+
+        <footer>
+            <p>&copy; 2025 uni-web 项目 | <a href="https://github.com/YouZiliCC/uni-web" style="color: #667eea;">GitHub Repository</a></p>
+            <p>技术文档 - 详细架构和开发指南</p>
+            <p>最后更新: 2025年11月4日</p>
+        </footer>
+    </div>
+
+    <div class="back-to-top" id="backToTop">↑</div>
+
+    <script>
+        // 平滑滚动和返回顶部功能
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 返回顶部按钮
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
