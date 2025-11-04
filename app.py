@@ -2,6 +2,7 @@ from datetime import timedelta
 from flask import Flask
 from flask_wtf import CSRFProtect
 from flask_socketio import SocketIO
+from flask_session import Session
 from database.base import db, login_manager
 from database.actions import create_user, get_user_by_uname
 from dotenv import load_dotenv
@@ -9,6 +10,7 @@ from markupsafe import Markup
 import logging
 import os
 import markdown
+import redis
 
 # 全局 SocketIO 实例
 socketio = None
@@ -18,6 +20,13 @@ def create_app():
     """创建Flask应用实例"""
 
     app = Flask(__name__)
+
+    # 先配置基础日志（这样后续的日志才能正常显示）
+    logging.basicConfig(
+        level=logging.INFO,  # 先设置为 INFO，稍后从环境变量读取
+        format="[%(asctime)s] [%(levelname)s] %(name)s : %(message)s",
+    )
+
     # 加载环境变量
     env_path = os.path.join(os.path.dirname(__file__), ".env")
     try:
@@ -32,6 +41,33 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.getenv(
         "SQLALCHEMY_TRACK_MODIFICATIONS"
     )
+
+    # Redis 会话配置
+    app.config["SESSION_TYPE"] = "redis"
+    app.config["SESSION_PERMANENT"] = True
+    app.config["SESSION_USE_SIGNER"] = True  # 对 session ID 进行签名
+    app.config["SESSION_KEY_PREFIX"] = "session:"  # Redis key 前缀
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)  # 会话过期时间
+
+    # 初始化 Redis 连接用于会话存储
+    try:
+        app.config["SESSION_REDIS"] = redis.Redis(
+            host=os.getenv("REDIS_HOST", "localhost"),
+            port=int(os.getenv("REDIS_PORT", 6379)),
+            db=int(os.getenv("REDIS_SESSION_DB", 1)),  # 使用独立的数据库
+            password=os.getenv("REDIS_PASSWORD", None),
+            decode_responses=False,  # Flask-Session 需要 bytes
+        )
+        # 测试连接
+        app.config["SESSION_REDIS"].ping()
+        app.logger.info("Redis 会话存储连接成功")
+    except Exception as e:
+        app.logger.warning(f"Redis 会话存储连接失败，将使用文件系统: {e}")
+        # 如果 Redis 不可用，回退到文件系统会话
+        app.config["SESSION_TYPE"] = "filesystem"
+        app.config["SESSION_FILE_DIR"] = os.path.join(
+            os.getcwd(), "instance", "sessions"
+        )
 
     # 数据库连接池配置（提升性能）
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
@@ -51,6 +87,12 @@ def create_app():
     app.config["LOG_LEVEL"] = os.getenv("LOG_LEVEL")
     app.config["ADMIN_ONLY_LOGIN"] = os.getenv("ADMIN_ONLY_LOGIN", "False") == "True"
     app.config["TEACHER_REGISTRATION_CODE"] = os.getenv("TEACHER_REGISTRATION_CODE")
+
+    # 更新日志级别（从环境变量读取）
+    log_level = getattr(logging, app.config["LOG_LEVEL"].upper(), logging.INFO)
+    logging.getLogger().setLevel(log_level)
+    app.logger.setLevel(log_level)
+
     # 测试服务器配置
     app.config["PORT"] = int(os.getenv("PORT", 5000))
     app.config["HOST"] = os.getenv("HOST", "0.0.0.0")
@@ -64,6 +106,9 @@ def create_app():
     # CSRF保护
     csrf = CSRFProtect()
     csrf.init_app(app)
+
+    # 初始化会话管理
+    Session(app)
 
     # 初始化 SocketIO (用于 WebShell)
     # 使用 eventlet 模式以支持 Gunicorn + WebSocket
@@ -182,13 +227,6 @@ def create_app():
                     )
             except Exception as e:
                 app.logger.error(f"初始化默认管理员用户失败: {e}", exc_info=True)
-
-    # 配置日志
-    logging.basicConfig(
-        level=app.config["LOG_LEVEL"],
-        format="[%(asctime)s] [%(levelname)s] %(name)s : %(message)s",
-    )
-    app.logger.setLevel(app.config["LOG_LEVEL"])
 
     app.logger.info("Flask应用初始化完成")
     return app, socketio
