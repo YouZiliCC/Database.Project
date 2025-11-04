@@ -1,31 +1,26 @@
 from flask import (
     Blueprint,
     render_template,
-    redirect,
-    url_for,
-    flash,
     request,
-    current_app,
     abort,
     jsonify,
 )
 from flask_login import login_required, current_user
 from flask_socketio import emit, disconnect
 from database.actions import *
-from blueprints.project import group_required_pid, docker_client
+from blueprints.project import group_required_pid
+from utils.redis_client import terminal_sessions as TERMINAL_SESSIONS_REDIS
+from utils.docker_client import docker_client
 import logging
 import docker
 import threading
-import struct
-import socket
 
 terminal_bp = Blueprint("terminal", __name__)
 logger = logging.getLogger(__name__)
 
-
-# 存储每个 WebSocket 会话的数据
-# session_id (request.sid) -> {'container': container, 'exec_id': exec_instance, 'pid': pid}
-TERMINAL_SESSIONS = {}
+# 本地存储不可序列化的对象 (socket, container对象)
+# session_id -> {'socket': socket_obj, 'container': container_obj}
+_LOCAL_SESSION_OBJECTS = {}
 
 
 def _get_container_by_project(pid: str):
@@ -79,14 +74,28 @@ def init_terminal_socketio(socketio_instance):
     def handle_disconnect():
         """客户端断开连接，清理会话"""
         logger.info(f"Terminal WebSocket 断开: sid={request.sid}")
-        if request.sid in TERMINAL_SESSIONS:
+
+        # 从 Redis 获取会话信息
+        session_info = TERMINAL_SESSIONS_REDIS.get(request.sid)
+        local_objs = _LOCAL_SESSION_OBJECTS.get(request.sid)
+
+        if session_info or local_objs:
             try:
-                session = TERMINAL_SESSIONS[request.sid]
-                # 关闭 socket
-                sock = session.get("socket")
-                if sock:
+                # 发送 exit 命令让 bash 优雅退出
+                if local_objs and local_objs.get("socket"):
+                    sock = local_objs["socket"]
                     try:
-                        # 尝试多种关闭方法以确保兼容性
+                        exit_cmd = b"exit\n"
+                        if hasattr(sock, "_sock"):
+                            sock._sock.sendall(exit_cmd)
+                        else:
+                            sock.sendall(exit_cmd)
+                        logger.info(f"已发送 exit 命令: sid={request.sid}")
+                    except Exception as send_error:
+                        logger.warning(f"发送 exit 命令失败: {send_error}")
+
+                    # 关闭 socket
+                    try:
                         if hasattr(sock, "_sock"):
                             sock._sock.close()
                         if hasattr(sock, "close"):
@@ -94,11 +103,17 @@ def init_terminal_socketio(socketio_instance):
                         logger.info(f"Socket 已关闭: sid={request.sid}")
                     except Exception as close_error:
                         logger.warning(f"关闭 socket 时出错（可忽略）: {close_error}")
-                logger.info(f"清理会话: sid={request.sid}, pid={session.get('pid')}")
+
+                if session_info:
+                    logger.info(
+                        f"清理会话: sid={request.sid}, pid={session_info.get('pid')}"
+                    )
             except Exception as e:
                 logger.error(f"清理会话失败: {e}", exc_info=True)
             finally:
-                del TERMINAL_SESSIONS[request.sid]
+                # 清理 Redis 和本地存储
+                TERMINAL_SESSIONS_REDIS.delete(request.sid)
+                _LOCAL_SESSION_OBJECTS.pop(request.sid, None)
 
     @socketio_instance.on("start_shell", namespace="/terminal")
     def handle_start_shell(data):
@@ -171,12 +186,22 @@ def init_terminal_socketio(socketio_instance):
                 exec_id, socket=True, tty=True
             )
 
-            # 保存会话
-            TERMINAL_SESSIONS[current_sid] = {
-                "container": container,
-                "exec_id": exec_id,
+            # 保存会话信息（分离可序列化和不可序列化数据）
+            # Redis 存储：可序列化的元数据（不设置过期时间，手动清理）
+            TERMINAL_SESSIONS_REDIS.set(
+                current_sid,
+                {
+                    "exec_id": exec_id,
+                    "pid": pid,
+                    "container_id": container.id,
+                    "container_name": container.name,
+                },
+            )
+
+            # 本地存储：不可序列化的对象
+            _LOCAL_SESSION_OBJECTS[current_sid] = {
                 "socket": exec_socket,
-                "pid": pid,
+                "container": container,
             }
 
             # 启动后台线程读取容器输出
@@ -270,13 +295,14 @@ def init_terminal_socketio(socketio_instance):
     @socketio_instance.on("input", namespace="/terminal")
     def handle_input(data):
         """处理用户输入"""
-        if request.sid not in TERMINAL_SESSIONS:
+        local_objs = _LOCAL_SESSION_OBJECTS.get(request.sid)
+
+        if not local_objs:
             logger.warning(f"Shell 会话不存在: sid={request.sid}")
             emit("error", {"message": "Shell 会话不存在"})
             return
 
-        session = TERMINAL_SESSIONS[request.sid]
-        sock = session.get("socket")
+        sock = local_objs.get("socket")
 
         if not sock:
             logger.warning(f"Socket 不存在: sid={request.sid}")
@@ -309,15 +335,17 @@ def init_terminal_socketio(socketio_instance):
     @socketio_instance.on("resize", namespace="/terminal")
     def handle_resize(data):
         """调整终端大小"""
-        if request.sid not in TERMINAL_SESSIONS:
+        session_info = TERMINAL_SESSIONS_REDIS.get(request.sid)
+        local_objs = _LOCAL_SESSION_OBJECTS.get(request.sid)
+
+        if not session_info or not local_objs:
             return
 
         try:
             rows = int(data.get("rows", 24))
             cols = int(data.get("cols", 80))
-            session = TERMINAL_SESSIONS[request.sid]
-            exec_id = session.get("exec_id")
-            container = session.get("container")
+            exec_id = session_info.get("exec_id")
+            container = local_objs.get("container")
 
             # 调用 Docker API 调整终端大小
             if container and exec_id:
