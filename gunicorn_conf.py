@@ -33,7 +33,7 @@ keepalive = int(os.getenv("KEEPALIVE", 5))
 loglevel = os.getenv("LOG_LEVEL", "info").lower()
 
 # 捕获
-capture_output = os.getenv("CAPTURE_OUTPUT", "True") == "True" 
+capture_output = os.getenv("CAPTURE_OUTPUT", "True") == "True"
 
 # 访问日志文件（- 表示 stdout）
 accesslog = os.getenv("ACCESSLOG", "-")

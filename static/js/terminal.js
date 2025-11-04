@@ -103,6 +103,7 @@
 
     // 页面卸载时断开连接
     window.addEventListener('beforeunload', function () {
+        socket.emit('exit\n');
         socket.disconnect();
     });
 })();

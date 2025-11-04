@@ -770,14 +770,9 @@ input[type="checkbox"]:focus {
     box-shadow: 0 4px 16px rgba(0,0,0,0.12);
     padding: 24px;
     z-index: 50;
-    transition: all 0.3s ease;
     overflow-y: auto;
     overflow-x: hidden; /* 防止横向溢出 */
     border: 1px solid #e5e7eb;
-}
-
-.project-info-sidebar:hover {
-    box-shadow: 0 6px 24px rgba(0,0,0,0.15);
 }
 
 .sidebar-content {
@@ -843,18 +838,11 @@ input[type="checkbox"]:focus {
     gap: 8px;
     padding: 14px 0;
     border-bottom: 1px solid #f3f4f6;
-    transition: background 0.2s ease;
 }
 
 .sidebar-info-item:last-child {
     border-bottom: none;
     padding-bottom: 0;
-}
-
-.sidebar-info-item:hover {
-    background: #f9fafb;
-    border-radius: 8px;
-    padding: 14px 12px;
 }
 
 .info-label {
@@ -974,11 +962,6 @@ input[type="checkbox"]:focus {
     background-clip: padding-box; /* 边框区域透明 */
 }
 
-.project-info-sidebar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-    background-clip: padding-box;
-}
-
 .project-detail { 
     background: #ffffff; 
     border-radius: 10px; 
@@ -1093,11 +1076,6 @@ input[type="checkbox"]:focus {
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
-.theme-dark .project-info-sidebar:hover {
-    box-shadow: 0 6px 28px rgba(0,0,0,0.6);
-    border-color: #475569;
-}
-
 .theme-dark .sidebar-image {
     background: linear-gradient(135deg, #4c1d95 0%, #581c87 100%);
     box-shadow: 0 4px 12px rgba(0,0,0,0.4);
@@ -1110,10 +1088,6 @@ input[type="checkbox"]:focus {
 
 .theme-dark .sidebar-info-item {
     border-bottom-color: #334155;
-}
-
-.theme-dark .sidebar-info-item:hover {
-    background: #334155;
 }
 
 .theme-dark .info-label {
@@ -1141,11 +1115,6 @@ input[type="checkbox"]:focus {
 /* 浮窗滚动条暗色主题 */
 .theme-dark .project-info-sidebar::-webkit-scrollbar-thumb {
     background: #475569;
-    background-clip: padding-box;
-}
-
-.theme-dark .project-info-sidebar::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
     background-clip: padding-box;
 }
 
