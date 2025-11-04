@@ -18,7 +18,7 @@ def internal_server_error(e):
 
 @app.route("/health")
 def health_check():
-    return {"status": "ok", "service": "DBSYS"}, 200
+    return {"status": "ok", "service": "Uniweb"}, 200
 
 
 if __name__ == "__main__":

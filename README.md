@@ -1,4 +1,4 @@
-# uni-web: Web项目管理与容器化部署平台
+# uniweb: Web项目管理与容器化部署平台
 
 <div align="center">
 
@@ -6,7 +6,7 @@
 [![Flask](https://img.shields.io/badge/Flask-3.1.2-green?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![Docker](https://img.shields.io/badge/Docker-20.10%2B-blue?logo=docker&logoColor=white)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
-[![GitHub](https://img.shields.io/badge/GitHub-YouZiliCC%2Funi--web-green?logo=github)](https://github.com/YouZiliCC/uni-web)
+[![GitHub](https://img.shields.io/badge/GitHub-YouZiliCC%2Funi--web-green?logo=github)](https://github.com/YouZiliCC/uniweb)
 
 Web综合项目管理平台，集成Docker容器化部署、实时Web终端、工作组协作等功能。
 
@@ -18,7 +18,7 @@ Web综合项目管理平台，集成Docker容器化部署、实时Web终端、�
 
 ## 📋 项目简介
 
-**uni-web** 是为大学教学和项目实践设计的一站式管理平台。通过集成Docker容器技术，为师生提供了便捷的项目部署、管理和协作环境。
+**uniweb** 是为大学教学和项目实践设计的一站式管理平台。通过集成Docker容器技术，为师生提供了便捷的项目部署、管理和协作环境。
 
 ### 核心应用场景
 
@@ -132,8 +132,8 @@ Web综合项目管理平台，集成Docker容器化部署、实时Web终端、�
 #### 1. 克隆项目
 
 ```bash
-git clone https://github.com/YouZiliCC/uni-web.git
-cd db_sys
+git clone https://github.com/YouZiliCC/uniweb.git
+cd uniweb
 ```
 
 #### 2. 创建虚拟环境
@@ -192,7 +192,7 @@ gunicorn -c gunicorn_conf.py main:app
 ## 📁 项目结构
 
 ```
-uni-web/
+uniweb/
 ├── app.py                      # Flask应用工厂
 ├── main.py                     # 应用入口
 ├── gunicorn_conf.py            # Gunicorn配置
@@ -402,7 +402,7 @@ User (多) ──→ Group (1)
 
 ### 报告问题
 
-遇到问题？请通过 [GitHub Issues](https://github.com/YouZiliCC/uni-web/issues) 提交。
+遇到问题？请通过 [GitHub Issues](https://github.com/YouZiliCC/uniweb/issues) 提交。
 
 ---
 
@@ -463,7 +463,7 @@ User (多) ──→ Group (1)
 
 <div align="center">
 
-**[⬆ 返回顶部](#uni-web)**
+**[⬆ 返回顶部](#uniweb)**
 
 Made with ❤️ by YouZiliCC
 
