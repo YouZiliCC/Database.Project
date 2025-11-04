@@ -301,10 +301,15 @@ def init_terminal_socketio(socketio_instance):
         try:
             rows = int(data.get("rows", 24))
             cols = int(data.get("cols", 80))
-            logger.debug(
-                f"终端大小调整请求: rows={rows}, cols={cols}, sid={request.sid}"
-            )
-            # 注意: Docker SDK 的 exec_run 不直接支持动态 resize
-            # 这个功能在某些场景下可能不完全生效
+            session = TERMINAL_SESSIONS[request.sid]
+            exec_id = session.get("exec_id")
+            container = session.get("container")
+            
+            # 调用 Docker API 调整终端大小
+            if container and exec_id:
+                container.client.api.exec_resize(exec_id, height=rows, width=cols)
+                logger.debug(
+                    f"终端大小已调整: rows={rows}, cols={cols}, sid={request.sid}"
+                )
         except Exception as e:
             logger.error(f"调整终端大小失败: {e}", exc_info=True)
