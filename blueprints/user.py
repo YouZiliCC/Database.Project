@@ -14,8 +14,8 @@ from wtforms import StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, ValidationError
 from database.actions import *
 from blueprints.auth import login_required
+from utils.image_upload import save_uploaded_image
 import logging
-import os
 
 user_bp = Blueprint("user", __name__)
 logger = logging.getLogger(__name__)
@@ -129,21 +129,16 @@ def user_edit():
         # 处理图片上传
         if "uimg" in request.files:
             file = request.files["uimg"]
-            if file and file.filename:
-                # 检查文件扩展名
-                allowed_extensions = {"png", "jpg", "jpeg", "gif", "webp"}
-                if (
-                    "." in file.filename
-                    and file.filename.rsplit(".", 1)[1].lower() in allowed_extensions
-                ):
-                    # 保存为 {uid}.png
-                    img_folder = "static/img/users"
-                    os.makedirs(img_folder, exist_ok=True)
-                    img_path = os.path.join(img_folder, f"{user.uid}.png")
-                    file.save(img_path)
-                    flash("头像上传成功", "success")
-                else:
-                    flash("不支持的图片格式", "warning")
+            success, message = save_uploaded_image(
+                file=file,
+                save_folder="static/img/users",
+                filename=str(user.uid),
+                convert_to_format="PNG",
+            )
+            if success:
+                flash(message, "success")
+            else:
+                flash(message, "warning")
 
         updated_user = update_user(
             user,
@@ -158,10 +153,16 @@ def user_edit():
                 f"更新用户信息失败: user={form.uname.data}, operator={current_user.uname}"
             )
             return render_template("user/edit.html", form=form, user=user)
-        flash("用户信息更新成功", "success")
-        logger.info(
-            f"更新用户信息成功: user={form.uname.data}, operator={current_user.uname}"
-        )
+        if updated_user and not success:
+            flash(f"用户信息更新成功，但图片上传失败", "warning")
+            logger.debug(
+                f"更新用户信息成功，但图片上传失败: {form.uname.data} by user {current_user.uname}"
+            )
+        else:
+            flash("用户信息更新成功", "success")
+            logger.info(
+                f"更新用户信息成功: {form.uname.data} by user {current_user.uname}"
+            )
         return redirect(url_for("user.user_me"))
     return render_template("user/edit.html", form=form, user=user)
 

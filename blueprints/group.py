@@ -15,8 +15,8 @@ from wtforms import StringField, SubmitField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Length
 from database.actions import *
 from blueprints.project import ProjectForm
+from utils.image_upload import save_uploaded_image
 import logging
-import os
 
 group_bp = Blueprint("group", __name__)
 logger = logging.getLogger(__name__)
@@ -422,20 +422,16 @@ def group_edit(gid):
         if "gimg" in request.files:
             file = request.files["gimg"]
             if file and file.filename:
-                # 检查文件扩展名
-                allowed_extensions = {"png", "jpg", "jpeg", "gif", "webp"}
-                if (
-                    "." in file.filename
-                    and file.filename.rsplit(".", 1)[1].lower() in allowed_extensions
-                ):
-                    # 保存为 {gid}.png
-                    img_folder = "static/img/groups"
-                    os.makedirs(img_folder, exist_ok=True)
-                    img_path = os.path.join(img_folder, f"{gid}.png")
-                    file.save(img_path)
-                    flash("图片上传成功", "success")
+                success, message = save_uploaded_image(
+                    file,
+                    save_folder="static/img/groups",
+                    filename=gid,
+                    convert_to_format="PNG",
+                )
+                if success:
+                    flash(message, "success")
                 else:
-                    flash("不支持的图片格式", "warning")
+                    flash(message, "warning")
 
         updated_group = update_group(
             group,
@@ -446,10 +442,16 @@ def group_edit(gid):
             flash("更新工作组信息失败，请重试", "danger")
             logger.warning(f"更新工作组信息失败: {form.gname.data}")
             return render_template("group/edit.html", form=form, group=group)
-        flash("工作组信息更新成功", "success")
-        logger.info(
-            f"更新工作组信息成功: {form.gname.data} by user {current_user.uname}"
-        )
+        if updated_group and not success:
+            flash(f"工作组信息更新成功，但图片上传失败", "warning")
+            logger.debug(
+                f"更新工作组信息成功，但图片上传失败: {form.gname.data} by user {current_user.uname}"
+            )
+        else:
+            flash("工作组信息更新成功", "success")
+            logger.info(
+                f"更新工作组信息成功: {form.gname.data} by user {current_user.uname}"
+            )
         return redirect(url_for("group.group_detail", gid=gid))
     return render_template("group/edit.html", form=form, group=group)
 

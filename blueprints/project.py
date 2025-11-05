@@ -27,9 +27,8 @@ from utils.docker_client import (
     _docker_stop_container,
     _docker_remove_container,
 )
+from utils.image_upload import save_uploaded_image
 import logging
-import os
-import docker
 import threading
 
 # 项目蓝图
@@ -334,21 +333,16 @@ def project_edit(pid):
         # 处理图片上传
         if "pimg" in request.files:
             file = request.files["pimg"]
-            if file and file.filename:
-                # 检查文件扩展名
-                allowed_extensions = {"png", "jpg", "jpeg", "gif", "webp"}
-                if (
-                    "." in file.filename
-                    and file.filename.rsplit(".", 1)[1].lower() in allowed_extensions
-                ):
-                    # 保存为 {pid}.png
-                    img_folder = "static/img/projects"
-                    os.makedirs(img_folder, exist_ok=True)
-                    img_path = os.path.join(img_folder, f"{pid}.png")
-                    file.save(img_path)
-                    flash("图片上传成功", "success")
-                else:
-                    flash("不支持的图片格式", "warning")
+            success, message = save_uploaded_image(
+                file=file,
+                save_folder="static/img/projects",
+                filename=pid,
+                convert_to_format="PNG",
+            )
+            if success:
+                flash(message, "success")
+            else:
+                flash(message, "warning")
 
         updated_project = update_project(
             project,
@@ -363,10 +357,14 @@ def project_edit(pid):
                 f"更新项目失败: project={form.pname.data}, user={current_user.uname}"
             )
             return render_template("project/edit.html", form=form, project=project)
-        flash("项目更新成功", "success")
-        logger.info(
-            f"更新项目成功: project={form.pname.data}, user={current_user.uname}"
-        )
+        if updated_project and not success:
+            flash(f"项目更新成功，但图片上传失败", "warning")
+            logger.debug(
+                f"更新项目成功，但图片上传失败: {form.pname.data} by user {current_user.uname}"
+            )
+        else:
+            flash("项目更新成功", "success")
+            logger.info(f"更新项目成功: {form.pname.data} by user {current_user.uname}")
         return redirect(url_for("project.project_detail", pid=pid))
     return render_template("project/edit.html", form=form, project=project)
 
