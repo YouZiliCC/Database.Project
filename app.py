@@ -4,13 +4,16 @@ from flask_wtf import CSRFProtect
 from flask_socketio import SocketIO
 from flask_session import Session
 from database.base import db, login_manager
-from database.actions import create_user, get_user_by_uname
 from dotenv import load_dotenv
 from markupsafe import Markup
 import logging
 import os
 import markdown
 import redis
+
+# 加载环境变量
+env_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(env_path)
 
 # 全局 SocketIO 实例
 socketio = None
@@ -27,15 +30,7 @@ def create_app():
         format="[%(asctime)s] [%(levelname)s] %(name)s : %(message)s",
     )
 
-    # 加载环境变量
-    env_path = os.path.join(os.path.dirname(__file__), ".env")
-    try:
-        load_dotenv(env_path)
-    except Exception as e:
-        app.logger.error(f"加载环境变量失败: {e}", exc_info=True)
-
     app.config["WORKING_DIR"] = os.getcwd()
-
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
     app.config["SERVER_PROTOCOL"] = os.getenv("SERVER_PROTOCOL")
     app.config["SERVER_DOMAIN"] = os.getenv("SERVER_DOMAIN")
@@ -104,6 +99,10 @@ def create_app():
     app.config["TIMEOUT_COMMAND_EXECUTION"] = int(
         os.getenv("TIMEOUT_COMMAND_EXECUTION", 1200)
     )  # 命令执行超时时间，单位秒
+    app.config["CPU_COUNT"] = int(os.getenv("CPU_COUNT", 1))
+    app.config["MEM_LIMIT"] = os.getenv("MEM_LIMIT", "1g")
+    app.config["MEMSWAP_LIMIT"] = os.getenv("MEMSWAP_LIMIT", "1.5g")
+    app.config["PIDS_LIMIT"] = int(os.getenv("PIDS_LIMIT", 8))
 
     # CSRF保护
     csrf = CSRFProtect()
@@ -220,6 +219,7 @@ def create_app():
             "role": int(os.getenv("INITIAL_ADMIN_ROLE", 1)),
             "sid": os.getenv("INITIAL_ADMIN_SID"),
         }
+        from database.actions import create_user, get_user_by_uname
         if initial_admin and not get_user_by_uname(initial_admin["uname"]):
             try:
                 admin = create_user(**initial_admin)

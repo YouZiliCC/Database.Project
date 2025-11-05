@@ -17,7 +17,6 @@ from wtforms.validators import DataRequired, Length, ValidationError
 from database.actions import *
 from utils.redis_client import docker_status as DOCKER_STATUS
 from utils.docker_client import (
-    docker_client,
     _docker_image_exists,
     _docker_container_exists,
     _docker_container_status,
@@ -34,6 +33,12 @@ import threading
 # 项目蓝图
 project_bp = Blueprint("project", __name__)
 logger = logging.getLogger(__name__)
+
+# docker config
+CPU_COUNT = current_app.config.get("CPU_COUNT", 1)
+MEM_LIMIT = current_app.config.get("MEM_LIMIT", "1g")
+MEMSWAP_LIMIT = current_app.config.get("MEMSWAP_LIMIT", "1.5g")
+PIDS_LIMIT = current_app.config.get("PIDS_LIMIT", 8)
 
 
 # -------------------------------------------------------------------------------------------
@@ -440,7 +445,9 @@ def start_docker(pid):
                     f"容器不存在，创建并运行: container={container_name}, project={project.pname}"
                 )
                 container_id = _docker_run_container(
-                    image_name, container_name, host_port, container_port
+                    image_name, container_name, host_port, container_port,
+                    cpu_count=CPU_COUNT, mem_limit=MEM_LIMIT,
+                    memswap_limit=MEMSWAP_LIMIT, pids_limit=PIDS_LIMIT
                 )
                 if container_id:
                     # persist container id to project record

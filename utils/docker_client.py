@@ -1,7 +1,8 @@
 """Docker 客户端封装和工具函数"""
-
+import os
 import docker
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,7 @@ def _docker_build_image(image_name: str, path: str = None) -> bool:
     if not docker_client:
         logger.warning("Docker client 未初始化，无法构建镜像")
         return False
+    # 目前决定手动加入镜像，此处直接失败
     try:
         build_path = path or os.getcwd()
         logger.info(f"开始构建镜像: {image_name} (路径: {build_path})")
@@ -96,7 +98,8 @@ def _docker_build_image(image_name: str, path: str = None) -> bool:
 
 
 def _docker_run_container(
-    image_name: str, container_name: str, host_port: int, container_port: int
+    image_name: str, container_name: str, host_port: int, container_port: int,
+    cpu_count: int = 1, mem_limit: str = "1g", memswap_limit: str = "1.5g", pids_limit: int = 8
 ) -> str:
     """运行容器（detached）并返回容器 ID，失败返回空字符串"""
     if not docker_client:
@@ -111,8 +114,10 @@ def _docker_run_container(
             stdin_open=True,  # 等价于 docker run -i
             tty=True,  # 等价于 docker run -t
             remove=False,  # 不自动删除
-            cpu_count=1,
-            mem_limit="1g",
+            cpu_count=cpu_count,
+            mem_limit=mem_limit,
+            memswap_limit=memswap_limit,
+            pids_limit=pids_limit,
         )
         logger.info(
             f"容器创建并启动成功: {container_name} (ID: {container.short_id}, 端口: {host_port}:{container_port})"

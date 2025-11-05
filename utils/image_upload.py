@@ -1,14 +1,13 @@
-"""图片上传和处理工具模块
-
+"""
+图片上传和处理工具模块
 提供图片上传、验证、压缩和保存的统一接口。
 """
-
 import os
 import logging
-from typing import Optional, Tuple
+from typing import Tuple
 from werkzeug.datastructures import FileStorage
 from PIL import Image
-import io
+
 
 logger = logging.getLogger(__name__)
 
