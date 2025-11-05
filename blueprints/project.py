@@ -34,12 +34,6 @@ import threading
 project_bp = Blueprint("project", __name__)
 logger = logging.getLogger(__name__)
 
-# docker config
-CPU_COUNT = current_app.config.get("CPU_COUNT", 1)
-MEM_LIMIT = current_app.config.get("MEM_LIMIT", "1g")
-MEMSWAP_LIMIT = current_app.config.get("MEMSWAP_LIMIT", "1.5g")
-PIDS_LIMIT = current_app.config.get("PIDS_LIMIT", 8)
-
 
 # -------------------------------------------------------------------------------------------
 # Project Forms
@@ -395,6 +389,12 @@ def start_docker(pid):
     except Exception:
         host_port = None
         container_port = None
+
+    # docker config
+    CPU_COUNT = current_app.config.get("CPU_COUNT", 1)
+    MEM_LIMIT = current_app.config.get("MEM_LIMIT", "1g")
+    MEMSWAP_LIMIT = current_app.config.get("MEMSWAP_LIMIT", "1.5g")
+    PIDS_LIMIT = current_app.config.get("PIDS_LIMIT", 8)
 
     if not host_port or not container_port:
         logger.error(
