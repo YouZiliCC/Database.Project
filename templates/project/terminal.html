@@ -10,9 +10,31 @@
     <div class="terminal-container">
         <div class="terminal-header">
             <span class="terminal-title">{{ project.pname }} - 终端</span>
-            <a href="{{ url_for('project.project_detail', pid=project.pid) }}"
-               class="btn btn-secondary">返回项目</a>
+            <div class="terminal-actions">
+                <label for="file-upload" class="btn btn-sm btn-primary upload-btn">
+                    <i class="fas fa-upload"></i> 上传文件
+                </label>
+                <input type="file" id="file-upload" style="display: none;" multiple>
+                <label for="folder-upload" class="btn btn-sm btn-info upload-btn">
+                    <i class="fas fa-folder-open"></i> 上传文件夹
+                </label>
+                <input type="file" id="folder-upload" style="display: none;" webkitdirectory directory multiple>
+                <a href="{{ url_for('project.project_detail', pid=project.pid) }}"
+                   class="btn btn-secondary">返回项目</a>
+            </div>
         </div>
+        
+        <!-- 上传进度区域 -->
+        <div id="upload-progress" class="upload-progress" style="display: none;">
+            <div class="upload-info">
+                <span id="upload-filename">正在上传...</span>
+                <span id="upload-status">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+        
         <div id="terminal"></div>
     </div>
 {% endblock %}
@@ -21,5 +43,6 @@
     <script src="{{ url_for('static', filename='vendor/xterm/xterm-addon-fit.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/socket.io/socket.io.min.js') }}"></script>
     <script>const PROJECT_ID = "{{ project.pid }}";</script>
+    <script src="{{ url_for('static', filename='vendor/pako/pako.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/terminal.js') }}"></script>
 {% endblock %}

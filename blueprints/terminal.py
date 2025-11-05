@@ -11,10 +11,13 @@ from flask_socketio import emit, disconnect
 from database.actions import *
 from blueprints.project import group_required_pid
 from utils.redis_client import terminal_sessions as TERMINAL_SESSIONS_REDIS
-from utils.docker_client import docker_client
+from utils.docker_client import docker_client, _upload_to_container
 import logging
 import docker
 import threading
+import gzip
+import io
+import os
 
 terminal_bp = Blueprint("terminal", __name__)
 logger = logging.getLogger(__name__)
@@ -61,6 +64,119 @@ def terminal(pid):
         return jsonify({"status": "error", "message": "容器未运行，请先启动项目"}), 400
 
     return render_template("project/terminal.html", project=project)
+
+
+@terminal_bp.route("/upload/<uuid:pid>", methods=["POST"])
+@login_required
+@group_required_pid
+def upload_file(pid):
+    """上传文件/文件夹到容器"""
+    pid = str(pid)
+    project = get_project_by_pid(pid)
+
+    if not project:
+        logger.warning(f"上传失败: 项目不存在 pid={pid}")
+        return jsonify({"status": "error", "message": "项目不存在"}), 404
+
+    # 检查容器是否运行
+    container = _get_container_by_project(pid)
+    if not container:
+        logger.warning(f"上传失败: 容器未运行 pid={pid}")
+        return jsonify({"status": "error", "message": "容器未运行，请先启动项目"}), 400
+
+    if "file" not in request.files:
+        logger.warning(f"上传失败: 没有文件被上传 pid={pid}")
+        return jsonify({"status": "error", "message": "没有文件被上传"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        logger.warning(f"上传失败: 文件名为空 pid={pid}")
+        return jsonify({"status": "error", "message": "文件名为空"}), 400
+
+    # 获取目标路径，默认为 /root
+    target_path = request.form.get("target_path", "/root")
+    is_compressed = request.form.get("is_compressed", "false") == "true"
+    relative_path = request.form.get("relative_path", file.filename)
+
+    logger.debug(
+        f"开始上传文件: {file.filename}, pid={pid}, 压缩={is_compressed}, 相对路径={relative_path}"
+    )
+
+    try:
+        # 读取文件内容
+        file_data = file.read()
+
+        # 检查文件大小限制 200MB
+        MAX_FILE_SIZE = 200 * 1024 * 1024  # 200MB
+        if len(file_data) > MAX_FILE_SIZE:
+            size_mb = len(file_data) / (1024 * 1024)
+            logger.warning(f"上传失败: 文件大小 {size_mb:.2f}MB 超过限制 200MB")
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": f"文件大小 {size_mb:.2f}MB 超过限制 200MB",
+                    }
+                ),
+                400,
+            )
+
+        logger.debug(f"文件读取成功: {file.filename}, 大小={len(file_data)} bytes")
+
+        # 如果客户端已压缩，先解压
+        if is_compressed:
+            try:
+                original_size = len(file_data)
+                file_data = gzip.decompress(file_data)
+                decompressed_size = len(file_data)
+                logger.debug(
+                    f"解压文件成功: {file.filename}, 压缩前={original_size}, 解压后={decompressed_size}"
+                )
+            except Exception as e:
+                logger.error(f"解压失败: {file.filename}, 错误={e}", exc_info=True)
+                return (
+                    jsonify({"status": "error", "message": f"文件解压失败: {str(e)}"}),
+                    400,
+                )
+
+        # 处理文件夹结构：如果有相对路径，确保在目标路径下创建对应的目录结构
+        import os as os_module
+
+        if "/" in relative_path:
+            # 提取目录部分
+            dir_path = os_module.path.dirname(relative_path)
+            final_target = f"{target_path.rstrip('/')}/{dir_path}"
+            filename = os_module.path.basename(relative_path)
+        else:
+            final_target = target_path
+            filename = file.filename
+
+        # 直接传输到容器
+        success, message = _upload_to_container(
+            container=container,
+            file_data=file_data,
+            target_path=final_target,
+            filename=filename,
+        )
+
+        if success:
+            logger.info(
+                f"用户 {current_user.uname} 上传文件到项目 {pid}: {relative_path} -> {final_target}/{filename}"
+            )
+            return jsonify(
+                {
+                    "status": "success",
+                    "message": message,
+                    "filename": filename,
+                    "path": f"{final_target}/{filename}",
+                }
+            )
+        else:
+            return jsonify({"status": "error", "message": message}), 500
+
+    except Exception as e:
+        logger.error(f"上传文件失败: {e}", exc_info=True)
+        return jsonify({"status": "error", "message": f"上传失败: {str(e)}"}), 500
 
 
 def init_terminal_socketio(socketio_instance):

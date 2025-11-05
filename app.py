@@ -220,6 +220,7 @@ def create_app():
             "sid": os.getenv("INITIAL_ADMIN_SID"),
         }
         from database.actions import create_user, get_user_by_uname
+
         if initial_admin and not get_user_by_uname(initial_admin["uname"]):
             try:
                 admin = create_user(**initial_admin)

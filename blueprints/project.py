@@ -445,9 +445,14 @@ def start_docker(pid):
                     f"容器不存在，创建并运行: container={container_name}, project={project.pname}"
                 )
                 container_id = _docker_run_container(
-                    image_name, container_name, host_port, container_port,
-                    cpu_count=CPU_COUNT, mem_limit=MEM_LIMIT,
-                    memswap_limit=MEMSWAP_LIMIT, pids_limit=PIDS_LIMIT
+                    image_name,
+                    container_name,
+                    host_port,
+                    container_port,
+                    cpu_count=CPU_COUNT,
+                    mem_limit=MEM_LIMIT,
+                    memswap_limit=MEMSWAP_LIMIT,
+                    pids_limit=PIDS_LIMIT,
                 )
                 if container_id:
                     # persist container id to project record

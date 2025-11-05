@@ -27,6 +27,21 @@
     font-weight: 500;
 }
 
+.terminal-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.upload-btn {
+    cursor: pointer;
+    margin: 0;
+}
+
+.upload-btn i {
+    margin-right: 4px;
+}
+
 .terminal-header .btn {
     padding: 6px 12px;
     font-size: 13px;
@@ -99,4 +114,61 @@
     #terminal {
         padding: 5px;
     }
+}
+
+/* 文件上传样式 */
+.upload-progress {
+    background: #2d2d2d;
+    padding: 12px 20px;
+    border-bottom: 1px solid #3e3e3e;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.upload-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    color: #d4d4d4;
+    font-size: 13px;
+}
+
+#upload-filename {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 15px;
+}
+
+#upload-status {
+    color: #2472c8;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #1e1e1e;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #2472c8;
+    border-radius: 3px;
+    transition: width 0.3s ease, background-color 0.3s ease;
 }

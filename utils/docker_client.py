@@ -1,7 +1,10 @@
 """Docker 客户端封装和工具函数"""
+
 import os
 import docker
 import logging
+import tarfile
+import io
 
 
 logger = logging.getLogger(__name__)
@@ -98,8 +101,14 @@ def _docker_build_image(image_name: str, path: str = None) -> bool:
 
 
 def _docker_run_container(
-    image_name: str, container_name: str, host_port: int, container_port: int,
-    cpu_count: int = 1, mem_limit: str = "1g", memswap_limit: str = "1.5g", pids_limit: int = 8
+    image_name: str,
+    container_name: str,
+    host_port: int,
+    container_port: int,
+    cpu_count: int = 1,
+    mem_limit: str = "1g",
+    memswap_limit: str = "1.5g",
+    pids_limit: int = 8,
 ) -> str:
     """运行容器（detached）并返回容器 ID，失败返回空字符串"""
     if not docker_client:
@@ -192,3 +201,61 @@ def _docker_remove_container(container_name: str) -> bool:
     except Exception as e:
         logger.error(f"容器删除异常: {container_name}", exc_info=True)
         return False
+
+
+def _upload_to_container(
+    container, file_data: bytes, target_path: str, filename: str
+) -> tuple[bool, str]:
+    """
+    将文件直接上传到容器中
+
+    Args:
+        container: Docker容器对象
+        file_data: 文件二进制数据
+        target_path: 容器内目标目录
+        filename: 文件名
+
+    Returns:
+        (success: bool, message: str)
+    """
+    try:
+        # 创建一个内存中的tar归档
+        tar_stream = io.BytesIO()
+        tar = tarfile.open(fileobj=tar_stream, mode="w")
+
+        # 将文件添加到tar归档
+        tarinfo = tarfile.TarInfo(name=filename)
+        tarinfo.size = len(file_data)
+        tarinfo.mode = 0o644  # 设置文件权限
+
+        tar.addfile(tarinfo, io.BytesIO(file_data))
+        tar.close()
+
+        # 重置流位置到开始
+        tar_stream.seek(0)
+
+        # 确保目标目录存在
+        try:
+            exec_result = container.exec_run(f"mkdir -p {target_path}", user="root")
+            if exec_result.exit_code != 0:
+                logger.warning(
+                    f"创建目录失败: {exec_result.output.decode('utf-8', errors='ignore')}"
+                )
+        except Exception as e:
+            logger.warning(f"创建目录时出错: {e}")
+
+        # 使用Docker API的put_archive方法上传文件
+        success = container.put_archive(path=target_path, data=tar_stream.read())
+
+        if success:
+            full_path = f"{target_path.rstrip('/')}/{filename}"
+            logger.info(f"文件上传成功: {filename} -> {full_path}")
+            return True, f"文件已成功上传到 {full_path}"
+        else:
+            logger.error(f"文件上传失败: {filename}")
+            return False, "文件上传失败"
+
+    except Exception as e:
+        error_msg = f"上传文件到容器时发生错误: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return False, error_msg
