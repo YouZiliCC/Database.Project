@@ -1,77 +1,115 @@
 {% extends "base.html" %}
 {% block title %}{{ user.uname }} - 用户详情{% endblock %}
 {% block content %}
-    <div class="container">
-        <div class="info-section">
-            <div class="info-header">
-                {% set user_img = '/static/img/users/' + user.uid + '.png' %}
-                <img src="{{ user_img }}"
-                     alt="{{ user.uname }}"
-                     class="user-avatar"
-                     onerror="this.src='/static/img/user.png';">
-                <div>
-                    <h2>{{ user.uname }}</h2>
-                    <p class="text-muted">
-                        {% if user.is_admin %}
-                            <span class="badge badge-admin">管理员</span>
-                        {% elif user.is_teacher %}
-                            <span class="badge badge-teacher">教师</span>
-                        {% elif user.is_leader %}
-                            <span class="badge badge-leader">组长</span>
-                        {% else %}
-                            <span class="badge">普通用户</span>
-                        {% endif %}
-                    </p>
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen py-12">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 flex items-center justify-between">
+                <div class="flex items-center">
+                    {% set user_img = '/static/img/users/' + user.uid + '.png' %}
+                    <div class="flex-shrink-0 h-16 w-16">
+                        <img class="h-16 w-16 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700" 
+                             src="{{ user_img }}" 
+                             alt="{{ user.uname }}"
+                             onerror="this.src='/static/img/user.png';">
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                            {{ user.uname }}
+                        </h3>
+                        <div class="mt-1 flex items-center">
+                            {% if user.is_admin %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                    管理员
+                                </span>
+                            {% elif user.is_teacher %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                    教师
+                                </span>
+                            {% elif user.is_leader %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    组长
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                    普通用户
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="info-content">
-                <div class="info-row">
-                    <label>邮箱：</label>
-                    <span>{{ user.email }}</span>
-                </div>
-                <div class="info-row">
-                    <label>学号：</label>
-                    <span>{{ user.sid }}</span>
-                </div>
-                <div class="info-row">
-                    <label>所属工作组：</label>
-                    <span>
-                        {% if user.group %}
-                            <a href="{{ url_for('group.group_detail', gid=user.gid) }}">{{ user.group.gname }}</a>
-                            {% if user.is_leader %}<span class="text-success">（组长）</span>{% endif %}
-                        {% else %}
-                            <span class="text-muted">未加入工作组</span>
-                        {% endif %}
-                    </span>
-                </div>
-                <div class="info-row">
-                    <label>注册时间：</label>
-                    <span>{{ user.created_at.strftime("%Y-%m-%d %H:%M") if user.created_at else '未知' }}</span>
-                </div>
-            </div>
-            {% if user.uinfo %}
-                <div class="info-content">
-                    <h3>📝 个人简介</h3>
-                    <div class="markdown-content">{{ user.uinfo | markdown }}</div>
-                </div>
-            {% endif %}
-            <div class="button-group mt-16">
-                {% if current_user.is_authenticated %}
-                    {% if current_user.uid == user.uid %}
-                        <a href="{{ url_for('user.user_edit') }}" class="btn">编辑个人信息</a>
-                        {% if current_user.gid %}
-                            <a href="{{ url_for('group.my_group') }}" class="btn">我的工作组</a>
-                            <button class="btn btn-danger" onclick="leaveGroup()">退出工作组</button>
-                        {% else %}
-                            <a href="{{ url_for('group.group_list') }}" class="btn">加入工作组</a>
-                        {% endif %}
-                    {% endif %}
-                    {% if current_user.is_admin %}
-                        <button class="btn btn-danger" onclick="deleteUser('{{ user.uid }}')">删除用户</button>
-                    {% endif %}
+                {% if current_user.is_authenticated and current_user.uid == user.uid %}
+                    <a href="{{ url_for('user.user_edit') }}" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <i class="fa-solid fa-pen mr-2"></i> 编辑
+                    </a>
                 {% endif %}
             </div>
+            <div class="border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:p-0">
+                <dl class="sm:divide-y sm:divide-gray-200 dark:sm:divide-gray-700">
+                    <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">邮箱</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">{{ user.email }}</dd>
+                    </div>
+                    <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">学号</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">{{ user.sid }}</dd>
+                    </div>
+                    <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">所属工作组</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                            {% if user.group %}
+                                <a href="{{ url_for('group.group_detail', gid=user.gid) }}" class="text-primary-600 hover:text-primary-500 dark:text-primary-400">{{ user.group.gname }}</a>
+                                {% if user.is_leader %}
+                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                        组长
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-500 dark:text-gray-400">未加入工作组</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">注册时间</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">{{ user.created_at.strftime("%Y-%m-%d %H:%M") if user.created_at else '未知' }}</dd>
+                    </div>
+                    {% if user.uinfo %}
+                    <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">个人简介</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2 prose dark:prose-invert max-w-none">
+                            {{ user.uinfo | markdown }}
+                        </dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+            
+            {% if current_user.is_authenticated %}
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-4 sm:px-6 flex flex-wrap gap-3 justify-end">
+                    {% if current_user.uid == user.uid %}
+                        {% if current_user.gid %}
+                            <a href="{{ url_for('group.my_group') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                <i class="fa-solid fa-users mr-2"></i> 我的工作组
+                            </a>
+                            <button onclick="leaveGroup()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                <i class="fa-solid fa-sign-out-alt mr-2"></i> 退出工作组
+                            </button>
+                        {% else %}
+                            <a href="{{ url_for('group.group_list') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                <i class="fa-solid fa-plus mr-2"></i> 加入工作组
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if current_user.is_admin %}
+                        <button onclick="deleteUser('{{ user.uid }}')" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <i class="fa-solid fa-trash mr-2"></i> 删除用户
+                        </button>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
+</div>
 {% endblock %}
 {% block scripts %}<script src="{{ url_for('static', filename='js/user.js') }}"></script>{% endblock %}

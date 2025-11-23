@@ -1,29 +1,52 @@
-// 全局脚本：闪存自动消失、主题切换、列表搜索
+// 全局脚本：闪存自动消失、列表搜索、分页
 (function(){
     // 闪存自动隐藏
-    const flashes = document.querySelectorAll('.flash');
+    const flashes = document.querySelectorAll('[role="alert"]');
     if(flashes.length){ setTimeout(()=> flashes.forEach(f=> f.remove()), 4000); }
 
     // 客户端Flash消息显示函数
     window.showFlash = function(message, category = 'info'){
         // 检查是否已存在 flash-container
-        let container = document.querySelector('.flash-container');
+        let container = document.querySelector('.max-w-7xl.mx-auto.px-4.mt-4');
         if (!container) {
-            // 创建容器并插入到 main 元素开头
             container = document.createElement('div');
-            container.className = 'flash-container';
+            container.className = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4';
             const main = document.querySelector('main');
             if (main) {
-                main.insertBefore(container, main.firstChild);
+                main.parentElement.insertBefore(container, main);
             } else {
                 document.body.insertBefore(container, document.body.firstChild);
             }
         }
 
+        // Determine classes based on category
+        let classes = 'rounded-md p-4 mb-4 border ';
+        let iconClass = '';
+        if (category === 'error') {
+            classes += 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-200 border-red-200 dark:border-red-800';
+            iconClass = 'fa-circle-exclamation';
+        } else if (category === 'success') {
+            classes += 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-200 border-green-200 dark:border-green-800';
+            iconClass = 'fa-circle-check';
+        } else {
+            classes += 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 border-blue-200 dark:border-blue-800';
+            iconClass = 'fa-circle-info';
+        }
+
         // 创建 flash 消息元素
         const flash = document.createElement('div');
-        flash.className = `flash ${category}`;
-        flash.textContent = message;
+        flash.className = classes;
+        flash.setAttribute('role', 'alert');
+        flash.innerHTML = `
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fa-solid ${iconClass}"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium">${message}</p>
+                </div>
+            </div>
+        `;
         flash.style.opacity = '0';
         flash.style.transform = 'translateY(-10px)';
         flash.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
@@ -51,62 +74,10 @@
         }, 4000);
     };
 
-    // 主题切换（localStorage 持久化）
-    // 注意：主题的初始应用已在 base.html 的 <head> 中完成，这里只处理切换
-    const THEME_KEY = 'app_theme';
-    const root = document.documentElement;
-    const toggleBtn = document.getElementById('theme-toggle');
-    toggleBtn?.addEventListener('click', () => {
-        const isDark = root.classList.toggle('theme-dark');
-        localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
-    });
-
-    // 移动端导航栏切换
-    const navbarToggle = document.getElementById('navbar-toggle');
-    const navbarMenu = document.getElementById('navbar-menu');
-    
-    if (navbarToggle && navbarMenu) {
-        // 点击汉堡按钮切换菜单
-        navbarToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            navbarToggle.classList.toggle('active');
-            navbarMenu.classList.toggle('active');
-        });
-        
-        // 点击菜单项后关闭菜单
-        const navLinks = navbarMenu.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    navbarToggle.classList.remove('active');
-                    navbarMenu.classList.remove('active');
-                }
-            });
-        });
-        
-        // 点击菜单外部关闭菜单
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768 && 
-                navbarMenu.classList.contains('active') &&
-                !navbarMenu.contains(e.target) && 
-                !navbarToggle.contains(e.target)) {
-                navbarToggle.classList.remove('active');
-                navbarMenu.classList.remove('active');
-            }
-        });
-        
-        // 窗口大小改变时自动关闭移动端菜单
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                navbarToggle.classList.remove('active');
-                navbarMenu.classList.remove('active');
-            }
-        });
-    }
-
     // 列表搜索（页面内简单过滤）——支持 ul/li 列表和卡片网格（.card/.project-card）
     const searchInputs = document.querySelectorAll('[data-list-search]');
-    const LIST_ITEM_SELECTOR = 'li, .card, .project-card, .list-item, .item';
+    // Updated selector to include Tailwind classes if needed, but keeping generic classes is safer
+    const LIST_ITEM_SELECTOR = 'li, .card, .project-card, .group-card, .list-item, .item';
     searchInputs.forEach(input => {
         const targetSelector = input.getAttribute('data-list-target');
         const list = document.querySelector(targetSelector);
@@ -134,7 +105,7 @@
         if(!pageSize || items.length <= pageSize){
             // 无需分页
             items.forEach(li => li.style.removeProperty('display'));
-            if(pager) pager.remove();
+            if(pager) pager.innerHTML = ''; // Clear pager instead of removing to keep layout stable if needed
             renderEmptyState(wrapper, items.length === 0);
             return;
         }
@@ -149,30 +120,46 @@
         // 渲染分页器
         if(!pager){
             pager = document.createElement('div');
-            pager.className = 'pager';
+            pager.className = 'pager mt-8 flex justify-center gap-2';
             wrapper.appendChild(pager);
         }
         pager.innerHTML = '';
-        for(let p=1; p<=pages; p++){
-            const btn = document.createElement('button');
-            btn.className = 'btn pager-btn' + (p===current ? ' active' : '');
-            btn.textContent = p;
-            btn.addEventListener('click', () => {
-                wrapper.setAttribute('data-page', String(p));
-                applyPagination(list);
-            });
-            pager.appendChild(btn);
+        
+        // Previous Button
+        if (pages > 1) {
+             // Simple numbered pagination
+            for(let p=1; p<=pages; p++){
+                const btn = document.createElement('button');
+                // Tailwind classes for pagination buttons
+                const baseClasses = 'relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:z-10 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500';
+                const activeClasses = 'z-10 bg-primary-50 border-primary-500 text-primary-600';
+                const inactiveClasses = 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700';
+                
+                btn.className = `${baseClasses} ${p === current ? activeClasses : inactiveClasses}`;
+                btn.textContent = p;
+                btn.addEventListener('click', () => {
+                    wrapper.setAttribute('data-page', String(p));
+                    applyPagination(list);
+                    // Scroll to top of list
+                    list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                pager.appendChild(btn);
+            }
         }
+        
         renderEmptyState(wrapper, total === 0);
     }
 
     function renderEmptyState(wrapper, isEmpty){
-        let empty = wrapper.querySelector('.empty');
+        let empty = wrapper.querySelector('.empty-state-msg');
         if(isEmpty){
             if(!empty){
                 empty = document.createElement('div');
-                empty.className = 'empty';
-                empty.textContent = '暂无数据';
+                empty.className = 'empty-state-msg text-center py-12';
+                empty.innerHTML = `
+                    <i class="fa-solid fa-folder-open text-4xl text-gray-400 mb-4"></i>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">没有找到匹配项</h3>
+                `;
                 wrapper.appendChild(empty);
             }
         }else{
@@ -181,9 +168,9 @@
     }
 
     // 初始应用分页（支持常见列表容器，包括项目网格 .project-list）
-    document.querySelectorAll('ul[list], ul.list, .list, .project-list').forEach(el => applyPagination(el));
+    document.querySelectorAll('ul[list], ul.list, .list, .project-list, .group-list').forEach(el => applyPagination(el));
 
-    // 列表排序：通过 data-sort-target 指定列表，select 使用 value: name-asc/name-desc
+    // 列表排序
     document.querySelectorAll('[data-sort-target]').forEach(select => {
         const target = document.querySelector(select.getAttribute('data-sort-target'));
         if(!target) return;
@@ -211,44 +198,6 @@
         applyPagination(list);
     }
 
-    // 多选与导出 CSV + 视图切换
-    document.addEventListener('change', (e) => {
-        const t = e.target;
-        if(!(t instanceof HTMLInputElement)) return;
-        if(t.matches('[data-select-all]')){
-            const target = document.querySelector(t.getAttribute('data-list-target'));
-            target?.querySelectorAll('[data-select-item]').forEach((cb) => { cb.checked = t.checked; });
-        }
-    });
-    document.addEventListener('click', (e) => {
-        const t = e.target;
-        if(!(t instanceof HTMLElement)) return;
-        if(t.matches('[data-export-csv]')){
-            const target = document.querySelector(t.getAttribute('data-list-target'));
-            if(!target) return;
-            const rows = [];
-            target.querySelectorAll('li').forEach(li => {
-                const cb = li.querySelector('[data-select-item]');
-                if(cb && cb.checked){ rows.push((li.innerText || '').trim()); }
-            });
-            if(rows.length === 0){ 
-                showFlash('请先勾选要导出的项', 'warning'); 
-                return; 
-            }
-            const csv = '\uFEFF' + rows.map(r => '"' + r.replace(/"/g,'""') + '"').join('\n');
-            const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'export.csv';
-            a.click();
-            URL.revokeObjectURL(a.href);
-        }
-        if(t.matches('[data-view-toggle]')){
-            const target = document.querySelector(t.getAttribute('data-list-target'));
-            if(!target) return;
-            target.classList.toggle('as-table');
-        }
-    });
     // 基础前端校验（必填与最小长度）。使用 data-validate="required|min:6" 声明
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', (e) => {
@@ -264,12 +213,21 @@
                         if(String(ctrl.value || '').length < n) valid = false;
                     }
                 });
-                ctrl.classList.toggle('invalid', !valid);
+                
+                // Toggle Tailwind error classes
+                if (!valid) {
+                    ctrl.classList.add('border-red-300', 'text-red-900', 'placeholder-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+                    ctrl.classList.remove('border-gray-300', 'focus:ring-primary-500', 'focus:border-primary-500');
+                } else {
+                    ctrl.classList.remove('border-red-300', 'text-red-900', 'placeholder-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+                    ctrl.classList.add('border-gray-300', 'focus:ring-primary-500', 'focus:border-primary-500');
+                }
+                
                 if(!valid) ok = false;
             });
             if(!ok){
                 e.preventDefault();
-                showFlash('请检查表单输入是否完整、长度是否达标', 'warning');
+                showFlash('请检查表单输入是否完整、长度是否达标', 'error');
             }
         });
     });

@@ -1,28 +1,55 @@
 {% extends "base.html" %}
 {% block title %}创建工作组 - Uniweb{% endblock %}
 {% block content %}
-    <div class="container">
-        <h2>创建工作组</h2>
-        <p class="text-muted">创建工作组后，您将自动成为该组的组长</p>
-        <form method="POST"
-              action="{{ url_for('group.group_create') }}"
-              class="form">
-            {{ form.hidden_tag() }}
-            <div class="form-row">
-                <label>{{ form.gname.label }}</label>
-                {{ form.gname(size=32, **{"data-validate":"required|min:3|max:50", "placeholder":"输入工作组名称"}) }}
-                {% if form.gname.errors %}<span class="error">{{ form.gname.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.ginfo.label }}</label>
-                {{ form.ginfo(rows=6, placeholder="简单介绍一下工作组...", maxlength=2000) }}
-                <small class="form-text text-muted">支持 Markdown 格式：**粗体**、*斜体*、`代码`、列表等</small>
-                {% if form.ginfo.errors %}<span class="error">{{ form.ginfo.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                {{ form.submit(class="btn", value="创建工作组") }}
-                <a href="{{ url_for('group.group_list') }}" class="btn btn-secondary">取消</a>
-            </div>
-        </form>
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            创建工作组
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            创建工作组后，您将自动成为该组的组长
+        </p>
     </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form class="space-y-6" method="POST" action="{{ url_for('group.group_create') }}">
+                {{ form.hidden_tag() }}
+                
+                <div>
+                    <label for="gname" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.gname.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.gname(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|min:3|max:50", "placeholder":"输入工作组名称"}) }}
+                    </div>
+                    {% if form.gname.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.gname.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="ginfo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.ginfo.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.ginfo(rows=6, class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", placeholder="简单介绍一下工作组...", maxlength=2000) }}
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">支持 Markdown 格式：**粗体**、*斜体*、`代码`、列表等</p>
+                    {% if form.ginfo.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.ginfo.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col space-y-3">
+                    {{ form.submit(class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer", value="创建工作组") }}
+                    
+                    <a href="{{ url_for('group.group_list') }}" class="w-full flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600">
+                        取消
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

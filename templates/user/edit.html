@@ -1,58 +1,101 @@
 {% extends "base.html" %}
 {% block title %}编辑个人信息 - Uniweb{% endblock %}
 {% block content %}
-    <div class="container">
-        <h2>编辑个人信息</h2>
-        <form method="POST"
-              action="{{ url_for('user.user_edit') }}"
-              class="form"
-              enctype="multipart/form-data"
-              id="edit-user-form">
-            {{ form.hidden_tag() }}
-            <div class="form-row">
-                <label>{{ form.uname.label }}</label>
-                {{ form.uname(size=32, **{"data-validate":"required|min:3|max:50"}) }}
-                {% if form.uname.errors %}<span class="error">{{ form.uname.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.email.label }}</label>
-                {{ form.email(size=64, type="email", **{"data-validate":"required|email"}) }}
-                {% if form.email.errors %}<span class="error">{{ form.email.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.sid.label }}</label>
-                {{ form.sid(size=10, **{"data-validate":"required|length:10"}) }}
-                {% if form.sid.errors %}<span class="error">{{ form.sid.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.uinfo.label }}</label>
-                {{ form.uinfo(rows=6, placeholder="简单介绍一下自己...", maxlength=2000) }}
-                <small class="form-text text-muted">支持 Markdown 格式，可使用 **粗体**、*斜体*、[链接](url)、列表等</small>
-                {% if form.uinfo.errors %}<span class="error">{{ form.uinfo.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label for="uimg">个人头像</label>
-                {% set user_img = '/static/img/users/' + user.uid + '.png' %}
-                <div class="image-preview">
-                    <img src="{{ user_img }}"
-                         alt="当前头像"
-                         id="current-image"
-                         onerror="this.src='/static/img/user.png';">
-                </div>
-                <input type="file"
-                       id="uimg"
-                       name="uimg"
-                       accept="image/*"
-                       onchange="previewImage(this)">
-                <small class="form-text text-muted">支持 PNG, JPG, JPEG, GIF, WEBP 格式</small>
-            </div>
-            <div class="form-row">
-                {{ form.submit(class="btn", value="保存更改") }}
-                <a href="{{ url_for('user.user_me') }}" class="btn btn-secondary">取消</a>
-                <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()">删除账号</button>
-            </div>
-        </form>
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            编辑个人信息
+        </h2>
     </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form class="space-y-6" 
+                  method="POST" 
+                  action="{{ url_for('user.user_edit') }}" 
+                  enctype="multipart/form-data"
+                  id="edit-user-form">
+                {{ form.hidden_tag() }}
+                
+                <div>
+                    <label for="uname" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.uname.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.uname(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|min:3|max:50"}) }}
+                    </div>
+                    {% if form.uname.errors %}
+                        <p class="mt-2 text-sm text-red-600" id="email-error">{{ form.uname.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.email.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.email(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", type="email", **{"data-validate":"required|email"}) }}
+                    </div>
+                    {% if form.email.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.email.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="sid" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.sid.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.sid(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|length:10"}) }}
+                    </div>
+                    {% if form.sid.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.sid.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="uinfo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.uinfo.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.uinfo(rows=6, class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", placeholder="简单介绍一下自己...", maxlength=2000) }}
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">支持 Markdown 格式，可使用 **粗体**、*斜体*、[链接](url)、列表等</p>
+                    {% if form.uinfo.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.uinfo.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">个人头像</label>
+                    <div class="mt-2 flex items-center space-x-5">
+                        <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+                            {% set user_img = '/static/img/users/' + user.uid + '.png' %}
+                            <img id="current-image" class="h-full w-full text-gray-300" src="{{ user_img }}" alt="Current profile photo" onerror="this.src='/static/img/user.png';">
+                        </span>
+                        <label for="uimg" class="bg-white dark:bg-gray-700 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer">
+                            <span>更换头像</span>
+                            <input id="uimg" name="uimg" type="file" class="sr-only" accept="image/*" onchange="previewImage(this)">
+                        </label>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">支持 PNG, JPG, JPEG, GIF, WEBP 格式</p>
+                </div>
+
+                <div class="flex flex-col space-y-3">
+                    {{ form.submit(class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer") }}
+                    
+                    <a href="{{ url_for('user.user_me') }}" class="w-full flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600">
+                        取消
+                    </a>
+                    
+                    <button type="button" onclick="confirmDeleteAccount()" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        删除账号
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/user.js') }}"></script>
@@ -63,7 +106,6 @@ function previewImage(input) {
         reader.onload = function(e) {
             const img = document.getElementById('current-image');
             img.src = e.target.result;
-            img.style.display = 'block';
         };
         reader.readAsDataURL(input.files[0]);
     }

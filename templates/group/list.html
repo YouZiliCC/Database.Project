@@ -1,74 +1,114 @@
 {% extends "base.html" %}
 {% block title %}工作组列表 - Uniweb{% endblock %}
 {% block content %}
-    <div class="container">
-        <div class="page-header">
-            <h2>工作组列表</h2>
-            {% if current_user.is_authenticated and not current_user.gid %}
-                <a href="{{ url_for('group.group_create') }}" class="btn">创建工作组</a>
-            {% endif %}
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="md:flex md:items-center md:justify-between mb-8">
+            <div class="flex-1 min-w-0">
+                <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate">
+                    工作组列表
+                </h2>
+            </div>
+            <div class="mt-4 flex md:mt-0 md:ml-4">
+                {% if current_user.is_authenticated and not current_user.gid %}
+                    <a href="{{ url_for('group.group_create') }}" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <i class="fa-solid fa-plus mr-2"></i> 创建工作组
+                    </a>
+                {% endif %}
+            </div>
         </div>
-        <div class="mb-16">
-            <input type="text"
-                   class="search"
-                   placeholder="搜索工作组..."
-                   data-list-search
-                   data-list-target=".group-list">
-            <select class="search" data-sort-target=".group-list">
-                <option value="name-asc">名称 ↑</option>
-                <option value="name-desc">名称 ↓</option>
-            </select>
+
+        <!-- Search and Sort -->
+        <div class="mb-8 flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <div class="relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" 
+                           class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-800 dark:text-white py-2" 
+                           placeholder="搜索工作组..." 
+                           data-list-search 
+                           data-list-target=".group-list">
+                </div>
+            </div>
+            <div class="sm:w-48">
+                <select class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md dark:bg-gray-800 dark:text-white" data-sort-target=".group-list">
+                    <option value="name-asc">名称 (A-Z)</option>
+                    <option value="name-desc">名称 (Z-A)</option>
+                </select>
+            </div>
         </div>
+
         {% if groups %}
-            <div class="grid-container">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 group-list" data-page-size="9">
                 {% for group in groups %}
-                    <div class="card group-card">
-                        <div class="card-header">
+                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg flex flex-col group-card transition hover:shadow-lg">
+                        <div class="relative h-48 bg-gray-200 dark:bg-gray-700">
                             {% set group_img = '/static/img/groups/' + group.gid + '.png' %}
-                            <img src="{{ group_img }}"
-                                 alt="{{ group.gname }}"
-                                 class="group-img"
+                            <img src="{{ group_img }}" 
+                                 alt="{{ group.gname }}" 
+                                 class="w-full h-full object-cover"
                                  onerror="this.src='/static/img/group.png';">
-                            <h3>
-                                <a href="{{ url_for('group.group_detail', gid=group.gid) }}">{{ group.gname }}</a>
-                            </h3>
                         </div>
-                        <div class="card-body">
-                            <div class="group-meta">
-                                <span class="meta-item" style="display: block; width: 100%;">
-                                    <strong>组长：</strong>
-                                    {% for user in group.users %}
-                                        {% if user.uid == group.leader_id %}
-                                            <a href="{{ url_for('user.user_detail', uid=user.uid) }}">{{ user.uname }}</a>
-                                        {% endif %}
-                                    {% endfor %}
-                                </span>
-                                <span class="meta-item">
-                                    <strong>成员数：</strong>{{ group.users|length }}
-                                </span>
-                                <span class="meta-item">
-                                    <strong>项目数：</strong>{{ group.projects|length }}
-                                </span>
+                        <div class="px-4 py-5 sm:p-6 flex-1 flex flex-col">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-2">
+                                <a href="{{ url_for('group.group_detail', gid=group.gid) }}" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                                    {{ group.gname }}
+                                </a>
+                            </h3>
+                            
+                            <div class="mt-4 space-y-2 text-sm text-gray-500 dark:text-gray-400 flex-1">
+                                <div class="flex items-center">
+                                    <i class="fa-solid fa-user-tie w-5 text-center mr-2 text-gray-400"></i>
+                                    <span>组长: 
+                                        {% for user in group.users %}
+                                            {% if user.uid == group.leader_id %}
+                                                <a href="{{ url_for('user.user_detail', uid=user.uid) }}" class="hover:text-gray-700 dark:hover:text-gray-300 font-medium">{{ user.uname }}</a>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fa-solid fa-users w-5 text-center mr-2 text-gray-400"></i>
+                                    <span>成员: {{ group.users|length }} 人</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fa-solid fa-folder w-5 text-center mr-2 text-gray-400"></i>
+                                    <span>项目: {{ group.projects|length }} 个</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-footer">
-                            <a href="{{ url_for('group.group_detail', gid=group.gid) }}"
-                               class="btn btn-sm">查看详情</a>
+                        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-4 sm:px-6 flex justify-between items-center">
+                            <a href="{{ url_for('group.group_detail', gid=group.gid) }}" class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">
+                                查看详情 <span aria-hidden="true">&rarr;</span>
+                            </a>
                             {% if current_user.is_authenticated and not current_user.gid %}
                                 {% if group.gid in user_applications %}
-                                    <button class="btn btn-sm btn-secondary" disabled>已申请</button>
+                                    <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-gray-500 bg-gray-100 cursor-not-allowed" disabled>
+                                        已申请
+                                    </button>
                                 {% else %}
-                                    <button class="btn btn-sm btn-primary"
-                                            onclick="applyToGroup('{{ group.gid }}')">申请加入</button>
+                                    <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                            onclick="applyToGroup('{{ group.gid }}')">
+                                        申请加入
+                                    </button>
                                 {% endif %}
                             {% endif %}
                         </div>
                     </div>
                 {% endfor %}
             </div>
+            <!-- Pagination container handled by app.js -->
+            <div class="pager mt-8 flex justify-center gap-2"></div>
         {% else %}
-            <div class="empty">暂无工作组，快来创建第一个吧！</div>
+            <div class="text-center py-12">
+                <i class="fa-solid fa-users-slash text-4xl text-gray-400 mb-4"></i>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">暂无工作组</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">还没有任何工作组。</p>
+            </div>
         {% endif %}
     </div>
+</div>
 {% endblock %}
 {% block scripts %}<script src="{{ url_for('static', filename='js/group.js') }}"></script>{% endblock %}

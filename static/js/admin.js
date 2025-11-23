@@ -19,16 +19,20 @@
 
     // 格式化描述文本：截断过长文本并添加省略号
     function formatDescription(text, maxLength = 50) {
-        if (!text) return '<span class="text-muted">无</span>';
+        if (!text) return '<span class="text-gray-400 dark:text-gray-500">无</span>';
         const escaped = String(text).replace(/[<>&"']/g, c => ({
             '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;'
         }[c]));
-        if (escaped.length <= maxLength) return `<span class="description">${escaped}</span>`;
-        return `<span class="description" title="${escaped}">${escaped.substring(0, maxLength)}...</span>`;
+        if (escaped.length <= maxLength) return `<span class="truncate" title="${escaped}">${escaped}</span>`;
+        return `<span class="truncate" title="${escaped}">${escaped.substring(0, maxLength)}...</span>`;
     }
 
     function showLoading() {
-        resultEl.innerHTML = '<div class="spinner" aria-label="加载中"></div>';
+        resultEl.innerHTML = `
+            <div class="flex justify-center items-center h-64">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            </div>
+        `;
     }
 
     async function fetchJson(endpoint) {
@@ -55,30 +59,47 @@
 
     function renderUsers(users) {
         if (!Array.isArray(users) || users.length === 0) {
-            resultEl.innerHTML = '<p class="empty">暂无用户</p>';
+            resultEl.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-400">暂无用户</div>';
             return;
         }
         const rows = users.map(u => `
-            <tr>
-                <td><a href="/user/${u.uid}">${u.uname}</a></td>
-                <td>${u.email ?? ''}</td>
-                <td>${u.sid ?? ''}</td>
-                <td>${u.is_admin ? '<span class="badge badge-admin">是</span>' : '否'}</td>
-                <td>${u.is_teacher ? '<span class="badge badge-teacher">是</span>' : '否'}</td>
-                <td>
-                    <button class="btn btn-sm btn-danger" data-action="del_user" data-id="${u.uid}">删除</button>
-                    <button class="btn btn-sm" data-action="reset_password" data-id="${u.uid}">重置密码</button>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                    <a href="/user/${u.uid}" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">${u.uname}</a>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${u.email ?? ''}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${u.sid ?? ''}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    ${u.is_admin ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">是</span>' : '否'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    ${u.is_teacher ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">是</span>' : '否'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 mr-3" data-action="del_user" data-id="${u.uid}">删除</button>
+                    <button class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" data-action="reset_password" data-id="${u.uid}">重置密码</button>
                 </td>
             </tr>
         `).join('');
         resultEl.innerHTML = `
-            <h3>用户管理</h3>
-            <div class="table-wrap">
-                <table class="table">
-                    <thead>
-                        <tr><th>用户名</th><th>邮箱</th><th>学号</th><th>Admin</th><th>Teacher</th><th>操作</th></tr>
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">用户管理</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">用户名</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">邮箱</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">学号</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Admin</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Teacher</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">操作</th>
+                        </tr>
                     </thead>
-                    <tbody>${rows}</tbody>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        ${rows}
+                    </tbody>
                 </table>
             </div>
         `;
@@ -86,29 +107,42 @@
 
     function renderProjects(projects) {
         if (!Array.isArray(projects) || projects.length === 0) {
-            resultEl.innerHTML = '<p class="empty">暂无项目</p>';
+            resultEl.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-400">暂无项目</div>';
             return;
         }
         const rows = projects.map(p => `
-            <tr>
-                <td><a href="/project/${p.pid}">${p.pname}</a></td>
-                <td>${formatDescription(p.pinfo, 50)}</td>
-                <td>${p.gname ?? ''}</td>
-                <td><code>${p.port ?? ''}</code></td>
-                <td><code>${p.docker_port ?? ''}</code></td>
-                <td>
-                    <button class="btn btn-sm btn-danger" data-action="del_projects" data-id="${p.pid}">删除</button>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                    <a href="/project/${p.pid}" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">${p.pname}</a>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">${formatDescription(p.pinfo, 50)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${p.gname ?? ''}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">${p.port ?? ''}</code></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">${p.docker_port ?? ''}</code></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" data-action="del_projects" data-id="${p.pid}">删除</button>
                 </td>
             </tr>
         `).join('');
         resultEl.innerHTML = `
-            <h3>项目管理</h3>
-            <div class="table-wrap">
-                <table class="table">
-                    <thead>
-                        <tr><th>项目名</th><th>简介</th><th>组名</th><th>端口</th><th>容器端口</th><th>操作</th></tr>
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">项目管理</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">项目名</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">简介</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">组名</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">端口</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">容器端口</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">操作</th>
+                        </tr>
                     </thead>
-                    <tbody>${rows}</tbody>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        ${rows}
+                    </tbody>
                 </table>
             </div>
         `;
@@ -116,28 +150,40 @@
 
     function renderGroups(groups) {
         if (!Array.isArray(groups) || groups.length === 0) {
-            resultEl.innerHTML = '<p class="empty">暂无工作组</p>';
+            resultEl.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-400">暂无工作组</div>';
             return;
         }
         const rows = groups.map(g => `
-            <tr>
-                <td><a href="/group/${g.gid}">${g.gname}</a></td>
-                <td>${formatDescription(g.ginfo, 50)}</td>
-                <td>${g.users?.length ?? 0}</td>
-                <td>${g.projects?.length ?? 0}</td>
-                <td>
-                    <button class="btn btn-sm btn-danger" data-action="del_group" data-id="${g.gid}">删除</button>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                    <a href="/group/${g.gid}" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">${g.gname}</a>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">${formatDescription(g.ginfo, 50)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${g.users?.length ?? 0}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${g.projects?.length ?? 0}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" data-action="del_group" data-id="${g.gid}">删除</button>
                 </td>
             </tr>
         `).join('');
         resultEl.innerHTML = `
-            <h3>工作组管理</h3>
-            <div class="table-wrap">
-                <table class="table">
-                    <thead>
-                        <tr><th>组名</th><th>简介</th><th>成员数</th><th>项目数</th><th>操作</th></tr>
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">工作组管理</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">组名</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">简介</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">成员数</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">项目数</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">操作</th>
+                        </tr>
                     </thead>
-                    <tbody>${rows}</tbody>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        ${rows}
+                    </tbody>
                 </table>
             </div>
         `;
@@ -149,7 +195,7 @@
             const data = await fetchJson(btnUsers.dataset.endpoint);
             renderUsers(data);
         } catch (e) {
-            resultEl.innerHTML = `<p class="error">加载失败：${e.message}</p>`;
+            resultEl.innerHTML = `<div class="p-4 text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-md">加载失败：${e.message}</div>`;
         }
     }
 
@@ -159,7 +205,7 @@
             const data = await fetchJson(btnProjects.dataset.endpoint);
             renderProjects(data);
         } catch (e) {
-            resultEl.innerHTML = `<p class="error">加载失败：${e.message}</p>`;
+            resultEl.innerHTML = `<div class="p-4 text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-md">加载失败：${e.message}</div>`;
         }
     }
 
@@ -169,7 +215,7 @@
             const data = await fetchJson(btnGroups.dataset.endpoint);
             renderGroups(data);
         } catch (e) {
-            resultEl.innerHTML = `<p class="error">加载失败：${e.message}</p>`;
+            resultEl.innerHTML = `<div class="p-4 text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-md">加载失败：${e.message}</div>`;
         }
     }
 

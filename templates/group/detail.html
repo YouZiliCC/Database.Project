@@ -1,181 +1,235 @@
 {% extends "base.html" %}
-{% block title %}{{ group.gname }} - 工作组详情{% endblock %}
+{% block title %}{{ group.gname }} - 小组详情{% endblock %}
 {% block content %}
-    <div class="container">
-        <div class="info-section">
-            <div class="info-header">
-                {% set group_img = '/static/img/groups/' + group.gid + '.png' %}
-                <img src="{{ group_img }}"
-                     alt="{{ group.gname }}"
-                     class="group-avatar"
-                     onerror="this.src='/static/img/group.png';">
-                <div>
-                    <h2>{{ group.gname }}</h2>
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <nav class="flex mb-8" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <div>
+                        <a href="{{ url_for('index.index') }}" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <i class="fa-solid fa-home flex-shrink-0 h-5 w-5"></i>
+                            <span class="sr-only">首页</span>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-chevron-right flex-shrink-0 h-5 w-5 text-gray-300"></i>
+                        <a href="{{ url_for('group.group_list') }}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">小组列表</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-chevron-right flex-shrink-0 h-5 w-5 text-gray-300"></i>
+                        <span class="ml-4 text-sm font-medium text-gray-500 dark:text-gray-400" aria-current="page">{{ group.gname }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="md:flex md:items-center md:justify-between mb-8">
+            <div class="flex-1 min-w-0">
+                <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate">
+                    {{ group.gname }}
+                </h2>
+                <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+                    <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fa-solid fa-crown flex-shrink-0 mr-1.5 text-yellow-400"></i>
+                        组长: {{ group.leader.uname if group.leader else '无' }}
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fa-solid fa-users flex-shrink-0 mr-1.5 text-gray-400"></i>
+                        成员: {{ group.users|length }} 人
+                    </div>
                 </div>
             </div>
-            <div class="info-content">
-                <div class="info-row">
-                    <label>创建时间：</label>
-                    <span>{{ group.created_at.strftime("%Y-%m-%d %H:%M") if group.created_at else '未知' }}</span>
-                </div>
-                <div class="info-row">
-                    <label>成员数量：</label>
-                    <span>{{ group.users|length }} 人</span>
-                </div>
-                <div class="info-row">
-                    <label>项目数量：</label>
-                    <span>{{ group.projects|length }} 个</span>
-                </div>
-            </div>
-            {% if group.ginfo %}
-                <div class="info-content">
-                    <h3>📄 工作组描述</h3>
-                    <div class="markdown-content">{{ group.ginfo | markdown }}</div>
-                </div>
-            {% endif %}
-            <h3>👥 成员列表</h3>
-            {% if group.users %}
-                <div class="table-wrap">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>用户名</th>
-                                <th>邮箱</th>
-                                <th>角色</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in group.users %}
-                                <tr>
-                                    <td>
-                                        <a href="{{ url_for('user.user_detail', uid=u.uid) }}">{{ u.uname }}</a>
-                                    </td>
-                                    <td>{{ u.email }}</td>
-                                    <td>
-                                        {% if group.leader_id == u.uid %}
-                                            <span class="badge badge-leader">组长</span>
-                                        {% else %}
-                                            <span class="badge">成员</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if current_user.is_authenticated and current_user.uid == group.leader_id and u.uid != group.leader_id %}
-                                            <button class="btn btn-sm btn-danger"
-                                                    onclick="removeMember('{{ group.gid }}', '{{ u.uid }}')">
-                                                移除
-                                            </button>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="empty">暂无成员</div>
-            {% endif %}
-            <h3>📋 待审核申请</h3>
-            {% if current_user.is_authenticated and current_user.uid == group.leader_id and pending_applications %}
-                <div class="table-wrap">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>用户名</th>
-                                <th>邮箱</th>
-                                <th>申请时间</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for appli in pending_applications %}
-                                <tr id="application-{{ appli.gaid }}">
-                                    <td>
-                                        <a href="{{ url_for('user.user_detail', uid=appli.user.uid) }}">{{ appli.user.uname }}</a>
-                                    </td>
-                                    <td>{{ appli.user.email }}</td>
-                                    <td>{{ appli.created_at.strftime("%Y-%m-%d %H:%M") if appli.created_at else '未知' }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-success"
-                                                onclick="acceptApplication('{{ group.gid }}', '{{ appli.gaid }}')">
-                                            接受
-                                        </button>
-                                        <button class="btn btn-sm btn-danger"
-                                                onclick="rejectApplication('{{ group.gid }}', '{{ appli.gaid }}')">
-                                            拒绝
-                                        </button>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="empty">暂无待审核申请</div>
-            {% endif %}
-            <h3>📦 项目列表</h3>
-            {% if group.projects %}
-                <div class="grid-container">
-                    {% for project in group.projects %}
-                        <div class="card project-card">
-                            <div class="card-header">
-                                <h4>
-                                    <a href="{{ url_for('project.project_detail', pid=project.pid) }}">{{ project.pname }}</a>
-                                </h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="project-meta">
-                                    <span class="meta-item">
-                                        <strong>端口：</strong>{{ project.port }}
-                                    </span>
-                                    <span class="meta-item">
-                                        <strong>Docker：</strong>{{ project.docker_port }}
-                                    </span>
-                                </div>
-                                <div class="project-stars">
-                                    <span class="star-icon">★</span>
-                                    <span class="star-count">{{ project.stars|length if project.stars else 0 }}</span>
-                                    <span class="star-label">Stars</span>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <a href="{{ url_for('project.project_detail', pid=project.pid) }}"
-                                   class="btn btn-sm">查看</a>
-                                {% if current_user.is_authenticated and current_user.uid == group.leader_id %}
-                                    <a href="{{ url_for('project.project_edit', pid=project.pid) }}"
-                                       class="btn btn-sm">编辑</a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty">暂无项目</div>
-            {% endif %}
-            <div class="button-group mt-16">
+            <div class="mt-4 flex md:mt-0 md:ml-4 space-x-3">
                 {% if current_user.is_authenticated %}
-                    {% if not current_user.gid %}
-                        {% if user_application %}
-                            <button class="btn btn-secondary" disabled>已申请，等待审核</button>
-                        {% else %}
-                            <button class="btn btn-primary" onclick="applyToGroup('{{ group.gid }}')">申请加入</button>
-                        {% endif %}
-                    {% elif current_user.gid == group.gid %}
+                    {% if current_user.gid == group.gid %}
                         {% if current_user.uid == group.leader_id %}
-                            <a href="{{ url_for('group.group_edit', gid=group.gid) }}" class="btn">编辑工作组</a>
-                            <a href="{{ url_for('group.project_create', gid=group.gid) }}"
-                               class="btn">创建项目</a>
-                            <a href="{{ url_for('group.leader_change', gid=group.gid) }}"
-                               class="btn">更换组长</a>
-                            <button class="btn btn-danger" onclick="deleteGroup('{{ group.gid }}')">删除工作组</button>
+                            <a href="{{ url_for('group.group_edit', gid=group.gid) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                <i class="fa-solid fa-pen mr-2"></i> 编辑小组
+                            </a>
+                            <a href="{{ url_for('group.change_leader', gid=group.gid) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                <i class="fa-solid fa-exchange-alt mr-2"></i> 转让组长
+                            </a>
                         {% else %}
-                            <button class="btn btn-danger" onclick="leaveGroup()">退出该组</button>
+                            <button onclick="leaveGroup('{{ group.gid }}')" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                <i class="fa-solid fa-sign-out-alt mr-2"></i> 退出小组
+                            </button>
                         {% endif %}
+                        <a href="{{ url_for('project.project_create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <i class="fa-solid fa-plus mr-2"></i> 创建项目
+                        </a>
+                    {% elif not current_user.gid %}
+                        <button onclick="joinGroup('{{ group.gid }}')" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <i class="fa-solid fa-user-plus mr-2"></i> 加入小组
+                        </button>
                     {% endif %}
                 {% endif %}
-                <a href="{{ url_for('group.group_list') }}" class="btn btn-secondary">返回列表</a>
+            </div>
+        </div>
+
+        <!-- Pending Applications (Leader Only) -->
+        {% if pending_applications %}
+        <div class="lg:col-span-3 mb-8">
+            <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+                <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                        🔔 待审核申请
+                    </h3>
+                </div>
+                <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for app in pending_applications %}
+                    <li class="px-4 py-4 sm:px-6" id="application-{{ app.gaid }}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-500">
+                                        <span class="text-sm font-medium leading-none text-white">{{ app.user.uname[0] | upper }}</span>
+                                    </span>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ app.user.uname }}
+                                    </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        申请加入工作组
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button onclick="acceptApplication('{{ group.gid }}', '{{ app.gaid }}')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    <i class="fa-solid fa-check mr-1"></i> 接受
+                                </button>
+                                <button onclick="rejectApplication('{{ group.gid }}', '{{ app.gaid }}')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                    <i class="fa-solid fa-xmark mr-1"></i> 拒绝
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <!-- Members List -->
+            <div class="lg:col-span-1">
+                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+                    <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                            👥 成员列表
+                        </h3>
+                    </div>
+                    <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for user in group.users %}
+                        <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center min-w-0">
+                                    <div class="flex-shrink-0">
+                                        <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-500">
+                                            <span class="text-sm font-medium leading-none text-white">{{ user.uname[0] | upper }}</span>
+                                        </span>
+                                    </div>
+                                    <div class="ml-4 truncate">
+                                        <div class="text-sm font-medium text-primary-600 dark:text-primary-400 truncate">
+                                            {{ user.uname }}
+                                            {% if user.uid == group.leader_id %}
+                                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                    组长
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                            {{ user.email }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    {% if current_user.is_authenticated and current_user.uid == group.leader_id and user.uid != group.leader_id %}
+                                        <button onclick="kickMember('{{ group.gid }}', '{{ user.uid }}')" class="inline-flex items-center p-1.5 border border-transparent rounded-full shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" title="移除成员">
+                                            <i class="fa-solid fa-user-minus text-xs"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Projects List -->
+            <div class="lg:col-span-2">
+                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+                    <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                            📂 项目列表
+                        </h3>
+                    </div>
+                    {% if group.projects %}
+                        <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for project in group.projects %}
+                            <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-12 w-12">
+                                            {% set project_img = '/static/img/projects/' + project.pid + '.png' %}
+                                            <img class="h-12 w-12 rounded object-cover bg-gray-100 dark:bg-gray-600" 
+                                                 src="{{ project_img }}" 
+                                                 alt="{{ project.pname }}"
+                                                 onerror="this.src='/static/img/project.png'">
+                                        </div>
+                                        <div class="ml-4">
+                                            <a href="{{ url_for('project.project_detail', pid=project.pid) }}" class="text-lg font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400">
+                                                {{ project.pname }}
+                                            </a>
+                                            <div class="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                <i class="fa-solid fa-clock mr-1.5 text-gray-400"></i>
+                                                <span>{{ project.created_at.strftime("%Y-%m-%d") }}</span>
+                                                {% if project.port %}
+                                                    <span class="mx-2">&bull;</span>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                        运行中
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a href="{{ url_for('project.project_detail', pid=project.pid) }}" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                            查看详情
+                                            <i class="fa-solid fa-chevron-right ml-2 text-gray-400"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="text-center py-12">
+                            <i class="fa-solid fa-folder-open text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                            <p class="text-gray-500 dark:text-gray-400">该小组暂无项目</p>
+                            {% if current_user.is_authenticated and current_user.gid == group.gid %}
+                                <div class="mt-6">
+                                    <a href="{{ url_for('project.project_create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                        <i class="fa-solid fa-plus mr-2"></i> 创建第一个项目
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/group.js') }}"></script>{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/group.js') }}"></script>
+{% endblock %}

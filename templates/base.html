@@ -1,89 +1,240 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>
-            {% block title %}{% endblock %}
-        </title>
-        <link rel="icon"
-              href="{{ url_for('static', filename='img/favicon.svg') }}"
-              type="image/svg+xml">
-        <link rel="stylesheet"
-              href="{{ url_for('static', filename='css/style.css') }}">
-        <!-- 防止主题闪烁：在页面渲染前应用主题 -->
-        <script>
-            (function() {
-                const theme = localStorage.getItem('app_theme');
-                if (theme === 'dark') {
-                    document.documentElement.classList.add('theme-dark');
+<html lang="zh-CN" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}Uniweb{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
                 }
-            })();
-        </script>
-        {% block head %}{% endblock %}
-    </head>
-    <body>
-        <header class="site-header">
-            <nav class="navbar">
-                <div class="navbar-header">
-                    <a href="/" class="nav-link brand">Uniweb</a>
-                    <!-- 汉堡菜单按钮 (仅在移动端显示) -->
-                    <button class="navbar-toggle" id="navbar-toggle" aria-label="切换导航菜单">
-                        <span class="navbar-toggle-icon"></span>
-                        <span class="navbar-toggle-icon"></span>
-                        <span class="navbar-toggle-icon"></span>
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Theme Init -->
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    {% block head %}{% endblock %}
+</head>
+<body class="h-full bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 flex flex-col" x-data="{ mobileMenuOpen: false }">
+
+    <!-- Navbar -->
+    <nav class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="/" class="text-2xl font-bold text-primary-600 dark:text-primary-400 flex items-center gap-2">
+                            <i class="fa-solid fa-database"></i>
+                            Uniweb
+                        </a>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="/group" class="border-transparent text-gray-500 dark:text-gray-300 hover:border-primary-500 hover:text-gray-700 dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
+                            工作组
+                        </a>
+                        <a href="/project" class="border-transparent text-gray-500 dark:text-gray-300 hover:border-primary-500 hover:text-gray-700 dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
+                            项目展台
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center sm:gap-4">
+                    <!-- Theme Toggle -->
+                    <button 
+                        type="button" 
+                        class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none"
+                        @click="
+                            if (localStorage.getItem('color-theme')) {
+                                if (localStorage.getItem('color-theme') === 'light') {
+                                    document.documentElement.classList.add('dark');
+                                    localStorage.setItem('color-theme', 'dark');
+                                } else {
+                                    document.documentElement.classList.remove('dark');
+                                    localStorage.setItem('color-theme', 'light');
+                                }
+                            } else {
+                                if (document.documentElement.classList.contains('dark')) {
+                                    document.documentElement.classList.remove('dark');
+                                    localStorage.setItem('color-theme', 'light');
+                                } else {
+                                    document.documentElement.classList.add('dark');
+                                    localStorage.setItem('color-theme', 'dark');
+                                }
+                            }
+                        "
+                    >
+                        <i class="fa-solid fa-moon hidden dark:inline"></i>
+                        <i class="fa-solid fa-sun inline dark:hidden"></i>
+                    </button>
+
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                        <a href="/admin/dashboard" class="text-gray-500 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fa-solid fa-shield-halved mr-1"></i> 管理员
+                        </a>
+                        {% endif %}
+                        
+                        <div class="relative ml-3" x-data="{ open: false }">
+                            <div>
+                                <button @click="open = !open" @click.away="open = false" type="button" class="bg-white dark:bg-gray-800 rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                                    <span class="sr-only">Open user menu</span>
+                                    <div class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-700 dark:text-primary-300 font-bold">
+                                        {{ current_user.uname[0] | upper }}
+                                    </div>
+                                </button>
+                            </div>
+                            <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-50" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1" style="display: none;">
+                                <div class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-600">
+                                    Signed in as <br> <span class="font-bold text-gray-900 dark:text-white">{{ current_user.uname }}</span>
+                                </div>
+                                <a href="/user/me" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" role="menuitem">个人资料</a>
+                                <a href="/group/my_group" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" role="menuitem">我的小组</a>
+                                <a href="/auth/logout" class="block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600" role="menuitem">退出登录</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="flex gap-2">
+                            <a href="/auth/login" class="text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">登录</a>
+                            <a href="/auth/register" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">注册</a>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fa-solid fa-bars text-xl" x-show="!mobileMenuOpen"></i>
+                        <i class="fa-solid fa-xmark text-xl" x-show="mobileMenuOpen" style="display: none;"></i>
                     </button>
                 </div>
-                <!-- 导航菜单 -->
-                <div class="navbar-menu" id="navbar-menu">
-                    <div class="nav-links">
-                        <a href="/group" class="nav-link">工作组</a>
-                        <a href="/project" class="nav-link">项目展台</a>
+            </div>
+        </div>
+
+        <!-- Mobile menu, show/hide based on menu state. -->
+        <div class="sm:hidden" id="mobile-menu" x-show="mobileMenuOpen" style="display: none;">
+            <div class="pt-2 pb-3 space-y-1">
+                <a href="/" class="bg-primary-50 dark:bg-gray-700 border-primary-500 text-primary-700 dark:text-primary-400 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">首页</a>
+                <a href="/group" class="border-transparent text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">工作组</a>
+                <a href="/project" class="border-transparent text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">项目展台</a>
+            </div>
+            <div class="pt-4 pb-4 border-t border-gray-200 dark:border-gray-700">
+                {% if current_user.is_authenticated %}
+                    <div class="flex items-center px-4">
+                        <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-700 dark:text-primary-300 font-bold text-lg">
+                                {{ current_user.uname[0] | upper }}
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-base font-medium text-gray-800 dark:text-white">{{ current_user.uname }}</div>
+                            <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ current_user.email }}</div>
+                        </div>
                     </div>
-                    <div class="nav-right">
-                        {% if current_user.is_admin %}<a href="/admin/dashboard" class="nav-link">管理员面板</a>{% endif %}
-                        {% if current_user.is_authenticated %}
-                            <a href="/group/my_group" class="nav-link">我的小组</a>
-                            <a href="/user/me" class="nav-link">{{ current_user.uname }}</a>
-                            <a href="/auth/logout" class="nav-link nav-logout">登出</a>
-                        {% else %}
-                            <a href="/auth/login" class="nav-link">登录</a>
-                            <a href="/auth/register" class="nav-link">注册</a>
+                    <div class="mt-3 space-y-1">
+                        <a href="/user/me" class="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700">个人资料</a>
+                        <a href="/group/my_group" class="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700">我的小组</a>
+                        {% if current_user.is_admin %}
+                        <a href="/admin/dashboard" class="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700">管理员面板</a>
                         {% endif %}
-                        <button id="theme-toggle" class="btn btn-theme" aria-label="切换主题">🌓</button>
+                        <a href="/auth/logout" class="block px-4 py-2 text-base font-medium text-red-600 dark:text-red-400 hover:text-red-800 hover:bg-gray-100 dark:hover:bg-gray-700">退出登录</a>
                     </div>
-                </div>
-            </nav>
-        </header>
-        <main>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="flash-container">
-                        {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+                {% else %}
+                    <div class="mt-3 space-y-1 px-4">
+                        <a href="/auth/login" class="block w-full text-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200">登录</a>
+                        <a href="/auth/register" class="block w-full text-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 mt-2">注册</a>
                     </div>
                 {% endif %}
-            {% endwith %}
-            {% block content %}{% endblock %}
-        </main>
-        <footer>
-            <p>&copy; 2025 数据库系统课程</p>
-            <p>
-                <a href="https://github.com/YouZiliCC/Database.Project"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                    <svg width="20"
-                         height="20"
-                         viewBox="0 0 16 16"
-                         fill="currentColor"
-                         aria-hidden="true">
-                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
-                    </svg>
-                    GitHub:YouZiliCC/Database.Project
-                </a>
-            </p>
-        </footer>
-        <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-        {% block scripts %}{% endblock %}
-    </body>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="rounded-md p-4 mb-4 {% if category == 'error' %}bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-200 border border-red-200 dark:border-red-800{% elif category == 'success' %}bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-800{% else %}bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-800{% endif %}" role="alert">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                {% if category == 'error' %}
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                {% elif category == 'success' %}
+                                    <i class="fa-solid fa-circle-check"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-circle-info"></i>
+                                {% endif %}
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium">{{ message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="md:flex md:items-center md:justify-between">
+                <div class="flex justify-center md:order-2 space-x-6">
+                    <a href="https://github.com/YouZiliCC/uniweb" target="_blank" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <span class="sr-only">GitHub</span>
+                        <i class="fa-brands fa-github text-xl"></i>
+                    </a>
+                </div>
+                <div class="mt-8 md:mt-0 md:order-1">
+                    <p class="text-center text-base text-gray-400 dark:text-gray-500">
+                        &copy; 2025 Uniweb Database Course Project. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
 </html>

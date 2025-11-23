@@ -1,41 +1,81 @@
 {% extends "base.html" %}
 {% block title %}创建项目 - Uniweb{% endblock %}
 {% block content %}
-    <div class="container">
-        <h2>创建项目</h2>
-        <p class="text-muted">为工作组 {{ group.gname }} 创建新项目</p>
-        <form method="POST"
-              action="{{ url_for('group.project_create', gid=group.gid) }}"
-              class="form">
-            {{ form.hidden_tag() }}
-            <div class="form-row">
-                <label>{{ form.pname.label }}</label>
-                {{ form.pname(size=40, **{"data-validate":"required|min:3|max:100", "placeholder":"输入项目名称"}) }}
-                {% if form.pname.errors %}<span class="error">{{ form.pname.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.pinfo.label }}</label>
-                {{ form.pinfo(rows=6, placeholder="项目简介...", maxlength=5000) }}
-                <small class="form-text text-muted">支持 Markdown 格式，可以编写详细的项目文档</small>
-                {% if form.pinfo.errors %}<span class="error">{{ form.pinfo.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.port.label }}</label>
-                {{ form.port(size=10, **{"data-validate":"required|min:1|max:65535", "placeholder":"如: 25565"}) }}
-                {% if form.port.errors %}<span class="error">{{ form.port.errors[0] }}</span>{% endif %}
-                <small class="form-help">宿主机端口 (10000-65535)，对应外部访问端口</small>
-            </div>
-            <div class="form-row">
-                <label>{{ form.docker_port.label }}</label>
-                {{ form.docker_port(size=10, **{"data-validate":"required|min:1|max:65535", "placeholder":"如: 3000"}) }}
-                {% if form.docker_port.errors %}<span class="error">{{ form.docker_port.errors[0] }}</span>{% endif %}
-                <small class="form-help">Docker容器内部端口 (1024-65535)，对应项目部署的端口</small>
-            </div>
-            <div class="form-row">
-                {{ form.submit(class="btn", value="创建项目") }}
-                <a href="{{ url_for('group.group_detail', gid=group.gid) }}"
-                   class="btn btn-secondary">取消</a>
-            </div>
-        </form>
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            创建项目
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            为工作组 {{ group.gname }} 创建新项目
+        </p>
     </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form class="space-y-6" method="POST" action="{{ url_for('group.project_create', gid=group.gid) }}">
+                {{ form.hidden_tag() }}
+                
+                <div>
+                    <label for="pname" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.pname.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.pname(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|min:3|max:100", "placeholder":"输入项目名称"}) }}
+                    </div>
+                    {% if form.pname.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.pname.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="pinfo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.pinfo.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.pinfo(rows=6, class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", placeholder="项目简介...", maxlength=5000) }}
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">支持 Markdown 格式，可以编写详细的项目文档</p>
+                    {% if form.pinfo.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.pinfo.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="port" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.port.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.port(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|min:1|max:65535", "placeholder":"如: 25565"}) }}
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">宿主机端口 (10000-65535)，对应外部访问端口</p>
+                    {% if form.port.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.port.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="docker_port" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.docker_port.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.docker_port(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|min:1|max:65535", "placeholder":"如: 3000"}) }}
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Docker容器内部端口 (1024-65535)，对应项目部署的端口</p>
+                    {% if form.docker_port.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.docker_port.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col space-y-3">
+                    {{ form.submit(class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer", value="创建项目") }}
+                    
+                    <a href="{{ url_for('group.group_detail', gid=group.gid) }}" class="w-full flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600">
+                        取消
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

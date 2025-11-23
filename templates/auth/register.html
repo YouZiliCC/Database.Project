@@ -1,44 +1,101 @@
 {% extends "base.html" %}
-{% block title %}注册 - 数据库系统课程项目展示平台{% endblock %}
+{% block title %}注册 - Uniweb{% endblock %}
 {% block content %}
-    <div class="container">
-        <h2>用户注册</h2>
-        <form method="POST" action="{{ url_for('auth.register') }}" class="form">
-            {{ form.hidden_tag() }}
-            <div class="form-row">
-                <label>{{ form.uname.label }}</label>
-                {{ form.uname(size=32, **{"data-validate":"required|min:3|max:20"}) }}
-                {% if form.uname.errors %}<span class="error">{{ form.uname.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.email.label }}</label>
-                {{ form.email(size=32, type="email", **{"data-validate":"required|email"}) }}
-                {% if form.email.errors %}<span class="error">{{ form.email.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.sid.label }}</label>
-                {{ form.sid(size=32, **{"data-validate":"required|length:10"}) }}
-                {% if form.sid.errors %}<span class="error">{{ form.sid.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.password.label }}</label>
-                {{ form.password(size=32, **{"data-validate":"required|min:6"}) }}
-                {% if form.password.errors %}<span class="error">{{ form.password.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.password2.label }}</label>
-                {{ form.password2(size=32, **{"data-validate":"required"}) }}
-                {% if form.password2.errors %}<span class="error">{{ form.password2.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.teacher_code.label }}</label>
-                {{ form.teacher_code(size=16) }}
-                {% if form.teacher_code.errors %}<span class="error">{{ form.teacher_code.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                {{ form.submit(class="btn") }}
-                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">登录已有账号</a>
-            </div>
-        </form>
+<div class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            注册新账号
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            已有账号?
+            <a href="{{ url_for('auth.login') }}" class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400">
+                立即登录
+            </a>
+        </p>
     </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200 dark:border-gray-700">
+            <form class="space-y-6" action="{{ url_for('auth.register') }}" method="POST">
+                {{ form.hidden_tag() }}
+                
+                <div>
+                    <label for="uname" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.uname.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.uname(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|min:3|max:20"}) }}
+                    </div>
+                    {% if form.uname.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.uname.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.email.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.email(type="email", class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|email"}) }}
+                    </div>
+                    {% if form.email.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.email.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="sid" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.sid.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.sid(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|length:10"}) }}
+                    </div>
+                    {% if form.sid.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.sid.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.password.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.password(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|min:6"}) }}
+                    </div>
+                    {% if form.password.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.password.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="password2" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.password2.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.password2(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required"}) }}
+                    </div>
+                    {% if form.password2.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.password2.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="teacher_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.teacher_code.label.text }} <span class="text-gray-400 text-xs">(选填)</span>
+                    </label>
+                    <div class="mt-1">
+                        {{ form.teacher_code(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white") }}
+                    </div>
+                    {% if form.teacher_code.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.teacher_code.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    {{ form.submit(class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors cursor-pointer") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

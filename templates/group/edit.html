@@ -1,48 +1,73 @@
 {% extends "base.html" %}
 {% block title %}编辑工作组 - Uniweb{% endblock %}
 {% block content %}
-    <div class="container">
-        <h2>编辑工作组信息</h2>
-        <form method="POST"
-              action="{{ url_for('group.group_edit', gid=group.gid) }}"
-              class="form"
-              enctype="multipart/form-data"
-              id="edit-group-form">
-            {{ form.hidden_tag() }}
-            <div class="form-row">
-                <label>{{ form.gname.label }}</label>
-                {{ form.gname(size=32, **{"data-validate":"required|min:3|max:50"}) }}
-                {% if form.gname.errors %}<span class="error">{{ form.gname.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label>{{ form.ginfo.label }}</label>
-                {{ form.ginfo(rows=6, placeholder="简单介绍一下工作组...", maxlength=2000) }}
-                <small class="form-text text-muted">支持 Markdown 格式：**粗体**、*斜体*、`代码`、列表等</small>
-                {% if form.ginfo.errors %}<span class="error">{{ form.ginfo.errors[0] }}</span>{% endif %}
-            </div>
-            <div class="form-row">
-                <label for="gimg">工作组图片</label>
-                {% set group_img = '/static/img/groups/' + group.gid + '.png' %}
-                <div class="image-preview">
-                    <img src="{{ group_img }}"
-                         alt="当前图片"
-                         id="current-image"
-                         onerror="this.src='/static/img/group.png';">
-                </div>
-                <input type="file"
-                       id="gimg"
-                       name="gimg"
-                       accept="image/*"
-                       onchange="previewImage(this)">
-                <small class="form-text text-muted">支持 PNG, JPG, JPEG, GIF, WEBP 格式</small>
-            </div>
-            <div class="form-row">
-                {{ form.submit(class="btn", value="保存更改") }}
-                <a href="{{ url_for('group.group_detail', gid=group.gid) }}"
-                   class="btn btn-secondary">取消</a>
-            </div>
-        </form>
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            编辑工作组信息
+        </h2>
     </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form class="space-y-6" 
+                  method="POST" 
+                  action="{{ url_for('group.group_edit', gid=group.gid) }}" 
+                  enctype="multipart/form-data"
+                  id="edit-group-form">
+                {{ form.hidden_tag() }}
+                
+                <div>
+                    <label for="gname" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.gname.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.gname(class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", **{"data-validate":"required|min:3|max:50"}) }}
+                    </div>
+                    {% if form.gname.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.gname.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="ginfo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ form.ginfo.label.text }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.ginfo(rows=6, class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-700 dark:text-white", placeholder="简单介绍一下工作组...", maxlength=2000) }}
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">支持 Markdown 格式：**粗体**、*斜体*、`代码`、列表等</p>
+                    {% if form.ginfo.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.ginfo.errors[0] }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">工作组图片</label>
+                    <div class="mt-2 flex items-center space-x-5">
+                        <span class="inline-block h-12 w-12 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-700">
+                            {% set group_img = '/static/img/groups/' + group.gid + '.png' %}
+                            <img id="current-image" class="h-full w-full object-cover" src="{{ group_img }}" alt="Current group photo" onerror="this.src='/static/img/group.png';">
+                        </span>
+                        <label for="gimg" class="bg-white dark:bg-gray-700 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer">
+                            <span>更换图片</span>
+                            <input id="gimg" name="gimg" type="file" class="sr-only" accept="image/*" onchange="previewImage(this)">
+                        </label>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">支持 PNG, JPG, JPEG, GIF, WEBP 格式</p>
+                </div>
+
+                <div class="flex flex-col space-y-3">
+                    {{ form.submit(class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer", value="保存更改") }}
+                    
+                    <a href="{{ url_for('group.group_detail', gid=group.gid) }}" class="w-full flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600">
+                        取消
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/group.js') }}"></script>

@@ -1,208 +1,304 @@
 {% extends "base.html" %}
 {% block title %}{{ project.pname }} - 项目详情{% endblock %}
 {% block content %}
-    <div class="container">
-        <div class="breadcrumb">
-            <a href="{{ url_for('index.index') }}">首页</a> &gt;
-            <a href="{{ url_for('project.project_list') }}">项目展台</a> &gt;
-            <span>{{ project.pname }}</span>
-        </div>
-        <!-- 右侧浮窗 -->
-        <aside class="project-info-sidebar" id="project-sidebar">
-            <div class="sidebar-content">
-                {% set project_img = '/static/img/projects/' + project.pid + '.png' %}
-                <div class="sidebar-image">
-                    <img src="{{ project_img }}"
-                         alt="{{ project.pname }}"
-                         onerror="this.src='/static/img/project.png'">
-                </div>
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">📋 基本信息</h3>
-                    <div class="sidebar-info-item">
-                        <span class="info-label">项目名称</span>
-                        <span class="info-value">{{ project.pname }}</span>
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <nav class="flex mb-8" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <div>
+                        <a href="{{ url_for('index.index') }}" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <i class="fa-solid fa-home flex-shrink-0 h-5 w-5"></i>
+                            <span class="sr-only">首页</span>
+                        </a>
                     </div>
-                    <div class="sidebar-info-item">
-                        <span class="info-label">所属小组</span>
-                        <span class="info-value">
-                            {% if project.group %}
-                                <a href="{{ url_for('group.group_detail', gid=project.gid) }}">{{ project.group.gname }}</a>
-                            {% else %}
-                                -
-                            {% endif %}
-                        </span>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-chevron-right flex-shrink-0 h-5 w-5 text-gray-300"></i>
+                        <a href="{{ url_for('project.project_list') }}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">项目展台</a>
                     </div>
-                    <div class="sidebar-info-item">
-                        <span class="info-label">访问端口</span>
-                        <span class="info-value"><code>{{ project.port }}</code></span>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-chevron-right flex-shrink-0 h-5 w-5 text-gray-300"></i>
+                        <span class="ml-4 text-sm font-medium text-gray-500 dark:text-gray-400" aria-current="page">{{ project.pname }}</span>
                     </div>
-                    <div class="sidebar-info-item">
-                        <span class="info-label">创建时间</span>
-                        <span class="info-value">{{ project.created_at.strftime("%Y-%m-%d %H:%M") if project.created_at else '未知' }}</span>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="lg:grid lg:grid-cols-12 lg:gap-8">
+            <!-- Sidebar (Project Info) -->
+            <div class="lg:col-span-4 order-2 lg:order-2 mb-8 lg:mb-0">
+                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg sticky top-24">
+                    <div class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-700">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                            📋 基本信息
+                        </h3>
                     </div>
-                    <div class="sidebar-info-item">
-                        <span class="info-label">容器状态</span>
-                        <span class="info-value">
-                            <span id="project-status" class="status-badge">加载中...</span>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </aside>
-        <!-- 侧边栏切换按钮 -->
-        <button class="sidebar-toggle-btn"
-                id="sidebar-toggle"
-                onclick="toggleSidebar()"
-                title="切换侧边栏">
-            <span id="sidebar-toggle-icon">📋</span>
-        </button>
-        <section class="project-detail">
-            <div class="detail-header">
-                <h2>{{ project.pname }}</h2>
-            </div>
-            <div class="info-section">
-                <h3>🚀 访问与管理</h3>
-                <div class="button-group">
-                    {% if project.port %}
-                        <a class="btn btn-primary"
-                           href="{{ external_url }}:{{ project.port }}"
-                           target="_blank">🌐 访问应用</a>
-                    {% endif %}
-                    {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
-                        <a id="terminal-btn"
-                           class="btn btn-info"
-                           href="{{ url_for('terminal.terminal', pid=project.pid) }}"
-                           target="_blank"
-                           style="display: none">🖥️ WebShell 终端</a>
-                        <button id="project-start-btn"
-                                class="btn btn-success"
-                                onclick="startProject('{{ project.pid }}')">🚀 启动容器</button>
-                        <button id="project-stop-btn"
-                                class="btn btn-warning"
-                                onclick="stopProject('{{ project.pid }}')">⏸️ 停止容器</button>
-                        <button id="project-remove-btn"
-                                class="btn btn-danger"
-                                onclick="removeProject('{{ project.pid }}')">🗑️ 删除容器</button>
-                        <a class="btn"
-                           href="{{ url_for('project.project_edit', pid=project.pid) }}">编辑项目</a>
-                        <button class="btn btn-danger"
-                                onclick="deleteProject('{{ project.gid }}', '{{ project.pid }}')">删除项目</button>
-                    {% endif %}
-                    <a class="btn btn-secondary"
-                       href="{{ url_for('group.group_detail', gid=project.gid) }}">返回工作组</a>
-                    <a class="btn btn-secondary"
-                       href="{{ url_for('project.project_list') }}">返回列表</a>
-                </div>
-            </div>
-            <div class="detail-content">
-                {% if project.pinfo %}
-                    <div class="info-section">
-                        <h3>📝 项目描述</h3>
-                        <div class="markdown-content">{{ project.pinfo | markdown }}</div>
-                    </div>
-                {% endif %}
-                <div class="info-section">
-                    <h3>🐳 Docker 配置</h3>
-                    <table class="info-table">
-                        <tr>
-                            <td>
-                                <strong>容器名称：</strong>
-                            </td>
-                            <td>
-                                <code>{{ project.docker_name }}</code>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <strong>容器端口：</strong>
-                            </td>
-                            <td>
-                                <code>{{ project.docker_port }}</code>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-            <!-- Comments section (只显示评论列表，不显示输入框) -->
-            <div class="info-section" id="comments-root">
-                <h3>💬 评论区</h3>
-                <div id="project-comments-list">
-                    {% if comments and comments|length > 0 %}
-                        {% for c in comments %}
-                            <div class="comment-item {% if c.is_teacher_comment %}teacher-comment{% endif %}"
-                                 data-comment-id="{{ c.pcid }}">
-                                <div class="comment-head">
-                                    <div class="comment-author">
-                                        <strong>
-                                            {{ c.user.uname if c.user else '匿名' }}
-                                            {% if c.is_teacher_comment %}<span class="teacher-badge">教师</span>{% endif %}
-                                        </strong>
-                                        <span class="text-muted">{{ c.created_at.strftime("%Y-%m-%d %H:%M") }}</span>
-                                    </div>
-                                    {% if current_user.is_authenticated and current_user.uid == c.uid %}
-                                        <div class="comment-actions">
-                                            <button class="btn-icon"
-                                                    onclick="editComment('{{ c.pcid }}', '{{ project.pid }}')"
-                                                    title="编辑">
-                                                <span>✏️</span>
-                                            </button>
-                                            <button class="btn-icon"
-                                                    onclick="deleteComment('{{ c.pcid }}', '{{ project.pid }}')"
-                                                    title="删除">
-                                                <span>🗑️</span>
-                                            </button>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                <div class="comment-body" data-original-content="{{ c.content | e }}">{{ c.content | e }}</div>
+                    <div class="border-t border-gray-200 dark:border-gray-700">
+                        <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700">
+                            {% set project_img = '/static/img/projects/' + project.pid + '.png' %}
+                            <img src="{{ project_img }}" 
+                                 alt="{{ project.pname }}" 
+                                 class="object-cover w-full h-full"
+                                 onerror="this.src='/static/img/project.png'">
+                        </div>
+                        <dl>
+                            <div class="bg-gray-50 dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">项目名称</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">{{ project.pname }}</dd>
                             </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="empty">暂无评论，快来抢沙发吧~</div>
-                    {% endif %}
+                            <div class="bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">所属小组</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                                    {% if project.group %}
+                                        <a href="{{ url_for('group.group_detail', gid=project.gid) }}" class="text-primary-600 hover:text-primary-500 dark:text-primary-400">{{ project.group.gname }}</a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </dd>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">访问端口</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                                    <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">{{ project.port }}</code>
+                                </dd>
+                            </div>
+                            <div class="bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">创建时间</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">{{ project.created_at.strftime("%Y-%m-%d %H:%M") if project.created_at else '未知' }}</dd>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">容器状态</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                                    <span id="project-status" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">加载中...</span>
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-8 order-1 lg:order-1">
+                <!-- Actions -->
+                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg mb-8">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                            🚀 访问与管理
+                        </h3>
+                        <div class="flex flex-wrap gap-3">
+                            {% if project.port %}
+                                <a class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                   href="{{ external_url }}:{{ project.port }}"
+                                   target="_blank">
+                                    <i class="fa-solid fa-globe mr-2"></i> 访问应用
+                                </a>
+                            {% endif %}
+                            
+                            {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
+                                <a id="terminal-btn"
+                                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                   href="{{ url_for('terminal.terminal', pid=project.pid) }}"
+                                   target="_blank"
+                                   style="display: none">
+                                    <i class="fa-solid fa-terminal mr-2"></i> WebShell
+                                </a>
+                                <button id="project-start-btn"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                        onclick="startProject('{{ project.pid }}')">
+                                    <i class="fa-solid fa-play mr-2"></i> 启动
+                                </button>
+                                <button id="project-stop-btn"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                                        onclick="stopProject('{{ project.pid }}')">
+                                    <i class="fa-solid fa-pause mr-2"></i> 停止
+                                </button>
+                                <button id="project-remove-btn"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                        onclick="removeProject('{{ project.pid }}')">
+                                    <i class="fa-solid fa-trash mr-2"></i> 删除容器
+                                </button>
+                                <a class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
+                                   href="{{ url_for('project.project_edit', pid=project.pid) }}">
+                                    编辑
+                                </a>
+                                <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                        onclick="deleteProject('{{ project.gid }}', '{{ project.pid }}')">
+                                    删除项目
+                                </button>
+                            {% endif %}
+                            
+                            <a class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
+                               href="{{ url_for('group.group_detail', gid=project.gid) }}">
+                                返回工作组
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                {% if project.pinfo %}
+                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg mb-8">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                            📝 项目描述
+                        </h3>
+                        <div class="prose dark:prose-invert max-w-none markdown-content">
+                            {{ project.pinfo | markdown }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Docker Config -->
+                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg mb-8">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                            🐳 Docker 配置
+                        </h3>
+                        <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                            <div class="sm:col-span-1">
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">容器名称</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                                    <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{{ project.docker_name }}</code>
+                                </dd>
+                            </div>
+                            <div class="sm:col-span-1">
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">容器端口</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                                    <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{{ project.docker_port }}</code>
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg" id="comments-root">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                            💬 评论区
+                        </h3>
+                        <div id="project-comments-list" class="space-y-4">
+                            {% if comments and comments|length > 0 %}
+                                {% for c in comments %}
+                                    <div class="flex space-x-3 comment-item {% if c.is_teacher_comment %}bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-md{% endif %}" data-comment-id="{{ c.pcid }}">
+                                        <div class="flex-shrink-0">
+                                            <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 font-bold">
+                                                {{ c.user.uname[0] | upper if c.user else '?' }}
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 space-y-1">
+                                            <div class="flex items-center justify-between">
+                                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">
+                                                    {{ c.user.uname if c.user else '匿名' }}
+                                                    {% if c.is_teacher_comment %}
+                                                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">教师</span>
+                                                    {% endif %}
+                                                </h3>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ c.created_at.strftime("%Y-%m-%d %H:%M") }}</p>
+                                            </div>
+                                            <div class="text-sm text-gray-700 dark:text-gray-300 comment-body" data-original-content="{{ c.content | e }}">
+                                                {{ c.content | e }}
+                                            </div>
+                                            {% if current_user.is_authenticated and current_user.uid == c.uid %}
+                                                <div class="flex space-x-2 mt-2">
+                                                    <button class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                                                            onclick="editComment('{{ c.pcid }}', '{{ project.pid }}')"
+                                                            title="编辑">
+                                                        <i class="fa-solid fa-pen text-xs"></i>
+                                                    </button>
+                                                    <button class="text-gray-400 hover:text-red-500 dark:hover:text-red-400"
+                                                            onclick="deleteComment('{{ c.pcid }}', '{{ project.pid }}')"
+                                                            title="删除">
+                                                        <i class="fa-solid fa-trash text-xs"></i>
+                                                    </button>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+                                    暂无评论，快来抢沙发吧~
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 </div>
-<!-- Floating comment button -->
-<div class="floating-comment-btn" id="project-floating-comment">
-    <button class="comment-btn" onclick="toggleCommentPanel()" title="评论">
-        <span class="comment-icon">💬</span>
-    </button>
-</div>
-<!-- Floating star button -->
-<div class="floating-star-btn" id="project-floating-star">
+
+<!-- Floating Buttons -->
+<div class="fixed bottom-8 right-8 flex flex-col gap-4 z-40">
+    <!-- Star Button -->
     <button id="project-star-btn"
-            class="star-btn {% if user_starred %}starred{% endif %}"
+            class="p-4 rounded-full shadow-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 {% if user_starred %}bg-yellow-400 text-white hover:bg-yellow-500{% else %}bg-white text-gray-400 hover:text-yellow-400 dark:bg-gray-800 dark:text-gray-500 dark:hover:text-yellow-400{% endif %}"
             onclick="toggleProjectStar('{{ project.pid }}')"
             title="点赞">
-        <span class="star-icon">
-            {% if user_starred %}
-                ★
-            {% else %}
-                ☆
-            {% endif %}
-        </span>
-        <span class="star-count" id="project-star-count">{{ star_count }}</span>
+        <i class="fa-solid fa-star text-xl star-icon"></i>
+        <span class="ml-1 font-bold" id="project-star-count">{{ star_count }}</span>
+    </button>
+
+    <!-- Comment Button -->
+    <button class="p-4 rounded-full shadow-lg bg-primary-600 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200"
+            onclick="toggleCommentPanel()"
+            title="评论">
+        <i class="fa-solid fa-comment text-xl"></i>
     </button>
 </div>
-<!-- Comment panel (hidden by default) -->
-<div class="comment-panel" id="comment-panel" style="display: none;">
-    <div class="comment-panel-header">
-        <h4>💬 发表评论</h4>
-        <button class="close-btn" onclick="toggleCommentPanel()">×</button>
-    </div>
-    <div class="comment-panel-body">
-        {% if current_user.is_authenticated %}
-            <textarea id="comment-input" placeholder="写下你的评论..." rows="4"></textarea>
-            <button class="btn btn-primary"
-                    onclick="postProjectComment('{{ project.pid }}')">发表评论</button>
-        {% else %}
-            <div class="empty">
-                请先 <a href="{{ url_for('auth.login') }}">登录</a> 后评论
+
+<!-- Comment Panel (Modal/Slide-over) -->
+<div id="comment-panel" class="fixed inset-0 overflow-hidden z-50" style="display: none;" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="toggleCommentPanel()"></div>
+        <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
+            <div class="w-screen max-w-md transform transition ease-in-out duration-500 sm:duration-700 translate-x-0 bg-white dark:bg-gray-800 shadow-xl flex flex-col">
+                <div class="h-full flex flex-col py-6 bg-white dark:bg-gray-800 shadow-xl overflow-y-scroll">
+                    <div class="px-4 sm:px-6">
+                        <div class="flex items-start justify-between">
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-white" id="slide-over-title">
+                                💬 发表评论
+                            </h2>
+                            <div class="ml-3 h-7 flex items-center">
+                                <button type="button" class="bg-white dark:bg-gray-800 rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" onclick="toggleCommentPanel()">
+                                    <span class="sr-only">Close panel</span>
+                                    <i class="fa-solid fa-xmark text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 relative flex-1 px-4 sm:px-6">
+                        {% if current_user.is_authenticated %}
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="comment-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">评论内容</label>
+                                    <div class="mt-1">
+                                        <textarea id="comment-input" rows="4" class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white" placeholder="写下你的评论..."></textarea>
+                                    </div>
+                                </div>
+                                <button class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                        onclick="postProjectComment('{{ project.pid }}')">
+                                    发表评论
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-12">
+                                <p class="text-gray-500 dark:text-gray-400">
+                                    请先 <a href="{{ url_for('auth.login') }}" class="text-primary-600 hover:text-primary-500">登录</a> 后评论
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-        {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

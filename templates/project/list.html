@@ -1,65 +1,98 @@
 {% extends "base.html" %}
 {% block title %}项目展台 - Uniweb{% endblock %}
 {% block content %}
-    <div class="container">
-        <div class="page-header">
-            <h2>项目展台</h2>
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="md:flex md:items-center md:justify-between mb-8">
+            <div class="flex-1 min-w-0">
+                <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate">
+                    项目展台
+                </h2>
+            </div>
         </div>
-        <div class="mb-16">
-            <input type="text"
-                   class="search"
-                   placeholder="搜索项目名称..."
-                   data-list-search
-                   data-list-target=".project-list">
-            <select class="search" data-sort-target=".project-list">
-                <option value="name-asc">名称 ↑</option>
-                <option value="name-desc">名称 ↓</option>
-            </select>
+
+        <!-- Search and Sort -->
+        <div class="mb-8 flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <div class="relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" 
+                           class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-800 dark:text-white py-2" 
+                           placeholder="搜索项目名称..." 
+                           data-list-search 
+                           data-list-target=".project-list">
+                </div>
+            </div>
+            <div class="sm:w-48">
+                <select class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md dark:bg-gray-800 dark:text-white" data-sort-target=".project-list">
+                    <option value="name-asc">名称 (A-Z)</option>
+                    <option value="name-desc">名称 (Z-A)</option>
+                </select>
+            </div>
         </div>
+
         {% if projects %}
-            <div class="grid-container project-list">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 project-list" data-page-size="9">
                 {% for project in projects %}
-                    <div class="card project-card">
-                        <div class="card-header">
+                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg flex flex-col project-card transition hover:shadow-lg">
+                        <div class="relative h-48 bg-gray-200 dark:bg-gray-700">
                             {% set project_img = '/static/img/projects/' + project.pid + '.png' %}
-                            <img src="{{ project_img }}"
-                                 alt="{{ project.pname }}"
-                                 class="project-img"
+                            <img src="{{ project_img }}" 
+                                 alt="{{ project.pname }}" 
+                                 class="w-full h-full object-cover"
                                  onerror="this.src='/static/img/project.png';">
-                            <h3>
-                                <a href="{{ url_for('project.project_detail', pid=project.pid) }}">{{ project.pname }}</a>
+                            <div class="absolute top-0 right-0 p-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <i class="fa-solid fa-star mr-1"></i> {{ project.stars|length if project.stars else 0 }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="px-4 py-5 sm:p-6 flex-1 flex flex-col">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-2">
+                                <a href="{{ url_for('project.project_detail', pid=project.pid) }}" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                                    {{ project.pname }}
+                                </a>
                             </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="project-meta">
-                                <span class="meta-item">
-                                    <strong>所属组：</strong>
-                                    <a href="{{ url_for('group.group_detail', gid=project.gid) }}">{{ project.group.gname }}</a>
-                                </span>
-                                <span class="meta-item">
-                                    <strong>端口：</strong>{{ project.port }}
-                                </span>
+                            <div class="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400 flex-1">
+                                <p class="line-clamp-3">{{ project.description or '暂无描述' }}</p>
                             </div>
-                            <div class="project-stars">
-                                <span class="star-icon">★</span>
-                                <span class="star-count">{{ project.stars|length if project.stars else 0 }}</span>
-                                <span class="star-label">Stars</span>
+                            <div class="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center">
+                                    <i class="fa-solid fa-users mr-1.5 text-gray-400"></i>
+                                    <a href="{{ url_for('group.group_detail', gid=project.gid) }}" class="hover:text-gray-700 dark:hover:text-gray-300">
+                                        {{ project.group.gname }}
+                                    </a>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fa-solid fa-network-wired mr-1.5 text-gray-400"></i>
+                                    <span>Port: {{ project.port }}</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-footer">
-                            <a href="{{ url_for('project.project_detail', pid=project.pid) }}"
-                               class="btn btn-sm">查看详情</a>
+                        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-4 sm:px-6 flex justify-between items-center">
+                            <a href="{{ url_for('project.project_detail', pid=project.pid) }}" class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">
+                                查看详情 <span aria-hidden="true">&rarr;</span>
+                            </a>
                             {% if project.port %}
-                                <a href="{{ external_url }}:{{ project.port }}"
-                                   target="_blank"
-                                   class="btn btn-sm btn-primary">访问应用</a>
+                                <a href="{{ external_url }}:{{ project.port }}" target="_blank" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-primary-700 bg-primary-100 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                    访问应用
+                                </a>
                             {% endif %}
                         </div>
                     </div>
                 {% endfor %}
             </div>
+            <!-- Pagination container handled by app.js -->
+            <div class="pager mt-8 flex justify-center gap-2"></div>
         {% else %}
-            <div class="empty">暂无项目</div>
+            <div class="text-center py-12">
+                <i class="fa-solid fa-folder-open text-4xl text-gray-400 mb-4"></i>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">暂无项目</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">还没有任何项目展示。</p>
+            </div>
         {% endif %}
     </div>
+</div>
 {% endblock %}
