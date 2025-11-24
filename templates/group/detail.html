@@ -69,7 +69,7 @@
             <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
                 <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                        🔔 待审核申请
+                        待审核申请
                     </h3>
                 </div>
                 <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -107,13 +107,31 @@
         </div>
         {% endif %}
 
+        <!-- Group Description -->
+        <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-8">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                    小组介绍
+                </h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                {% if group.ginfo %}
+                    <div class="prose dark:prose-invert max-w-none markdown-content">
+                        {{ group.ginfo | markdown }}
+                    </div>
+                {% else %}
+                    <p class="text-gray-500 dark:text-gray-400 italic">暂无介绍</p>
+                {% endif %}
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <!-- Members List -->
             <div class="lg:col-span-1">
                 <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
                     <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                            👥 成员列表
+                            成员列表
                         </h3>
                     </div>
                     <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -128,7 +146,9 @@
                                     </div>
                                     <div class="ml-4 truncate">
                                         <div class="text-sm font-medium text-primary-600 dark:text-primary-400 truncate">
-                                            {{ user.uname }}
+                                            <a href="{{ url_for('user.user_detail', uid=user.uid) }}" class="hover:underline">
+                                                {{ user.uname }}
+                                            </a>
                                             {% if user.uid == group.leader_id %}
                                                 <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
                                                     组长
@@ -159,7 +179,7 @@
                 <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
                     <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                            📂 项目列表
+                            项目列表
                         </h3>
                     </div>
                     {% if group.projects %}
