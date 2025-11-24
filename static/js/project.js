@@ -79,16 +79,18 @@
         try{
             const res = await post(`/project/${pid}/star`);
             const btn = document.querySelector('#project-star-btn');
-            const icon = btn?.querySelector('.star-icon');
             const count = document.querySelector('#project-star-count');
             
             if(res.starred){
-                btn?.classList.add('starred');
-                if(icon) icon.textContent = '★';
+                // Switch to Starred state
+                btn.classList.remove('bg-white', 'text-gray-400', 'hover:text-yellow-400', 'dark:bg-gray-800', 'dark:text-gray-500', 'dark:hover:text-yellow-400');
+                btn.classList.add('bg-yellow-400', 'text-white', 'hover:bg-yellow-500');
             }else{
-                btn?.classList.remove('starred');
-                if(icon) icon.textContent = '☆';
+                // Switch to Unstarred state
+                btn.classList.remove('bg-yellow-400', 'text-white', 'hover:bg-yellow-500');
+                btn.classList.add('bg-white', 'text-gray-400', 'hover:text-yellow-400', 'dark:bg-gray-800', 'dark:text-gray-500', 'dark:hover:text-yellow-400');
             }
+            
             if(count) count.textContent = res.star_count || 0;
             showFlash(res.message || '操作成功', 'success');
         }catch(e){ 
@@ -127,11 +129,17 @@
         
         // 创建编辑界面
         const editHtml = `
-            <div class="comment-edit-form">
-                <textarea class="comment-edit-textarea">${escapeHtml(originalContent)}</textarea>
-                <div class="comment-edit-actions">
-                    <button class="btn btn-sm btn-primary" onclick="saveComment('${pcid}', '${pid}')">保存</button>
-                    <button class="btn btn-sm btn-secondary" onclick="cancelEditComment('${pcid}')">取消</button>
+            <div class="comment-edit-form mt-3 animate-fade-in-up">
+                <div class="relative rounded-md shadow-sm">
+                    <textarea class="comment-edit-textarea shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white p-3 resize-none transition-all duration-200" rows="3">${escapeHtml(originalContent)}</textarea>
+                </div>
+                <div class="comment-edit-actions flex space-x-3 justify-end mt-3">
+                    <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200" onclick="cancelEditComment('${pcid}')">
+                        取消
+                    </button>
+                    <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-sm transition-colors duration-200" onclick="saveComment('${pcid}', '${pid}')">
+                        保存
+                    </button>
                 </div>
             </div>
         `;

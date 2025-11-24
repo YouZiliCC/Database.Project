@@ -186,18 +186,18 @@
                 <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg" id="comments-root">
                     <div class="px-4 py-5 sm:p-6">
                         <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
-                            💬 评论区
+                            评论区
                         </h3>
                         <div id="project-comments-list" class="space-y-4">
                             {% if comments and comments|length > 0 %}
                                 {% for c in comments %}
-                                    <div class="flex space-x-3 comment-item {% if c.is_teacher_comment %}bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-md{% endif %}" data-comment-id="{{ c.pcid }}">
+                                    <div class="flex space-x-3 comment-item p-4 rounded-lg transition-colors duration-200 {% if c.is_teacher_comment %}bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-900/30{% else %}bg-gray-50 dark:bg-gray-700/30 border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700/50{% endif %}" data-comment-id="{{ c.pcid }}">
                                         <div class="flex-shrink-0">
-                                            <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 font-bold">
+                                            <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 font-bold shadow-sm">
                                                 {{ c.user.uname[0] | upper if c.user else '?' }}
                                             </div>
                                         </div>
-                                        <div class="flex-1 space-y-1">
+                                        <div class="flex-1 min-w-0 space-y-1">
                                             <div class="flex items-center justify-between">
                                                 <h3 class="text-sm font-medium text-gray-900 dark:text-white">
                                                     {{ c.user.uname if c.user else '匿名' }}
@@ -207,7 +207,7 @@
                                                 </h3>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ c.created_at.strftime("%Y-%m-%d %H:%M") }}</p>
                                             </div>
-                                            <div class="text-sm text-gray-700 dark:text-gray-300 comment-body" data-original-content="{{ c.content | e }}">
+                                            <div class="text-sm text-gray-700 dark:text-gray-300 comment-body break-all whitespace-pre-wrap" data-original-content="{{ c.content | e }}">
                                                 {{ c.content | e }}
                                             </div>
                                             {% if current_user.is_authenticated and current_user.uid == c.uid %}
@@ -291,9 +291,9 @@
                     {% if current_user.is_authenticated %}
                         <div class="space-y-4">
                             <div>
-                                <label for="comment-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">评论内容</label>
-                                <div class="mt-1">
-                                    <textarea id="comment-input" rows="4" class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white" placeholder="写下你的评论..."></textarea>
+                                <label for="comment-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">评论内容</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <textarea id="comment-input" rows="4" class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white p-4 transition-all duration-200 ease-in-out resize-none" placeholder="写下你的评论..."></textarea>
                                 </div>
                             </div>
                         </div>
