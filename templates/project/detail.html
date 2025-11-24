@@ -30,51 +30,133 @@
         </nav>
 
         <div class="lg:grid lg:grid-cols-12 lg:gap-8">
-            <!-- Sidebar (Project Info) -->
-            <div class="lg:col-span-4 order-2 lg:order-2 mb-8 lg:mb-0">
-                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg sticky top-24">
+            <!-- Sidebar (Project Info & Actions) -->
+            <div class="lg:col-span-4 order-2 lg:order-2 mb-8 lg:mb-0 space-y-8">
+                
+                <!-- Image & Status -->
+                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+                    <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700 relative">
+                        {% set project_img = '/static/img/projects/' + project.pid + '.png' %}
+                        <img src="{{ project_img }}" 
+                             alt="{{ project.pname }}" 
+                             class="object-cover w-full h-full"
+                             onerror="this.src='/static/img/project.png'">
+                        <div class="absolute top-2 right-2">
+                            <span id="project-status" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 shadow-sm">
+                                加载中...
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Panel -->
+                {% if current_user.is_authenticated and current_user.gid and (current_user.gid|string|lower == project.gid|string|lower) %}
+                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                            🎮 控制面板
+                        </h3>
+                        <div class="flex flex-col space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <button id="project-start-btn"
+                                        class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                        onclick="startProject('{{ project.pid }}')">
+                                    <i class="fa-solid fa-play mr-2"></i> 启动
+                                </button>
+                                <button id="project-stop-btn"
+                                        class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                                        onclick="stopProject('{{ project.pid }}')">
+                                    <i class="fa-solid fa-pause mr-2"></i> 停止
+                                </button>
+                            </div>
+                            
+                            <a id="terminal-btn"
+                               class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                               href="{{ url_for('terminal.terminal', pid=project.pid) }}"
+                               target="_blank"
+                               style="display: none">
+                                <i class="fa-solid fa-terminal mr-2"></i> WebShell
+                            </a>
+
+                            {% if project.port %}
+                                <a class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                   href="{{ external_url }}:{{ project.port }}"
+                                   target="_blank">
+                                    <i class="fa-solid fa-globe mr-2"></i> 访问应用
+                                </a>
+                            {% endif %}
+
+                            <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <a class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
+                                   href="{{ url_for('project.project_edit', pid=project.pid) }}">
+                                    <i class="fa-solid fa-pen mr-2"></i> 编辑
+                                </a>
+                                <button class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                        onclick="deleteProject('{{ project.gid }}', '{{ project.pid }}')">
+                                    <i class="fa-solid fa-trash mr-2"></i> 删除
+                                </button>
+                            </div>
+                            <button id="project-remove-btn"
+                                    class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-600 bg-transparent hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none"
+                                    onclick="removeProject('{{ project.pid }}')">
+                                <i class="fa-solid fa-rotate-left mr-2"></i> 重置容器
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% elif project.port %}
+                    <!-- Public Access Button for non-members -->
+                    <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <a class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                               href="{{ external_url }}:{{ project.port }}"
+                               target="_blank">
+                                <i class="fa-solid fa-globe mr-2"></i> 访问应用
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Basic Info -->
+                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
                     <div class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-700">
                         <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                            📋 基本信息
+                            📋 项目信息
                         </h3>
                     </div>
-                    <div class="border-t border-gray-200 dark:border-gray-700">
-                        <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700">
-                            {% set project_img = '/static/img/projects/' + project.pid + '.png' %}
-                            <img src="{{ project_img }}" 
-                                 alt="{{ project.pname }}" 
-                                 class="object-cover w-full h-full"
-                                 onerror="this.src='/static/img/project.png'">
-                        </div>
-                        <dl>
-                            <div class="bg-gray-50 dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <div class="border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:px-6">
+                        <dl class="space-y-4">
+                            <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">项目名称</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">{{ project.pname }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ project.pname }}</dd>
                             </div>
-                            <div class="bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">所属小组</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white">
                                     {% if project.group %}
-                                        <a href="{{ url_for('group.group_detail', gid=project.gid) }}" class="text-primary-600 hover:text-primary-500 dark:text-primary-400">{{ project.group.gname }}</a>
+                                        <a href="{{ url_for('group.group_detail', gid=project.gid) }}" class="text-primary-600 hover:text-primary-500 dark:text-primary-400 hover:underline">{{ project.group.gname }}</a>
                                     {% else %}
                                         -
                                     {% endif %}
                                 </dd>
                             </div>
-                            <div class="bg-gray-50 dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">访问端口</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
-                                    <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">{{ project.port }}</code>
-                                </dd>
-                            </div>
-                            <div class="bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">创建时间</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">{{ project.created_at.strftime("%Y-%m-%d %H:%M") if project.created_at else '未知' }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ project.created_at.strftime("%Y-%m-%d %H:%M") if project.created_at else '未知' }}</dd>
                             </div>
-                            <div class="bg-gray-50 dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">容器状态</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
-                                    <span id="project-status" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">加载中...</span>
+                            <div class="border-t border-gray-100 dark:border-gray-700 pt-4">
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Docker 配置</dt>
+                                <dd class="space-y-2">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gray-500">容器名</span>
+                                        <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">{{ project.docker_name }}</code>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gray-500">端口映射</span>
+                                        <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">{{ project.docker_port }} -> {{ project.port }}</code>
+                                    </div>
                                 </dd>
                             </div>
                         </dl>
@@ -83,104 +165,27 @@
             </div>
 
             <!-- Main Content -->
-            <div class="lg:col-span-8 order-1 lg:order-1">
-                <!-- Actions -->
-                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg mb-8">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-                            🚀 访问与管理
-                        </h3>
-                        <div class="flex flex-wrap gap-3">
-                            {% if project.port %}
-                                <a class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                                   href="{{ external_url }}:{{ project.port }}"
-                                   target="_blank">
-                                    <i class="fa-solid fa-globe mr-2"></i> 访问应用
-                                </a>
-                            {% endif %}
-                            
-                            {% if current_user.is_authenticated and current_user.gid and (current_user.gid == project.gid) %}
-                                <a id="terminal-btn"
-                                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                   href="{{ url_for('terminal.terminal', pid=project.pid) }}"
-                                   target="_blank"
-                                   style="display: none">
-                                    <i class="fa-solid fa-terminal mr-2"></i> WebShell
-                                </a>
-                                <button id="project-start-btn"
-                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                        onclick="startProject('{{ project.pid }}')">
-                                    <i class="fa-solid fa-play mr-2"></i> 启动
-                                </button>
-                                <button id="project-stop-btn"
-                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-                                        onclick="stopProject('{{ project.pid }}')">
-                                    <i class="fa-solid fa-pause mr-2"></i> 停止
-                                </button>
-                                <button id="project-remove-btn"
-                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                        onclick="removeProject('{{ project.pid }}')">
-                                    <i class="fa-solid fa-trash mr-2"></i> 删除容器
-                                </button>
-                                <a class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
-                                   href="{{ url_for('project.project_edit', pid=project.pid) }}">
-                                    编辑
-                                </a>
-                                <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                        onclick="deleteProject('{{ project.gid }}', '{{ project.pid }}')">
-                                    删除项目
-                                </button>
-                            {% endif %}
-                            
-                            <a class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
-                               href="{{ url_for('group.group_detail', gid=project.gid) }}">
-                                返回工作组
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="lg:col-span-8 order-1 lg:order-1 space-y-8">
                 <!-- Description -->
-                {% if project.pinfo %}
-                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg mb-8">
+                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
                             📝 项目描述
                         </h3>
-                        <div class="prose dark:prose-invert max-w-none markdown-content">
-                            {{ project.pinfo | markdown }}
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Docker Config -->
-                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg mb-8">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-                            🐳 Docker 配置
-                        </h3>
-                        <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                            <div class="sm:col-span-1">
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">容器名称</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                                    <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{{ project.docker_name }}</code>
-                                </dd>
+                        {% if project.pinfo %}
+                            <div class="prose dark:prose-invert max-w-none markdown-content">
+                                {{ project.pinfo | markdown }}
                             </div>
-                            <div class="sm:col-span-1">
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">容器端口</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                                    <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{{ project.docker_port }}</code>
-                                </dd>
-                            </div>
-                        </dl>
+                        {% else %}
+                            <p class="text-gray-500 dark:text-gray-400 italic">暂无描述</p>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Comments -->
                 <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg" id="comments-root">
                     <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
                             💬 评论区
                         </h3>
                         <div id="project-comments-list" class="space-y-4">
@@ -303,6 +308,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/group.js') }}"></script>
     <script src="{{ url_for('static', filename='js/project.js') }}"></script>
 {% endblock %}

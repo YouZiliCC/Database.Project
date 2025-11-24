@@ -54,7 +54,8 @@ def group_required(func):
                 str(current_user.gid) != str(gid),
             ]
         ):
-            abort(403, description="需要工作组成员权限才能访问此页面")
+            flash("需要工作组成员权限才能访问此页面", "warning")
+            return redirect(url_for("group.group_detail", gid=gid))
         return func(*args, **kwargs)
 
     return decorated
@@ -75,7 +76,8 @@ def leader_required(func):
                 str(group.leader_id) != str(current_user.uid),
             ]
         ):
-            abort(403, description="需要工作组组长权限才能访问此页面")
+            flash("需要工作组组长权限才能执行此操作", "warning")
+            return redirect(url_for("group.group_detail", gid=gid))
         return func(*args, **kwargs)
 
     return decorated
@@ -271,7 +273,7 @@ def remove_member(gid, uid):
     return jsonify({"message": "用户已成功移除工作组"}), 200
 
 
-@group_bp.route("/<uuid:gid>/change_leader", methods=["GET", "POST"])
+@group_bp.route("/<uuid:gid>/leader_change", methods=["GET", "POST"])
 @login_required
 @leader_required
 def leader_change(gid):
@@ -287,19 +289,19 @@ def leader_change(gid):
         new_leader = get_user_by_uname(form.new_leader_name.data)
         if not new_leader:
             flash("新组长不存在", "error")
-            return render_template("group/change_leader.html", form=form, group=group)
+            return render_template("group/leader_change.html", form=form, group=group)
         if not update_group(group, leader_id=new_leader.uid):
             logger.error(
                 f"更换组长失败: group={group.gname}, new_leader={new_leader.uname}, operator={current_user.uname}"
             )
             flash("更换组长失败", "error")
-            return render_template("group/change_leader.html", form=form, group=group)
+            return render_template("group/leader_change.html", form=form, group=group)
         logger.info(
             f"组长更换成功: group={group.gname}, new_leader={new_leader.uname}, operator={current_user.uname}"
         )
         flash("组长更换成功", "success")
         return redirect(url_for("group.group_detail", gid=gid))
-    return render_template("group/change_leader.html", form=form, group=group)
+    return render_template("group/leader_change.html", form=form, group=group)
 
 
 # -------------------------------------------------------------------------------------------
