@@ -36,17 +36,42 @@
         return json;
     }
 
-    // Toggle comment panel
+    // Toggle comment panel (Modal)
     window.toggleCommentPanel = function(){
         const panel = document.getElementById('comment-panel');
         if(!panel) return;
+        
+        const backdrop = document.getElementById('modal-backdrop');
+        const content = document.getElementById('modal-content');
+
         if(panel.style.display === 'none' || !panel.style.display){
+            // Open
             panel.style.display = 'block';
-            // animate in
-            setTimeout(() => panel.classList.add('show'), 10);
+            // Trigger reflow
+            panel.offsetHeight; 
+            
+            if(backdrop) {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+            }
+            if(content) {
+                content.classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+                content.classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
+            }
         }else{
-            panel.classList.remove('show');
-            setTimeout(() => panel.style.display = 'none', 300);
+            // Close
+            if(backdrop) {
+                backdrop.classList.remove('opacity-100');
+                backdrop.classList.add('opacity-0');
+            }
+            if(content) {
+                content.classList.remove('opacity-100', 'translate-y-0', 'sm:scale-100');
+                content.classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            }
+            
+            setTimeout(() => {
+                panel.style.display = 'none';
+            }, 300);
         }
     }
 
@@ -259,7 +284,7 @@
             if(startBtn) startBtn.disabled = true;
             if(stopBtn) stopBtn.disabled = false;
             if(removeBtn) removeBtn.disabled = false;
-            if(terminalBtn) terminalBtn.style.display = 'inline-block';
+            if(terminalBtn) terminalBtn.style.display = 'flex';
         }else if(status === 'starting'){
             el.textContent = '启动中';
             el.classList.add('badge-warning');

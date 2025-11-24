@@ -39,7 +39,44 @@
 
     // 打开终端
     term.open(document.getElementById('terminal'));
-    fitAddon.fit();
+    
+    // 稍微延迟一下以确保容器渲染完成
+    setTimeout(() => {
+        fitAddon.fit();
+    }, 100);
+
+    // 更新连接状态指示器
+    function updateConnectionStatus(status) {
+        const dot = document.getElementById('connection-status-dot');
+        const text = document.getElementById('connection-status-text');
+        if (!dot || !text) return;
+
+        // Reset classes but keep base
+        dot.className = 'w-2 h-2 rounded-full mr-2 transition-colors duration-300';
+        
+        switch (status) {
+            case 'connecting':
+                dot.classList.add('bg-yellow-500');
+                text.textContent = '正在连接...';
+                text.className = 'text-xs text-gray-400';
+                break;
+            case 'connected':
+                dot.classList.add('bg-green-500');
+                text.textContent = '已连接';
+                text.className = 'text-xs text-green-500';
+                break;
+            case 'disconnected':
+                dot.classList.add('bg-red-500');
+                text.textContent = '已断开';
+                text.className = 'text-xs text-red-500';
+                break;
+            case 'error':
+                dot.classList.add('bg-red-500');
+                text.textContent = '连接错误';
+                text.className = 'text-xs text-red-500';
+                break;
+        }
+    }
 
     // 连接 Socket.IO
     const socket = io('/terminal', {
@@ -49,22 +86,30 @@
     // Socket.IO 事件处理
     socket.on('connect', function () {
         console.log('WebSocket 已连接');
+        updateConnectionStatus('connecting');
         term.write('\r\n正在连接终端...\r\n');
+        
+        // 确保在启动 shell 前获取正确的终端尺寸
+        fitAddon.fit();
         
         // 启动 shell
         socket.emit('start_shell', {
-            pid: PROJECT_ID
+            pid: PROJECT_ID,
+            rows: term.rows,
+            cols: term.cols
         });
     });
 
     socket.on('ready', function (data) {
         console.log('Shell 已就绪:', data.message);
+        updateConnectionStatus('connected');
         
         // Shell 就绪后立即发送实际的终端尺寸
         socket.emit('resize', {
             rows: term.rows,
             cols: term.cols
         });
+        term.focus();
     });
 
     socket.on('output', function (data) {
@@ -74,16 +119,19 @@
 
     socket.on('error', function (data) {
         console.error('终端错误:', data.message);
+        updateConnectionStatus('error');
         term.write('\r\n\x1b[1;31m错误: ' + data.message + '\x1b[0m\r\n');
     });
 
     socket.on('disconnected', function (data) {
         console.log('Shell 已断开:', data.message);
+        updateConnectionStatus('disconnected');
         term.write('\r\n\x1b[1;33m' + data.message + '\x1b[0m\r\n');
     });
 
     socket.on('disconnect', function () {
         console.log('WebSocket 已断开');
+        updateConnectionStatus('disconnected');
         term.write('\r\n\x1b[1;31m连接已断开\x1b[0m\r\n');
     });
 
@@ -244,6 +292,23 @@
         }
     }
 
+    // 切换上传进度条显示
+    function toggleUploadProgress(show) {
+        if (show) {
+            uploadProgress.classList.remove('hidden');
+            // Trigger reflow
+            void uploadProgress.offsetWidth;
+            uploadProgress.classList.remove('opacity-0', 'translate-y-4');
+            uploadProgress.classList.add('opacity-100', 'translate-y-0');
+        } else {
+            uploadProgress.classList.remove('opacity-100', 'translate-y-0');
+            uploadProgress.classList.add('opacity-0', 'translate-y-4');
+            setTimeout(() => {
+                uploadProgress.classList.add('hidden');
+            }, 300);
+        }
+    }
+
     // 上传单个文件
     async function uploadSingleFile(file, index, total) {
         try {
@@ -252,7 +317,7 @@
             const displayName = relativePath;
             
             // 显示上传进度
-            uploadProgress.style.display = 'block';
+            toggleUploadProgress(true);
             uploadFilename.textContent = `正在上传 (${index}/${total}): ${displayName}`;
             uploadStatus.textContent = '准备中...';
             progressFill.style.width = '0%';
@@ -350,7 +415,7 @@
         } finally {
             // 如果是最后一个文件，隐藏进度条
             if (index === total) {
-                uploadProgress.style.display = 'none';
+                toggleUploadProgress(false);
                 progressFill.style.backgroundColor = '#2472c8';
             }
         }
