@@ -184,8 +184,8 @@
                                                 <span>{{ project.created_at.strftime("%Y-%m-%d") }}</span>
                                                 {% if project.port %}
                                                     <span class="mx-2">&bull;</span>
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                                        运行中
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                                        端口: {{ project.port }}
                                                     </span>
                                                 {% endif %}
                                             </div>
