@@ -256,6 +256,7 @@ def reject_application(gid, gaid):
 def remove_member(gid, uid):
     """移除工作组成员"""
     gid = str(gid)
+    uid = str(uid)
     group = get_group_by_gid(gid)
     if not group:
         return jsonify({"error": "工作组不存在"}), 404
