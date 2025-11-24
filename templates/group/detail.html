@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ group.gname }} - 小组详情{% endblock %}
+{% block title %}{{ group.gname }} - 工作组详情{% endblock %}
 {% block content %}
 <div class="bg-gray-50 dark:bg-gray-900 min-h-screen py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,7 +17,7 @@
                 <li>
                     <div class="flex items-center">
                         <i class="fa-solid fa-chevron-right flex-shrink-0 h-5 w-5 text-gray-300"></i>
-                        <a href="{{ url_for('group.group_list') }}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">小组列表</a>
+                        <a href="{{ url_for('group.group_list') }}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">工作组列表</a>
                     </div>
                 </li>
                 <li>
@@ -41,14 +41,14 @@
                     {% if current_user.gid and group.gid and current_user.gid|string|lower == group.gid|string|lower %}
                         {% if current_user.uid == group.leader_id %}
                             <a href="{{ url_for('group.group_edit', gid=group.gid) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                                <i class="fa-solid fa-pen mr-2"></i> 编辑小组
+                                <i class="fa-solid fa-pen mr-2"></i> 编辑工作组
                             </a>
                             <a href="{{ url_for('group.leader_change', gid=group.gid) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                                 <i class="fa-solid fa-exchange-alt mr-2"></i> 转让组长
                             </a>
                         {% else %}
                             <button onclick="leaveGroup('{{ group.gid }}')" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                <i class="fa-solid fa-sign-out-alt mr-2"></i> 退出小组
+                                <i class="fa-solid fa-sign-out-alt mr-2"></i> 退出工作组
                             </button>
                         {% endif %}
                         <a href="{{ url_for('group.project_create', gid=group.gid) }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
@@ -56,7 +56,7 @@
                         </a>
                     {% elif not current_user.gid %}
                         <button onclick="applyToGroup('{{ group.gid }}')" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                            <i class="fa-solid fa-user-plus mr-2"></i> 加入小组
+                            <i class="fa-solid fa-user-plus mr-2"></i> 申请加入
                         </button>
                     {% endif %}
                 {% endif %}
@@ -111,7 +111,7 @@
         <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-8">
             <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                    小组介绍
+                    工作组介绍
                 </h3>
             </div>
             <div class="px-4 py-5 sm:p-6">
@@ -224,7 +224,7 @@
                     {% else %}
                         <div class="text-center py-12">
                             <i class="fa-solid fa-folder-open text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
-                            <p class="text-gray-500 dark:text-gray-400">该小组暂无项目</p>
+                            <p class="text-gray-500 dark:text-gray-400">该工作组暂无项目</p>
                             {% if current_user.is_authenticated and current_user.gid == group.gid %}
                                 <div class="mt-6">
                                     <a href="{{ url_for('group.project_create', gid=group.gid) }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">

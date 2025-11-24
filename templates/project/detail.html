@@ -133,7 +133,7 @@
                                 <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ project.pname }}</dd>
                             </div>
                             <div>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">所属小组</dt>
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">所属工作组</dt>
                                 <dd class="mt-1 text-sm text-gray-900 dark:text-white">
                                     {% if project.group %}
                                         <a href="{{ url_for('group.group_detail', gid=project.gid) }}" class="text-primary-600 hover:text-primary-500 dark:text-primary-400 hover:underline">{{ project.group.gname }}</a>
