@@ -191,25 +191,23 @@
                         <div id="project-comments-list" class="space-y-4">
                             {% if comments and comments|length > 0 %}
                                 {% for c in comments %}
-                                    <div class="flex space-x-3 comment-item p-4 rounded-lg transition-colors duration-200 {% if c.is_teacher_comment %}bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-900/30{% else %}bg-gray-50 dark:bg-gray-700/30 border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700/50{% endif %}" data-comment-id="{{ c.pcid }}">
+                                    <div class="flex space-x-3 comment-item p-3 rounded-lg transition-colors duration-200 {% if c.is_teacher_comment %}bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-900/30{% else %}bg-gray-50 dark:bg-gray-700/30 border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700/50{% endif %}" data-comment-id="{{ c.pcid }}">
                                         <div class="flex-shrink-0">
-                                            <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 font-bold shadow-sm">
+                                            <div class="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 font-bold shadow-sm text-xs">
                                                 {{ c.user.uname[0] | upper if c.user else '?' }}
                                             </div>
                                         </div>
-                                        <div class="flex-1 min-w-0 space-y-1">
-                                            <div class="flex items-center justify-between">
-                                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <h3 class="text-sm font-medium text-gray-900 dark:text-white flex items-center">
                                                     {{ c.user.uname if c.user else '匿名' }}
                                                     {% if c.is_teacher_comment %}
-                                                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">教师</span>
+                                                        <span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">教师</span>
                                                     {% endif %}
                                                 </h3>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ c.created_at.strftime("%Y-%m-%d %H:%M") }}</p>
+                                                <p class="text-xs text-gray-400 dark:text-gray-500">{{ c.created_at.strftime("%Y-%m-%d %H:%M") }}</p>
                                             </div>
-                                            <div class="text-sm text-gray-700 dark:text-gray-300 comment-body break-all whitespace-pre-wrap" data-original-content="{{ c.content | e }}">
-                                                {{ c.content | e }}
-                                            </div>
+                                            <div class="text-sm text-gray-700 dark:text-gray-300 comment-body break-all whitespace-pre-wrap leading-relaxed" data-original-content="{{ c.content | e }}">{{ c.content | e }}</div>
                                             {% if current_user.is_authenticated and current_user.uid == c.uid %}
                                                 <div class="flex space-x-2 mt-2">
                                                     <button class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
